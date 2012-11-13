@@ -32,7 +32,13 @@
     <ClCompile Include="..\src\MCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\MFltk13GUI.cpp">
+    <ClCompile Include="..\src\Fltk13GUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\F13FileList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\F13KeyValueList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -58,9 +64,21 @@
     <ClInclude Include="..\src\MGUI.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\MFltk13GUI.h">
+    <ClInclude Include="..\src\Fltk13GUI.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\F13FileList.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\F13KeyValueList.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="mameed.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\div\mameed-icon.ico">

@@ -74,6 +74,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\F13FileList.cpp" />
+    <ClCompile Include="..\src\F13KeyValueList.cpp" />
     <ClCompile Include="..\src\MCore.cpp" />
     <ClCompile Include="..\src\MDDirDataBase.cpp" />
     <ClCompile Include="..\src\MDDir.cpp" />
@@ -81,17 +83,23 @@
     <ClCompile Include="..\src\MDFile.cpp" />
     <ClCompile Include="..\src\MDPropFile.cpp" />
     <ClCompile Include="..\src\MDProperty.cpp" />
-    <ClCompile Include="..\src\MFltk13GUI.cpp" />
+    <ClCompile Include="..\src\Fltk13GUI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\F13FileList.h" />
+    <ClInclude Include="..\src\F13KeyValueList.h" />
     <ClInclude Include="..\src\MCore.h" />
     <ClInclude Include="..\src\MDDirDataBase.h" />
     <ClInclude Include="..\src\MDDir.h" />
     <ClInclude Include="..\src\MDFile.h" />
     <ClInclude Include="..\src\MDPropFile.h" />
     <ClInclude Include="..\src\MDProperty.h" />
-    <ClInclude Include="..\src\MFltk13GUI.h" />
+    <ClInclude Include="..\src\Fltk13GUI.h" />
     <ClInclude Include="..\src\MGUI.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="mameed.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\div\mameed-icon.ico" />

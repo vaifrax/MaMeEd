@@ -9,12 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "MFltk13GUI.h"
+#include "Fltk13GUI.h"
 #include "MCore.h"
 
 int main(int argc, char* argv[]) {
 	MCore* mCore = new MCore();
-	MGUI* mGUI = (MGUI*) new MFltk13GUI(mCore);
+	MGUI* mGUI = (MGUI*) new Fltk13GUI(mCore);
 	mGUI->setCmdParams(argc, argv);
 
 	// handle command line arguments : open file/folder that is passed on
