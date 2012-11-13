@@ -31,32 +31,40 @@
 
 
 // path to a directory or a file
-MDDir::MDDir(std::string path) : path(path) {
-	std::string selectedFileName;
-
-	if (isFile(this->path.c_str())) {
+MDDir::MDDir(std::string const& path) {
+	// is it the path to a file?
+	if (isFile(path.c_str())) {
+		// it is a file
 		size_t p=path.find_last_of("/\\");
 		if (p == std::string::npos) {
-			// TODO: error
+			return; // error
 		} else {
-			this->path = this->path.substr(0, this->path.size() - p - 1);
+			dirPath = path.substr(0, path.size() - p - 1);
+			initiallySelectedFileName = path.substr(p);
 		}
 	} else {
-		char lastCh = this->path.back();
+		// not a file; strip tailing / or \ if it exists
+		char lastCh = path.back();
 		if ((lastCh == '/') || (lastCh == '\\')) {
-			this->path = this->path.substr(0, this->path.size() - 1);
+			dirPath = path.substr(0, path.size() - 1);
 		}
 	}
 
-	if (!isDirectory(this->path.c_str())) {
-		// TODO: error
+	// TODO: dirPath could also be just the drive, e.g. "C:", which currently fails ??
+	if (!isDirectory(dirPath.c_str())) {
+		dirPath = "";
+		return; // error
 	}
 
-	// list all directories and files in this directory
+	// list all subdirectories(TODO?) and files in this directory
 	#ifdef WIN32
 	HANDLE hFind;
 	WIN32_FIND_DATA FindData;
-	hFind = FindFirstFile((this->path + "/*").c_str(), &FindData);
+	hFind = FindFirstFile((dirPath + "/*").c_str(), &FindData);
+	if (hFind == INVALID_HANDLE_VALUE) {
+		dirPath = "";
+		return; // error
+	}
 	MDFile* f = new MDFile(FindData.cFileName);
 	files.push_back(f);
 	while (FindNextFile(hFind, &FindData)) {

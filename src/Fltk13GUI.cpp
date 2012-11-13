@@ -10,6 +10,9 @@
 #include "F13FileList.h"
 #include "F13KeyValueList.h"
 
+#include "MCore.h"
+//#include "F13FileList.h"
+
 #include <FL/Fl_Button.H>
 
 #include <FL/x.H> // to set icon in windows
@@ -100,7 +103,8 @@ Fltk13GUI::~Fltk13GUI() {
 		case BUTTON_PATH: {
 			Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
 			if (!fgui) return; // TODO: error
-			fgui->fileChooser->preset_file(fgui->pathTextEdit->value());
+			//fgui->fileChooser->preset_file(fgui->pathTextEdit->value());
+			fgui->fileChooser->directory(fgui->pathTextEdit->value());
 			fgui->showFileChooser();
 			} break;
 		case BUTTON_ABOUT_OK:
@@ -121,12 +125,13 @@ Fltk13GUI::~Fltk13GUI() {
 
 void Fltk13GUI::showFileChooser() {
 	fileChooser->title("Open");
-	fileChooser->type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);		// only picks directories that exist
+	fileChooser->type(Fl_Native_File_Chooser::BROWSE_DIRECTORY); // already existing directories
 	switch (fileChooser->show()) {
 	  case -1: break; // Error
 	  case  1: break; // Cancel
 	  default: // Choice
-		fileChooser->preset_file(fileChooser->filename());
+		//fileChooser->preset_file(fileChooser->filename());
+		fileChooser->directory(fileChooser->filename());
 		openDir(fileChooser->filename());
 	break;
 	}
@@ -135,6 +140,11 @@ void Fltk13GUI::showFileChooser() {
 void Fltk13GUI::openDir(std::string path) {
 	pathTextEdit->value(path.c_str());
 	//pathTextEdit->red
+
+	if (mCore->openDir(path)) {
+		//if (fileList) delete fileList;
+		//fileList = new F13FileList(mCore->getMDDir());
+	}
 }
 
 int Fltk13GUI::showWindow() {

@@ -7,7 +7,7 @@
 #include <assert.h>
 
 MDDirDataBase::MDDirDataBase(MDDir& dir) : dir(dir) {
-	fileName = dir.getPath() + "/.metadata.mmd";
+	fileName = dir.getDirPath() + "/.metadata.mmd";
 	readFromFile(); // Marcel's Metadata Database (file format)
 }
 
