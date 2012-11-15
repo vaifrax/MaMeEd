@@ -1,3 +1,4 @@
+/*
 #include <fstream>
 #include <map>
 
@@ -16,3 +17,4 @@ class MDPropFile {
 	//std::map<std::string, MDProperty> properties;
 	std::map<std::string, std::string> properties;
 };
+*/

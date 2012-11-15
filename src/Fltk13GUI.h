@@ -14,6 +14,7 @@
 
 class F13FileList;
 class F13KeyValueList;
+class MDFile;
 
 class Fltk13GUI : public MGUI, public Fl_Window {
   public:
@@ -21,6 +22,7 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	~Fltk13GUI();
 
 	void openDir(std::string path);
+	void showFileMetaData(); // update/show new file meta data window (of selected file)
 	int showWindow();
 
 	static void menuCallback(Fl_Widget* widget, void* userData);

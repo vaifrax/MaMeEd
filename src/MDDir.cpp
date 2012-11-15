@@ -8,6 +8,8 @@
 #include "MDFile.h"
 
 #include <iostream>
+#include <fstream>
+#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -47,6 +49,8 @@ MDDir::MDDir(std::string const& path) {
 		char lastCh = path.back();
 		if ((lastCh == '/') || (lastCh == '\\')) {
 			dirPath = path.substr(0, path.size() - 1);
+		} else {
+			dirPath = path;
 		}
 	}
 
@@ -73,4 +77,104 @@ MDDir::MDDir(std::string const& path) {
 	}
 	FindClose(hFind);
 	#endif // WIN32
+
+	// read properties from database
+	dbFileName = dirPath + "/.metadata.mmd";
+	readFromFile(); // Marcel's Metadata Database (file format)
+}
+
+MDDir::~MDDir() {
+	for (std::vector<MDFile*>::iterator i=files.begin(); i!=files.end(); ++i) {
+		delete (*i);
+	}
+}
+
+// TODO: for performance: use an additional map<string fileName, int arrayIndex> ??
+MDFile* MDDir::getMDFile(std::string const& fileName) const {
+	for (std::vector<MDFile*>::const_iterator i=files.begin(); i!=files.end(); ++i) {
+		if ((*i)->getName() == fileName) return *i;
+	}
+	return NULL;
+};
+
+// first token is key, second value
+// '=' are treated as whitespaces (so they can be used)
+// whitespaces are ignored (before and after value)
+// value containing whitespaces can be enclosed in "" (meaning " are ignored)
+// key has to start with alphabetical value (ignored otherwise)
+bool MDDir::processLine(std::string line) {
+	// ignore empty lines
+	if (!line.size()) return false;
+
+	// ignore comment lines starting with ';','#' or '%'
+	if (line.front() == ';') return false;
+	if (line.front() == '%') return false;
+	if (line.front() == '#') return false;
+
+	// sections []
+	if ((line.front() == '[') && (line.back() == ']')) {
+		//tmpPropFile = new MDPropFile(line.substr(1, line.size()-2));
+		///propFiles
+		std::string sectionName = line.substr(1, line.size()-2);
+		tmpFile = getMDFile(sectionName);
+
+		return true;
+	}
+
+	int posEqual = line.find_first_of('=');
+	if (posEqual == std::string::npos) return false;
+
+	std::string key = line.substr(0, posEqual);
+	std::string value = line.substr(posEqual+1);
+
+	if (value.size() && tmpFile) {
+		//properties[key] = value;
+		//tmpPropFile->addKeyValue(key, value);
+		tmpFile->addKeyValue(key, value);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool MDDir::readFromFile() {
+	std::ifstream confFile(dbFileName);
+	if (!confFile.is_open()) {
+		std::cerr << "Error loading database file " << dbFileName << std::endl;
+		return false;
+	}
+
+	// process lines
+	int lineNumber = 0;
+	std::string line;
+	while (std::getline(confFile, line)) {
+		lineNumber++;
+		if (!line.empty()) {
+			processLine(line);
+		}
+	}
+
+	confFile.close();
+	return true;
+}
+
+bool MDDir::writeToFile() {
+	std::ofstream os;
+
+	os.open(dbFileName.c_str());
+	if (!os) return false; // file couldn't be opened
+	os << "# meta data for files in this folder (file written by MaMeEd)\n\n";
+
+	//for (std::map<std::string, MDProperty>::iterator i=properties.begin(); i!=properties.end(); ++i) {
+	//	os << i->first << '=' << i->second << '\n';
+	//}
+
+	//for (std::map<std::string, MDPropFile>::iterator i=propFiles.begin(); i!=propFiles.end(); ++i) {
+	for (std::vector<MDFile*>::iterator i=files.begin(); i!=files.end(); ++i) {
+		(*i)->writeToFile(os);
+	}
+
+	os.close();
+
+	return true;
 }

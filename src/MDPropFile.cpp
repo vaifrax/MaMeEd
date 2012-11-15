@@ -1,3 +1,4 @@
+/*
 #include "MDPropFile.h"
 //#include "MDProperty.h"
 #include <string>
@@ -13,3 +14,4 @@ void MDPropFile::writeToFile(std::ofstream& os) {
 		os << i->first << '=' << i->second << '\n';
 	}
 }
+*/

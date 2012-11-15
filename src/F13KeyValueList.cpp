@@ -1,6 +1,9 @@
 #include "F13KeyValueList.h"
-/*
-KeyValueGroup* selectedKeyValue = NULL;
+#include "MDFile.h"
+#include "MDProperty.h"
+
+#include "FL/Fl_Box.H"
+#include "FL/Fl_Input.H"
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
 class KeyValueGroup : public Fl_Group {
@@ -16,7 +19,7 @@ public:
 		begin();
 			// Fixed width box
 			//fixedBox = new Fl_Box(X,Y,fixedWidth,25,key);
-			fixedBox = new Fl_Input(X,Y,fixedWidth,25,"");
+			fixedBox = new Fl_Input(X,Y,90,25,"");
 			fixedBox->value(key);
 			//fixedBox->box(FL_BORDER_FRAME);
 			fixedBox->box(FL_FLAT_BOX);
@@ -24,7 +27,7 @@ public:
 fixedBox->color(0xFFFFFF00);
 			// Stretchy boxKeyValueScroll
 			//stretchBox = new Fl_Box(X+fixedWidth,Y,W-fixedWidth,defaultHeight, value);
-			stretchBox = new Fl_Input(X+fixedWidth+1,Y,W-fixedWidth-1,defaultHeight);
+			stretchBox = new Fl_Input(X+90+1,Y,W-90-1,25);
 			stretchBox->value(value);
 			//stretchBox->box(FL_BORDER_FRAME);
 			stretchBox->box(FL_FLAT_BOX);
@@ -40,22 +43,24 @@ stretchBox->color(0xFFFFFF00);
 			//case FL_DRAG:
 			//case FL_MOVE:
 				//return handle_mouse(eventn,Fl::event_button(), Fl::event_x(),Fl::event_y());
-			case FL_FOCUS:
+			case FL_FOCUS: {
 				//label ("Gained focus");
-				selectedKeyValue = this;
-if (selectedFile) {
-	MDPropFile& pf = dirDB->getPropFile(selectedFile->getFileName()); // TODO
-	propFile = &pf; // TODO
-}
+				((F13KeyValueList*) parent())->setSelectedKeyValue(this);
+				//selectedKeyValue = this;
+//if (selectedFile) {
+//	MDPropFile& pf = dirDB->getPropFile(selectedFile->getFileName()); // TODO
+//	propFile = &pf; // TODO
+//}
 				//return Fl_Window::handle(eventn); //return 1;
-				return Fl_Group::handle(eventn);
-			case FL_UNFOCUS:
+				return Fl_Group::handle(eventn); }
+			case FL_UNFOCUS: {
 				//label ("Lost focus");
 				//damage(1);
 // TODO: also do this before saving, or at return; maybe add a new empty key value pair at the end
-				propFile->addKeyValue(selectedKeyValue->fixedBox->value(), selectedKeyValue->stretchBox->value());
+				KeyValueGroup* selectedKeyValue = ((F13KeyValueList*) parent())->getSelectedKeyValue();
+//				propFile->addKeyValue(selectedKeyValue->fixedBox->value(), selectedKeyValue->stretchBox->value());
 // TODO: how to remove?
-				return 1;
+				return 1; }
 			default:
 				//return Fl_Window::handle(eventn);
 				return 0;
@@ -63,6 +68,29 @@ if (selectedFile) {
 	}
 };
 
+F13KeyValueList::F13KeyValueList(int X, int Y, int W, int H, MDFile* mdfile) : Fl_Scroll(X,Y,W,H,0), mdfile(mdfile), selectedKeyValue(NULL), itemNum(0) {
+	if (mdfile) fillList();
+}
+
+void F13KeyValueList::addItem(std::string const& key, std::string const& value) {
+	int X = x() + 1,
+		Y = y() - yposition() + (itemNum*41) + 1,
+		W = w() - 20,                           // -20: compensate for vscroll bar
+		H = 41;
+	add(new KeyValueGroup(X,Y,W,H, key.c_str(), value.c_str()));
+	redraw();
+	itemNum++;
+}
+
+void F13KeyValueList::fillList() {
+	if (!mdfile) return;
+
+	for (std::vector<MDProperty*>::iterator i=mdfile->properties.begin(); i!=mdfile->properties.end(); ++i) {
+		addItem((*i)->key, (*i)->value);
+	}
+}
+
+/*
 
 // Custom scroll that tells children to follow scroll's width when resized
 class KeyValueScroll : public Fl_Scroll {

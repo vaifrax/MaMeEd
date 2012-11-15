@@ -11,7 +11,7 @@
 #include "F13KeyValueList.h"
 
 #include "MCore.h"
-//#include "F13FileList.h"
+#include "MDDir.h"
 
 #include <FL/Fl_Button.H>
 
@@ -142,8 +142,23 @@ void Fltk13GUI::openDir(std::string path) {
 	//pathTextEdit->red
 
 	if (mCore->openDir(path)) {
-		//if (fileList) delete fileList;
-		//fileList = new F13FileList(mCore->getMDDir());
+		if (fileList) {
+			remove(fileList); // remove from window
+			delete fileList;
+		}
+		if (keyValueList) {
+			remove(keyValueList);
+			delete keyValueList;
+			keyValueList = NULL;
+		}
+
+		fileList = new F13FileList(10,80,200,500,mCore->getMDDir()); // TODO
+		add(fileList); // add to window
+
+		//std::string const& selFileName = mCore->getMDDir()->getInitiallySelectedFileName();
+		//if (selFileName.size()) {
+		//	keyValueList = new F13KeyValueList(250, 30, 200, 600, selFileName);
+		//}
 	}
 }
 
@@ -156,6 +171,24 @@ int Fltk13GUI::showWindow() {
 	return Fl::run();
 }
 
+void Fltk13GUI::showFileMetaData() {
+	if (keyValueList) {
+		remove(keyValueList);
+		Fl::delete_widget(keyValueList); // todo: instead of deleting, clearing and refilling it should be good, too?!?
+		keyValueList = NULL;
+	}
+
+	if (!fileList) return;
+
+	MDDir const* mddir = mCore->getMDDir();
+	if (!mddir) return;
+	MDFile* mdfile = mddir->getMDFile(fileList->getSelectedFileName());
+	if (!mdfile) return;
+
+	keyValueList = new F13KeyValueList(350, 30, 200, 600, mdfile);
+	add(keyValueList);
+	keyValueList->redraw();
+}
 
 
 

@@ -1,3 +1,4 @@
+/*
 // small database for a single directory
 // can be saved to or read from a file
 
@@ -31,3 +32,4 @@ class MDDirDataBase {
 	//MDPropFile* tmpPropFile; // used during file reading
 	std::string tmpSection;
 };
+*/

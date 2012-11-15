@@ -1,7 +1,7 @@
 #include "MCore.h"
 #include "MDDir.h"
 
-MCore::MCore() {
+MCore::MCore() : mddir(NULL) {
 }
 
 MCore::~MCore() {
