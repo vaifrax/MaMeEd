@@ -16,6 +16,8 @@ class MDFile {
 	void writeToFile(std::ofstream& os);
 	void addKeyValue(std::string key, std::string value);
 
+	void changeKeyValue(std::string const& oldKey, std::string const& newKey, std::string const& newValue);
+
 	std::vector<MDProperty*> properties;
 
   protected:

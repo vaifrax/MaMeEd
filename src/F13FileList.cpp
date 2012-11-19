@@ -4,6 +4,9 @@
 #include "MDFile.h"
 #include "FL/Fl_Box.H"
 
+#include <FL/Fl_Shared_Image.H>
+#include <FL/Fl_JPEG_Image.H>
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
@@ -18,6 +21,17 @@ public:
 			// Fixed width box
 			fixedBox = new Fl_Box(X,Y,60,40,"Fixed");
 			fixedBox->box(FL_UP_BOX);
+
+// todo: test for .jpg or .jpeg
+std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
+//Fl_JPEG_Image jpgImg(path.c_str());
+Fl_JPEG_Image jpgImgBig(path.c_str());
+//Fl_JPEG_Image* jpgImg = new Fl_JPEG_Image(path.c_str());
+Fl_Image* jpgImg = jpgImgBig.copy(30, 30);
+//Fl_JPEG_Image jpgImg(NULL, mem-location);
+if (jpgImg && (jpgImg->w() > 0))
+	fixedBox->image(jpgImg);
+
 			// Stretchy box
 			stretchBox = new Fl_Box(X+60,Y,W-60,25, fileName);
 			//stretchBox->box(FL_UP_BOX);
@@ -54,10 +68,10 @@ public:
 				this->box(FL_UP_BOX);
 				redraw();
 				return 1; }
-			case FL_UNFOCUS:
-				//label ("Lost focus");
-				//damage(1);
-				return 1;
+			//case FL_UNFOCUS:
+			//	//label ("Lost focus");
+			//	//damage(1);
+			//	return 1;
 			default:
 				//return Fl_Window::handle(eventn);
 				return 0;

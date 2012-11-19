@@ -158,7 +158,7 @@ bool MDDir::readFromFile() {
 	return true;
 }
 
-bool MDDir::writeToFile() {
+bool MDDir::writeToFile() const {
 	std::ofstream os;
 
 	os.open(dbFileName.c_str());
@@ -170,7 +170,7 @@ bool MDDir::writeToFile() {
 	//}
 
 	//for (std::map<std::string, MDPropFile>::iterator i=propFiles.begin(); i!=propFiles.end(); ++i) {
-	for (std::vector<MDFile*>::iterator i=files.begin(); i!=files.end(); ++i) {
+	for (std::vector<MDFile*>::const_iterator i=files.begin(); i!=files.end(); ++i) {
 		(*i)->writeToFile(os);
 	}
 

@@ -14,6 +14,8 @@ class F13FileList : public Fl_Scroll {
 	const char* getSelectedFileName() const;
 	void setSelectedFile(FileGroup* sel) {selectedFile = sel;}
 
+	MDDir const* getMDDir() const {return mddir;};
+
   protected:
 	void addItem(std::string const& fileName);
 	void fillList();

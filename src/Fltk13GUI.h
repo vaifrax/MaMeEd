@@ -24,7 +24,10 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	void openDir(std::string path);
 	void showFileMetaData(); // update/show new file meta data window (of selected file)
 	int showWindow();
+	void applyChangesOfSelectedKeyValue();
+	void saveDataBase();
 
+	//int Fltk13GUI::handle(int e);
 	static void menuCallback(Fl_Widget* widget, void* userData);
 	static void buttonCallback(Fl_Widget* widget, void* userData);
 	static void keyboardCallback(Fl_Widget* widget, void* userData);
@@ -38,10 +41,16 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	void showFileChooser();
 
 	Fl_Window* aboutDialog;
+	void showAboutDialog();
+	Fl_Window* exitNoSavingDialog;
+	void showExitNoSavingDialog();
 
-	static enum {FILE_OPEN, FILE_SAVE, FILE_EXIT, EDIT_UNDO, HELP_ABOUT} MenuItemEnum;
-	static enum {BUTTON_PATH, BUTTON_ABOUT_OK} ButtonEnum;
+	static enum {FILE_OPEN, FILE_SAVE, FILE_EXIT_NO_SAVING, FILE_EXIT, EDIT_UNDO, HELP_ABOUT} MenuItemEnum;
+	static enum {BUTTON_PATH, BUTTON_ABOUT_OK, BUTTON_NO_SAVING_OK, BUTTON_NO_SAVING_CANCEL} ButtonEnum;
 	static enum {FROM_PATHTEXTEDIT} KeyboardEnum;
+
+	//char* dragDropEventText; // required for drag and drop
+	//static void dragDropCallbackDeferred(void* v);
 };
 
 #endif // FLTK13GUI_HEADER_INCLUDED

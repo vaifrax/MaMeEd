@@ -15,7 +15,7 @@ class MDDir {
 	MDFile* getMDFile(std::string const& fileName) const;
 
 	bool readFromFile();
-	bool writeToFile();
+	bool writeToFile() const;
 
 	static bool isFile(const char const* pathName);
 	static bool isDirectory(const char const* pathName);

@@ -15,6 +15,8 @@
 
 #include <FL/Fl_Button.H>
 
+#include <FL/Fl_Shared_Image.H>
+
 #include <FL/x.H> // to set icon in windows
 #include "../prj/resource.h" // for icon ID
 
@@ -29,6 +31,7 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 		{"&File", 0, 0, 0, FL_SUBMENU},
 			{"&Open", FL_COMMAND + 'o', menuCallback, (void*) FILE_OPEN},
 			{"&Save", FL_COMMAND + 's', menuCallback, (void*) FILE_SAVE},
+			{"Exit without saving", FL_COMMAND + 'q', menuCallback, (void*) FILE_EXIT_NO_SAVING},
 			{"E&xit", FL_COMMAND + 'q', menuCallback, (void*) FILE_EXIT},
 			{0},
 		{"&Edit", 0, 0, 0, FL_SUBMENU},
@@ -42,6 +45,8 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 	Fl_Menu_Bar *menu = new Fl_Menu_Bar(0, 0, 400, 25);
 	menu->copy(menuitems);
 
+	fl_register_images(); // init image lib
+
 	pathTextEdit = new Fl_Input(20, 50, 270, 24, "");
 	//pathTextEdit->value("C:");
 	pathTextEdit->callback(keyboardCallback, (void*) FROM_PATHTEXTEDIT);
@@ -51,34 +56,55 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 	pathButton->type(FL_NORMAL_BUTTON);
 	pathButton->callback(buttonCallback, (void*) BUTTON_PATH);
 
-/*
-	fileList = new FileList();
-	keyValueList = new KeyValueList();
+	end(); //////////////////////
 
-	scroll = new FileScroll(10,90,w()/3-20,h()-110);
-	scroll->box(FL_BORDER_BOX);
-	scroll->end();
-
-	scroll2 = new KeyValueScroll(w()/3+3,90,w()/3-20,h()-110);
-	scroll2->box(FL_BORDER_BOX);
-	scroll2->end();
-*/
-	// Initialize the file chooser
-	fileChooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
-	//fc->filter("Text\t*.txt\n");
-	//fileChooser->preset_file(untitled_default());
-
-	end();
-
-	// about dialog
-	aboutDialog = new Fl_Window(300, 105, "About");
-	Fl_Box *aboutInfo = new Fl_Box(70, 10, 200, 25, "MaMeEd 2012-11-12"); // TODO: update date automatically
-	Fl_Button *aboutOk = new Fl_Button(230, 70, 60, 25, "Ok");
-	aboutOk->callback(buttonCallback, (void*) BUTTON_ABOUT_OK);
+	// dialogs
+	fileChooser = NULL;
+	aboutDialog = NULL;
+	exitNoSavingDialog = NULL;
 }
 
 Fltk13GUI::~Fltk13GUI() {
+	applyChangesOfSelectedKeyValue();
 }
+
+void Fltk13GUI::applyChangesOfSelectedKeyValue() {
+	if (keyValueList) keyValueList->applyChangesOfSelectedKeyValue();
+}
+
+void Fltk13GUI::saveDataBase() {
+	if (!keyValueList) return;
+	keyValueList->applyChangesOfSelectedKeyValue();
+	mCore->getMDDir()->writeToFile();
+}
+
+
+//int Fltk13GUI::handle(int e) {
+//	switch (e) {
+//		case FL_PASTE:
+//			// make a copy of the DND payload
+//			int evtLen = Fl::event_length();
+//			if (dragDropEventText) delete[] dragDropEventText;
+//			dragDropEventText = new char[evtLen];
+//			strcpy(dragDropEventText, Fl::event_text());
+//			// If there is a callback registered, call it.
+//			// The callback must access Fl::event_text() to
+//			// get the string or file path that was dropped.
+//			// Note that do_callback() is not called directly.
+//			// Instead it will be executed by the FLTK main-loop
+//			// once we have finished handling the DND event.
+//			// This allows caller to popup a window or change widget focus.
+//			if(callback() && ((when() & FL_WHEN_RELEASE) || (when() & FL_WHEN_CHANGED)))
+//				Fl::add_timeout(0.0, dragDropCallbackDeferred, (void*)this);
+//			return 1;
+//	}
+//}
+//
+///*static*/ void dragDropCallbackDeferred(void* v) {
+//	Fltk13GUI* fgui = (Fltk13GUI*) v;
+//	fgui->openDir(dragDropEventText);
+//	delete[] dragDropEventText;
+//}
 
 /*static*/ void Fltk13GUI::menuCallback(Fl_Widget* widget, void* userData) {
 	Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
@@ -86,14 +112,23 @@ Fltk13GUI::~Fltk13GUI() {
 
 	switch ((int) userData) {
 		case FILE_OPEN:
+			fgui->applyChangesOfSelectedKeyValue();
 			fgui->showFileChooser();
 			break;
 		case FILE_SAVE:
+			//fgui->applyChangesOfSelectedKeyValue();
+			fgui->saveDataBase();
+			break;
+		case FILE_EXIT_NO_SAVING:
+			fgui->showExitNoSavingDialog();
 			break;
 		case FILE_EXIT:
-			break;
+			fgui->applyChangesOfSelectedKeyValue();
+			fgui->saveDataBase(); // auto-save on exit
+			exit(0);
+			//break;
 		case HELP_ABOUT:
-			fgui->aboutDialog->show();
+			fgui->showAboutDialog();
 			break;
 	}
 }
@@ -110,6 +145,13 @@ Fltk13GUI::~Fltk13GUI() {
 		case BUTTON_ABOUT_OK:
 			widget->window()->hide();
 			break;
+
+		case BUTTON_NO_SAVING_OK:
+			exit(0);
+			break;
+		case BUTTON_NO_SAVING_CANCEL:
+			widget->window()->hide();
+			break;
 	}
 }
 
@@ -124,6 +166,10 @@ Fltk13GUI::~Fltk13GUI() {
 }
 
 void Fltk13GUI::showFileChooser() {
+	if (!fileChooser) {
+		fileChooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
+	}
+
 	fileChooser->title("Open");
 	fileChooser->type(Fl_Native_File_Chooser::BROWSE_DIRECTORY); // already existing directories
 	switch (fileChooser->show()) {
@@ -135,6 +181,32 @@ void Fltk13GUI::showFileChooser() {
 		openDir(fileChooser->filename());
 	break;
 	}
+}
+
+void Fltk13GUI::showAboutDialog() {
+	if (!aboutDialog) {
+		aboutDialog = new Fl_Window(300, 105, "About");
+		Fl_Box *aboutInfo = new Fl_Box(70, 10, 200, 25, "MaMeEd 2012-11-12"); // TODO: update date automatically
+		Fl_Button *aboutOk = new Fl_Button(230, 70, 60, 25, "Ok");
+		aboutOk->callback(buttonCallback, (void*) BUTTON_ABOUT_OK);
+		aboutDialog->end();
+	}
+
+	aboutDialog->show();
+}
+
+void Fltk13GUI::showExitNoSavingDialog() {
+	if (!exitNoSavingDialog) {
+	exitNoSavingDialog = new Fl_Window(390, 100, "Exit without saving?");
+	Fl_Box *exitNoSavingInfo = new Fl_Box(70, 10, 200, 25, "Discard all changes?"); // TODO: update date automatically
+	Fl_Button *exitNoSavingOk = new Fl_Button(230, 70, 60, 25, "Ok");
+	exitNoSavingOk->callback(buttonCallback, (void*) BUTTON_NO_SAVING_OK);
+	Fl_Button *exitNoSavingCancel = new Fl_Button(320, 70, 60, 25, "Cancel");
+	exitNoSavingCancel->callback(buttonCallback, (void*) BUTTON_NO_SAVING_CANCEL);
+	exitNoSavingDialog->end();
+	}
+
+	exitNoSavingDialog->show();
 }
 
 void Fltk13GUI::openDir(std::string path) {

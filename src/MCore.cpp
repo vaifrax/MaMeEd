@@ -15,7 +15,10 @@ bool MCore::openDir(std::string const& path) {
 		return false; // error
 	}
 
-	if (mddir) delete mddir;
+	if (mddir) {
+		mddir->writeToFile();
+		delete mddir;
+	}
 	mddir = newMddir;
 
 	return true;
