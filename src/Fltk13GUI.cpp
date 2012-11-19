@@ -27,6 +27,8 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 	fileList = NULL;
 	keyValueList = NULL;
 
+	fl_register_images(); // init image lib
+
 	Fl_Menu_Item menuitems[] = {
 		{"&File", 0, 0, 0, FL_SUBMENU},
 			{"&Open", FL_COMMAND + 'o', menuCallback, (void*) FILE_OPEN},
@@ -42,20 +44,31 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 			{0},
 		{0}
 	};
-	Fl_Menu_Bar *menu = new Fl_Menu_Bar(0, 0, 400, 25);
+
+	const int MENU_HEIGHT = 25;
+	Fl_Menu_Bar *menu = new Fl_Menu_Bar(0, 0, w(), MENU_HEIGHT);
 	menu->copy(menuitems);
 
-	fl_register_images(); // init image lib
+	// main group, containing all elements in the window
+	const int MAIN_GROUP_PADDING = 2;
+	mainGroup = new Fl_Group(MAIN_GROUP_PADDING, MENU_HEIGHT+MAIN_GROUP_PADDING, w()-2*MAIN_GROUP_PADDING, h()-MENU_HEIGHT-2*MAIN_GROUP_PADDING); // put everything in a group for equal resizing
+		pathFilesGroup = new Fl_Group(mainGroup->x(), mainGroup->y(), mainGroup->w()/3, mainGroup->h()); // left side
+			pathGroup = new Fl_Group(pathFilesGroup->x(), pathFilesGroup->y(), pathFilesGroup->w(), 25); // top bar of left side
+				const int PATH_BUTTON_WIDTH = 35;
+				pathTextEdit = new Fl_Input(pathGroup->x(), pathGroup->y(), pathGroup->w()-PATH_BUTTON_WIDTH-2, pathGroup->h());
+				//pathTextEdit->value("C:");
+				pathTextEdit->callback(keyboardCallback, (void*) FROM_PATHTEXTEDIT);
+				pathTextEdit->when(FL_WHEN_ENTER_KEY); // FL_WHEN_RELEASE
 
-	pathTextEdit = new Fl_Input(20, 50, 270, 24, "");
-	//pathTextEdit->value("C:");
-	pathTextEdit->callback(keyboardCallback, (void*) FROM_PATHTEXTEDIT);
-	pathTextEdit->when(FL_WHEN_ENTER_KEY); // FL_WHEN_RELEASE
-
-	Fl_Button* pathButton = new Fl_Button(300, 50, 34, 24, "Path"); // "@#menu"
-	pathButton->type(FL_NORMAL_BUTTON);
-	pathButton->callback(buttonCallback, (void*) BUTTON_PATH);
-
+				Fl_Button* pathButton = new Fl_Button(pathGroup->x()+pathGroup->w()-PATH_BUTTON_WIDTH, pathGroup->y(), PATH_BUTTON_WIDTH, pathGroup->h(), "Path");
+				pathButton->type(FL_NORMAL_BUTTON);
+				pathButton->callback(buttonCallback, (void*) BUTTON_PATH);
+			pathGroup->end();
+			pathGroup->resizable(pathTextEdit);
+		pathFilesGroup->end();
+		pathFilesGroup->resizable(fileList);
+	mainGroup->end();
+	resizable(mainGroup);
 	end(); //////////////////////
 
 	// dialogs
@@ -215,7 +228,7 @@ void Fltk13GUI::openDir(std::string path) {
 
 	if (mCore->openDir(path)) {
 		if (fileList) {
-			remove(fileList); // remove from window
+			pathFilesGroup->remove(fileList); // remove from window
 			delete fileList;
 		}
 		if (keyValueList) {
@@ -224,8 +237,8 @@ void Fltk13GUI::openDir(std::string path) {
 			keyValueList = NULL;
 		}
 
-		fileList = new F13FileList(10,80,200,500,mCore->getMDDir()); // TODO
-		add(fileList); // add to window
+		fileList = new F13FileList(pathFilesGroup->x(), pathFilesGroup->y() + 26, pathFilesGroup->w(), pathFilesGroup->h()-26, mCore->getMDDir());
+		pathFilesGroup->add(fileList); // add to window
 
 		//std::string const& selFileName = mCore->getMDDir()->getInitiallySelectedFileName();
 		//if (selFileName.size()) {
@@ -245,7 +258,7 @@ int Fltk13GUI::showWindow() {
 
 void Fltk13GUI::showFileMetaData() {
 	if (keyValueList) {
-		remove(keyValueList);
+		mainGroup->remove(keyValueList);
 		Fl::delete_widget(keyValueList); // todo: instead of deleting, clearing and refilling it should be good, too?!?
 		keyValueList = NULL;
 	}
@@ -257,7 +270,7 @@ void Fltk13GUI::showFileMetaData() {
 	MDFile* mdfile = mddir->getMDFile(fileList->getSelectedFileName());
 	if (!mdfile) return;
 
-	keyValueList = new F13KeyValueList(350, 30, 200, 600, mdfile);
-	add(keyValueList);
+	keyValueList = new F13KeyValueList(mainGroup->x() + mainGroup->w()/3, mainGroup->y(), mainGroup->w()/3, mainGroup->h(), mdfile);
+	mainGroup->add(keyValueList);
 	keyValueList->redraw();
 }

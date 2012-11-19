@@ -48,21 +48,28 @@ public:
 				unsigned char* thumbData = ef.getThumbnailData();
 				if (thumbData) {
 					Fl_JPEG_Image jpgImgThumb(NULL, thumbData);
-std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
-					Fl_Image* jpgImg = jpgImgThumb.copy(40, 40);
+					//std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
+					float scDiv = 40.f / max(jpgImgThumb.w(), jpgImgThumb.h());
+					int newW = (int) (scDiv * jpgImgThumb.w() + 0.499);
+					int newH = (int) (scDiv * jpgImgThumb.h() + 0.499);
+					Fl_Image* jpgImg = jpgImgThumb.copy(newW, newH);
 					if (jpgImg && (jpgImg->w() > 0))
 						fixedBox->image(jpgImg);
 				} else {
 					// load full resolution and scale it down
 					Fl_JPEG_Image jpgImgBig(path.c_str());
-					Fl_Image* jpgImg = jpgImgBig.copy(40, 40);
+					float scDiv = 40.f / max(jpgImgBig.w(), jpgImgBig.h());
+					int newW = (int) (scDiv * jpgImgBig.w() + 0.499);
+					int newH = (int) (scDiv * jpgImgBig.h() + 0.499);
+					Fl_Image* jpgImg = jpgImgBig.copy(newW, newH);
 					if (jpgImg && (jpgImg->w() > 0))
 						fixedBox->image(jpgImg);
 				}
 			}
 
 			// Stretchy box
-			stretchBox = new Fl_Box(X+60,Y,W-60,25, fileName);
+			stretchBox = new Fl_Box(X+50,Y,W-50,40, fileName);
+			stretchBox->align(FL_ALIGN_CENTER | FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 			//stretchBox->box(FL_UP_BOX);
 			resizable(stretchBox);
 		end();

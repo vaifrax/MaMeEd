@@ -49,6 +49,10 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	static enum {BUTTON_PATH, BUTTON_ABOUT_OK, BUTTON_NO_SAVING_OK, BUTTON_NO_SAVING_CANCEL} ButtonEnum;
 	static enum {FROM_PATHTEXTEDIT} KeyboardEnum;
 
+	Fl_Group* mainGroup; // put everything in a group for equal resizing
+	Fl_Group* pathFilesGroup; // left side
+	Fl_Group* pathGroup; // top bar of left side
+
 	//char* dragDropEventText; // required for drag and drop
 	//static void dragDropCallbackDeferred(void* v);
 };
