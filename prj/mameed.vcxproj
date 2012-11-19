@@ -74,6 +74,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\ExifFile.cpp" />
     <ClCompile Include="..\src\F13FileList.cpp" />
     <ClCompile Include="..\src\F13KeyValueList.cpp" />
     <ClCompile Include="..\src\MCore.cpp" />
@@ -84,6 +85,7 @@
     <ClCompile Include="..\src\Fltk13GUI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\ExifFile.h" />
     <ClInclude Include="..\src\F13FileList.h" />
     <ClInclude Include="..\src\F13KeyValueList.h" />
     <ClInclude Include="..\src\MCore.h" />

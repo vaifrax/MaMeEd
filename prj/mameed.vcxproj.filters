@@ -41,6 +41,9 @@
     <ClCompile Include="..\src\MDProperty.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ExifFile.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\F13FileList.h">
@@ -69,6 +72,9 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Source Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ExifFile.h">
+      <Filter>Source Files\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

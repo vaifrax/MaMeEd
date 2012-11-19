@@ -7,6 +7,10 @@
 #include <FL/Fl_Shared_Image.H>
 #include <FL/Fl_JPEG_Image.H>
 
+#include "ExifFile.h"
+
+#include <iostream> // for cout, debugging only!?
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
@@ -19,18 +23,43 @@ public:
 	FileGroup(int X, int Y, int W, int H, const char* fileName, const char* L=0) : Fl_Group(X,Y,W,H,L) {
 		begin();
 			// Fixed width box
-			fixedBox = new Fl_Box(X,Y,60,40,"Fixed");
-			fixedBox->box(FL_UP_BOX);
+			fixedBox = new Fl_Box(X,Y,40,40);
+			//fixedBox->box(FL_UP_BOX);
 
-// todo: test for .jpg or .jpeg
-std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
-//Fl_JPEG_Image jpgImg(path.c_str());
-Fl_JPEG_Image jpgImgBig(path.c_str());
-//Fl_JPEG_Image* jpgImg = new Fl_JPEG_Image(path.c_str());
-Fl_Image* jpgImg = jpgImgBig.copy(30, 30);
-//Fl_JPEG_Image jpgImg(NULL, mem-location);
-if (jpgImg && (jpgImg->w() > 0))
-	fixedBox->image(jpgImg);
+			std::string fileNameStr(fileName);
+			int fileNameStrLen = fileNameStr.length();
+
+			// extract extension and convert to upper case
+			std::string ext;
+			if (fileNameStrLen > 1) {
+				std::string::size_type p = fileNameStr.rfind('.', fileNameStrLen-1);
+				if (p != std::string::npos) {
+					ext = fileNameStr.substr(p+1);
+					for (int i=0; i<ext.length(); i++) ext[i] = toupper(ext[i]);
+				}
+			}
+
+			// test for .jpg or .jpeg
+			if ((ext == "JPG") || (ext == "JPEG")) {
+				std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
+
+				// try to load exif thumbnail and use as image
+				ExifFile ef(path.c_str());
+				unsigned char* thumbData = ef.getThumbnailData();
+				if (thumbData) {
+					Fl_JPEG_Image jpgImgThumb(NULL, thumbData);
+std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
+					Fl_Image* jpgImg = jpgImgThumb.copy(40, 40);
+					if (jpgImg && (jpgImg->w() > 0))
+						fixedBox->image(jpgImg);
+				} else {
+					// load full resolution and scale it down
+					Fl_JPEG_Image jpgImgBig(path.c_str());
+					Fl_Image* jpgImg = jpgImgBig.copy(40, 40);
+					if (jpgImg && (jpgImg->w() > 0))
+						fixedBox->image(jpgImg);
+				}
+			}
 
 			// Stretchy box
 			stretchBox = new Fl_Box(X+60,Y,W-60,25, fileName);
