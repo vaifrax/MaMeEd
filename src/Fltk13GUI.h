@@ -33,8 +33,10 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	static void keyboardCallback(Fl_Widget* widget, void* userData);
 
   protected:
+char antiMemCor1[100];
 	F13FileList* fileList;
 	F13KeyValueList* keyValueList;
+char antiMemCor2[100];
 
 	Fl_Input* pathTextEdit;
 	Fl_Native_File_Chooser *fileChooser;

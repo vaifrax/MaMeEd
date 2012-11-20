@@ -16,6 +16,8 @@ class F13KeyValueList : public Fl_Scroll {
 
 	static void keyCallback(Fl_Widget *w, void *data);
 
+	void resize(int X, int Y, int W, int H);
+
   protected:
 	void addItem(std::string const& key, std::string const& value);
 	void fillList();

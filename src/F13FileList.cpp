@@ -11,6 +11,8 @@
 
 #include <iostream> // for cout, debugging only!?
 
+#include <assert.h>
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
@@ -85,6 +87,7 @@ public:
 			//case FL_FOCUS:
 			{
 				//label ("Gained focus");
+				assert(dynamic_cast<F13FileList*> (parent()));
 				F13FileList* fileList = (F13FileList*) parent();
 				FileGroup* prevSelectedFile = fileList->getSelectedFile(); // previously selected file
 				//if (this == prevSelectedFile) return 1; // same file: do nothing (no FL_FOCUS event anyway, right?)
@@ -97,7 +100,8 @@ public:
 				}
 
 				fileList->setSelectedFile(this);
-				Fltk13GUI* fgui = (Fltk13GUI*) fileList->parent();
+				assert(dynamic_cast<Fltk13GUI*> (fileList->window()));
+				Fltk13GUI* fgui = (Fltk13GUI*) fileList->window();
 				fgui->showFileMetaData();
 
 				this->color(0xFF000000);
@@ -143,4 +147,15 @@ void F13FileList::fillList() {
 	for (std::vector<MDFile*>::const_iterator i=files.begin(); i!=files.end(); ++i) {
 		addItem((*i)->getName());
 	}
+}
+
+void F13FileList::resize(int X, int Y, int W, int H) {
+	// Tell children to resize to our new width
+	for ( int t=0; t<itemNum; t++ ) {
+		Fl_Widget *w = child(t);
+		w->resize(w->x(), w->y(), W-20, w->h());    // W-20: leave room for scrollbar
+	}
+	// Tell scroll children changed in size
+	init_sizes();
+	Fl_Scroll::resize(X,Y,W,H);
 }

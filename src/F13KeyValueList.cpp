@@ -119,3 +119,14 @@ void F13KeyValueList::fillList() {
 	}
 	addItem(emptyString, emptyString);
 }
+
+void F13KeyValueList::resize(int X, int Y, int W, int H) {
+	// Tell children to resize to our new width
+	for ( int t=0; t<itemNum; t++ ) {
+		Fl_Widget *w = child(t);
+		w->resize(w->x(), w->y(), W-20, w->h());    // W-20: leave room for scrollbar
+	}
+	// Tell scroll children changed in size
+	init_sizes();
+	Fl_Scroll::resize(X,Y,W,H);
+}

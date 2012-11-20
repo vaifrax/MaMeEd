@@ -16,6 +16,8 @@ class F13FileList : public Fl_Scroll {
 
 	MDDir const* getMDDir() const {return mddir;};
 
+	void resize(int X, int Y, int W, int H);
+
   protected:
 	void addItem(std::string const& fileName);
 	void fillList();

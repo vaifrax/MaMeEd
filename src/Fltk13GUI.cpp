@@ -114,6 +114,7 @@ void Fltk13GUI::saveDataBase() {
 //}
 //
 ///*static*/ void dragDropCallbackDeferred(void* v) {
+//	assert(dynamic_cast<Fltk13GUI*> v);
 //	Fltk13GUI* fgui = (Fltk13GUI*) v;
 //	fgui->openDir(dragDropEventText);
 //	delete[] dragDropEventText;
