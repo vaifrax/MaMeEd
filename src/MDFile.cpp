@@ -2,8 +2,8 @@
 #include "MDDir.h"
 #include "MDProperty.h"
 
-MDFile::MDFile(std::string fileName) : fileName(fileName) {
-	isDir = MDDir::isDirectory(this->fileName.c_str());
+MDFile::MDFile(std::string fileName, std::string const& dirPath) : fileName(fileName) {
+	isDir = MDDir::isDirectory((dirPath + '/' + this->fileName).c_str());
 }
 
 void MDFile::writeToFile(std::ofstream& os) {

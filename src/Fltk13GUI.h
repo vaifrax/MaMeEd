@@ -21,7 +21,8 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	Fltk13GUI(MCore* mCore);
 	~Fltk13GUI();
 
-	void openDir(std::string path);
+	void openDir(std::string path); // absolute path
+	void openSubDir(std::string subDirName); // relative to currently opened path
 	void showFileMetaData(); // update/show new file meta data window (of selected file)
 	int showWindow();
 	void applyChangesOfSelectedKeyValue();
@@ -31,6 +32,7 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	static void menuCallback(Fl_Widget* widget, void* userData);
 	static void buttonCallback(Fl_Widget* widget, void* userData);
 	static void keyboardCallback(Fl_Widget* widget, void* userData);
+	static void changeDirCallback(Fl_Widget* widget, void* userData);
 
   protected:
 char antiMemCor1[100];
@@ -40,7 +42,7 @@ char antiMemCor2[100];
 
 	Fl_Input* pathTextEdit;
 	Fl_Native_File_Chooser *fileChooser;
-	void showFileChooser();
+	void showFileChooser(const char* initPath = NULL);
 
 	Fl_Window* aboutDialog;
 	void showAboutDialog();

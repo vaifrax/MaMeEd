@@ -3,6 +3,7 @@
 #include "MDDir.h"
 #include "MDFile.h"
 #include "FL/Fl_Box.H"
+#include "FL/Fl_Button.H"
 
 #include <FL/Fl_Shared_Image.H>
 #include <FL/Fl_JPEG_Image.H>
@@ -17,53 +18,67 @@
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
 class FileGroup : public Fl_Group {
-	Fl_Box *thumbnailBox;
+	Fl_Button *thumbnailButton;
 	Fl_Box *nameDateBox;
 public:
 	const char* getFileName() const {return nameDateBox->label();}
 
-	FileGroup(int X, int Y, int W, int H, const char* fileName, const char* L=0) : Fl_Group(X,Y,W,H,L) {
+	FileGroup(int X, int Y, int W, int H, const char* fileName, bool isDirectory, const char* L=0) : Fl_Group(X,Y,W,H,L) {
 		begin();
-			thumbnailBox = new Fl_Box(X,Y,40,40);
+			thumbnailButton = NULL;
 
-			std::string fileNameStr(fileName);
-			int fileNameStrLen = fileNameStr.length();
-
-			// extract extension and convert to upper case
-			std::string ext;
-			if (fileNameStrLen > 1) {
-				std::string::size_type p = fileNameStr.rfind('.', fileNameStrLen-1);
-				if (p != std::string::npos) {
-					ext = fileNameStr.substr(p+1);
-					for (int i=0; i<ext.length(); i++) ext[i] = toupper(ext[i]);
-				}
-			}
-
-			// test for .jpg or .jpeg
-			if ((ext == "JPG") || (ext == "JPEG")) {
-				std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
-
-				// try to load exif thumbnail and use as image
-				ExifFile ef(path.c_str());
-				unsigned char* thumbData = ef.getThumbnailData();
-				if (thumbData) {
-					Fl_JPEG_Image jpgImgThumb(NULL, thumbData);
-					//std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
-					float scDiv = 40.f / max(jpgImgThumb.w(), jpgImgThumb.h());
-					int newW = (int) (scDiv * jpgImgThumb.w() + 0.499);
-					int newH = (int) (scDiv * jpgImgThumb.h() + 0.499);
-					Fl_Image* jpgImg = jpgImgThumb.copy(newW, newH);
-					if (jpgImg && (jpgImg->w() > 0))
-						thumbnailBox->image(jpgImg);
+			if (isDirectory) {
+				// this is a directory
+				thumbnailButton = new Fl_Button(X,Y,40,40);
+				//thumbnailButton->type(FL_NORMAL_BUTTON);
+				if (strcmp(fileName, "..") == 0) {
+					thumbnailButton->label("@8->");
 				} else {
-					// load full resolution and scale it down
-					Fl_JPEG_Image jpgImgBig(path.c_str());
-					float scDiv = 40.f / max(jpgImgBig.w(), jpgImgBig.h());
-					int newW = (int) (scDiv * jpgImgBig.w() + 0.499);
-					int newH = (int) (scDiv * jpgImgBig.h() + 0.499);
-					Fl_Image* jpgImg = jpgImgBig.copy(newW, newH);
-					if (jpgImg && (jpgImg->w() > 0))
-						thumbnailBox->image(jpgImg);
+					thumbnailButton->label("@->");
+				}
+				thumbnailButton->callback(Fltk13GUI::changeDirCallback, (void*) fileName);
+			} else {
+				// this is a file
+				std::string fileNameStr(fileName);
+				int fileNameStrLen = fileNameStr.length();
+
+				// extract extension and convert to upper case
+				std::string ext;
+				if (fileNameStrLen > 1) {
+					std::string::size_type p = fileNameStr.rfind('.', fileNameStrLen-1);
+					if (p != std::string::npos) {
+						ext = fileNameStr.substr(p+1);
+						for (int i=0; i<ext.length(); i++) ext[i] = toupper(ext[i]);
+					}
+				}
+
+				// test for .jpg or .jpeg
+				if ((ext == "JPG") || (ext == "JPEG")) {
+					thumbnailButton = new Fl_Button(X,Y,40,40);
+					std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
+
+					// try to load exif thumbnail and use as image
+					ExifFile ef(path.c_str());
+					unsigned char* thumbData = ef.getThumbnailData();
+					if (thumbData) {
+						Fl_JPEG_Image jpgImgThumb(NULL, thumbData);
+						//std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
+						float scDiv = 40.f / max(jpgImgThumb.w(), jpgImgThumb.h());
+						int newW = (int) (scDiv * jpgImgThumb.w() + 0.499);
+						int newH = (int) (scDiv * jpgImgThumb.h() + 0.499);
+						Fl_Image* jpgImg = jpgImgThumb.copy(newW, newH);
+						if (jpgImg && (jpgImg->w() > 0))
+							thumbnailButton->image(jpgImg);
+					} else {
+						// load full resolution and scale it down
+						Fl_JPEG_Image jpgImgBig(path.c_str());
+						float scDiv = 40.f / max(jpgImgBig.w(), jpgImgBig.h());
+						int newW = (int) (scDiv * jpgImgBig.w() + 0.499);
+						int newH = (int) (scDiv * jpgImgBig.h() + 0.499);
+						Fl_Image* jpgImg = jpgImgBig.copy(newW, newH);
+						if (jpgImg && (jpgImg->w() > 0))
+							thumbnailButton->image(jpgImg);
+					}
 				}
 			}
 
@@ -75,6 +90,7 @@ public:
 	}
 
 	int handle(int eventn) {
+Fl_Group::handle(eventn);
 		switch (eventn) {
 			//case FL_PUSH:
 			case FL_RELEASE:
@@ -105,13 +121,16 @@ public:
 				this->color(0xDDEEFF00);
 				this->box(FL_UP_BOX);
 				redraw();
-				return 1; }
+//return 0;
+//return Fl_Group::handle(eventn);
+				return 1;
+ }
 			//case FL_UNFOCUS:
 			//	//label ("Lost focus");
 			//	//damage(1);
 			//	return 1;
 			default:
-				//return Fl_Window::handle(eventn);
+				return Fl_Group::handle(eventn);
 				return 0;
 		};
 	}
@@ -128,12 +147,12 @@ const char* F13FileList::getSelectedFileName() const {
 }
 
 
-void F13FileList::addItem(std::string const& fileName) {
-	int X = x() + 1,
+void F13FileList::addItem(std::string const& fileName, bool isDirectory) {
+	int X = x(),
 		Y = y() - yposition() + (itemNum*41) + 1,
 		W = w() - 20,                           // -20: compensate for vscroll bar
-		H = 41;
-	add(new FileGroup(X,Y,W,H, fileName.c_str()));
+		H = 40;
+	add(new FileGroup(X,Y,W,H, fileName.c_str(), isDirectory));
 	redraw();
 	itemNum++;
 }
@@ -143,7 +162,7 @@ void F13FileList::fillList() {
 
 	std::vector<MDFile*> const& files = mddir->getFiles();
 	for (std::vector<MDFile*>::const_iterator i=files.begin(); i!=files.end(); ++i) {
-		addItem((*i)->getName());
+		addItem((*i)->getName(), (*i)->isDirectory());
 	}
 }
 

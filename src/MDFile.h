@@ -9,7 +9,7 @@ class MDProperty;
 
 class MDFile {
   public:
-	MDFile(std::string fileName); // file name (without complete path)
+	MDFile(std::string fileName, std::string const& dirPath); // file name (without complete path)
 	bool const isDirectory() {return isDir;}
 	std::string const& getName() {return fileName;}
 	//std::string const& getAbsPath() {return path;} // return complete absolute path

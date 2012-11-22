@@ -69,10 +69,13 @@ MDDir::MDDir(std::string const& path) {
 		dirPath = "";
 		return; // error
 	}
-	MDFile* f = new MDFile(FindData.cFileName);
-	files.push_back(f);
+	MDFile* f = new MDFile(FindData.cFileName, dirPath);
+	if ((FindData.cFileName[0] != '.') || (FindData.cFileName[1] != 0)) { // if not '.', add it
+		files.push_back(f);
+	}
+
 	while (FindNextFile(hFind, &FindData)) {
-		f = new MDFile(FindData.cFileName);
+		f = new MDFile(FindData.cFileName, dirPath);
 		files.push_back(f);
 	}
 	FindClose(hFind);

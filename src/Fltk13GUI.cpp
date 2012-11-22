@@ -153,8 +153,7 @@ void Fltk13GUI::saveDataBase() {
 			Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
 			if (!fgui) return; // TODO: error
 			//fgui->fileChooser->preset_file(fgui->pathTextEdit->value());
-			fgui->fileChooser->directory(fgui->pathTextEdit->value());
-			fgui->showFileChooser();
+			fgui->showFileChooser(fgui->pathTextEdit->value());
 			} break;
 		case BUTTON_ABOUT_OK:
 			widget->window()->hide();
@@ -179,10 +178,21 @@ void Fltk13GUI::saveDataBase() {
 	}
 }
 
-void Fltk13GUI::showFileChooser() {
+// callback for the button next to a directory in fileList
+/*static*/ void Fltk13GUI::changeDirCallback(Fl_Widget* widget, void* userData) {
+	const char* dirName = (const char*) userData;
+	Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
+	if (!fgui) return; // TODO: error
+
+	fgui->openSubDir(dirName);
+}
+
+void Fltk13GUI::showFileChooser(const char* initPath/* = NULL*/) {
 	if (!fileChooser) {
 		fileChooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
 	}
+
+	if (initPath) fileChooser->directory(initPath);
 
 	fileChooser->title("Open");
 	fileChooser->type(Fl_Native_File_Chooser::BROWSE_DIRECTORY); // already existing directories
@@ -230,12 +240,13 @@ void Fltk13GUI::openDir(std::string path) {
 	if (mCore->openDir(path)) {
 		if (fileList) {
 			pathFilesGroup->remove(fileList); // remove from window
-			delete fileList;
+			Fl::delete_widget(fileList);
 		}
 		if (keyValueList) {
 			remove(keyValueList);
-			delete keyValueList;
+			Fl::delete_widget(keyValueList);
 			keyValueList = NULL;
+//window()->redraw(); // TODO: redraw, somehow (without crashing!)
 		}
 
 		fileList = new F13FileList(pathFilesGroup->x(), pathFilesGroup->y() + 26, pathFilesGroup->w(), pathFilesGroup->h()-26, mCore->getMDDir());
@@ -246,6 +257,27 @@ pathFilesGroup->resizable(fileList);
 		//if (selFileName.size()) {
 		//	keyValueList = new F13KeyValueList(250, 30, 200, 600, selFileName);
 		//}
+		fileList->redraw();
+//redraw();
+	}
+}
+
+void Fltk13GUI::openSubDir(std::string subDirName) {
+	std::string currentPath(mCore->getMDDir()->getDirPath());
+
+	// todo: this code could be put into the core?
+	if (subDirName == "..") {
+		// go up one directory
+
+		size_t p = currentPath.find_last_of("/\\");
+		if (p == std::string::npos) {
+			return; // do nothing: already uppermost directory
+		}
+
+		std::string newPath = currentPath.substr(0, p);
+		openDir(newPath);
+	} else {
+		openDir(currentPath + '/' + subDirName);
 	}
 }
 
