@@ -12,26 +12,26 @@
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
 class KeyValueGroup : public Fl_Group {
-	Fl_Input *fixedBox;
-	Fl_Input *stretchBox;
+	Fl_Input *keyInput;
+	Fl_Input *valueInput;
 public:
-	std::string /*const&*/ getKey() const {return fixedBox->value();}
-	std::string /*const&*/ getValue() const {return stretchBox->value();}
+	std::string /*const&*/ getKey() const {return keyInput->value();}
+	std::string /*const&*/ getValue() const {return valueInput->value();}
 
 	KeyValueGroup(int X, int Y, int W, int H, const char* key, const char* value, const char* L=0) : Fl_Group(X,Y,W,H,L) {
 		begin();
-			fixedBox = new Fl_Input(X,Y,90,25,"");
-			fixedBox->value(key);
-			fixedBox->box(FL_FLAT_BOX);
-			fixedBox->callback(F13KeyValueList::keyCallback, this->parent());
-			fixedBox->when(FL_WHEN_CHANGED |  FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
-fixedBox->color(0xFFFFFF00);
+			keyInput = new Fl_Input(X,Y,90,25,"");
+			keyInput->value(key);
+			keyInput->box(FL_FLAT_BOX);
+			keyInput->color(0xFFFFFF00);
+			keyInput->callback(F13KeyValueList::keyCallback, this->parent());
+			keyInput->when(FL_WHEN_CHANGED |  FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
 
-			stretchBox = new Fl_Input(X+90+1,Y,W-90-1,25);
-			stretchBox->value(value);
-			stretchBox->box(FL_FLAT_BOX);
-stretchBox->color(0xFFFFFF00);
-			resizable(stretchBox);
+			valueInput = new Fl_Input(X+90+1,Y,W-90-1,25);
+			valueInput->value(value);
+			valueInput->box(FL_FLAT_BOX);
+			valueInput->color(0xFFFFFF00);
+			//resizable(valueInput);
 		end();
 	}
 

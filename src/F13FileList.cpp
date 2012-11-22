@@ -17,16 +17,14 @@
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
 class FileGroup : public Fl_Group {
-	Fl_Box *fixedBox;
-	Fl_Box *stretchBox;
+	Fl_Box *thumbnailBox;
+	Fl_Box *nameDateBox;
 public:
-	const char* getFileName() const {return stretchBox->label();}
+	const char* getFileName() const {return nameDateBox->label();}
 
 	FileGroup(int X, int Y, int W, int H, const char* fileName, const char* L=0) : Fl_Group(X,Y,W,H,L) {
 		begin();
-			// Fixed width box
-			fixedBox = new Fl_Box(X,Y,40,40);
-			//fixedBox->box(FL_UP_BOX);
+			thumbnailBox = new Fl_Box(X,Y,40,40);
 
 			std::string fileNameStr(fileName);
 			int fileNameStrLen = fileNameStr.length();
@@ -56,7 +54,7 @@ public:
 					int newH = (int) (scDiv * jpgImgThumb.h() + 0.499);
 					Fl_Image* jpgImg = jpgImgThumb.copy(newW, newH);
 					if (jpgImg && (jpgImg->w() > 0))
-						fixedBox->image(jpgImg);
+						thumbnailBox->image(jpgImg);
 				} else {
 					// load full resolution and scale it down
 					Fl_JPEG_Image jpgImgBig(path.c_str());
@@ -65,15 +63,14 @@ public:
 					int newH = (int) (scDiv * jpgImgBig.h() + 0.499);
 					Fl_Image* jpgImg = jpgImgBig.copy(newW, newH);
 					if (jpgImg && (jpgImg->w() > 0))
-						fixedBox->image(jpgImg);
+						thumbnailBox->image(jpgImg);
 				}
 			}
 
-			// Stretchy box
-			stretchBox = new Fl_Box(X+50,Y,W-50,40, fileName);
-			stretchBox->align(FL_ALIGN_CENTER | FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-			//stretchBox->box(FL_UP_BOX);
-			resizable(stretchBox);
+			// box for name and date
+			nameDateBox = new Fl_Box(X+50,Y,W-50,40, fileName);
+			nameDateBox->align(FL_ALIGN_CENTER | FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+			resizable(nameDateBox);
 		end();
 	}
 
@@ -92,7 +89,8 @@ public:
 				FileGroup* prevSelectedFile = fileList->getSelectedFile(); // previously selected file
 				//if (this == prevSelectedFile) return 1; // same file: do nothing (no FL_FOCUS event anyway, right?)
 				if (prevSelectedFile) {
-					prevSelectedFile->color(0xDDDDDD00); // TODO
+					//prevSelectedFile->color(0xDDDDDD00); // TODO
+					prevSelectedFile->color(FL_BACKGROUND_COLOR); // TODO
 					prevSelectedFile->box(FL_FLAT_BOX);
 					prevSelectedFile->redraw();
 					//selectedFile->box(FL_NO_BOX);
@@ -104,7 +102,7 @@ public:
 				Fltk13GUI* fgui = (Fltk13GUI*) fileList->window();
 				fgui->showFileMetaData();
 
-				this->color(0xFF000000);
+				this->color(0xDDEEFF00);
 				this->box(FL_UP_BOX);
 				redraw();
 				return 1; }
@@ -153,7 +151,7 @@ void F13FileList::resize(int X, int Y, int W, int H) {
 	// Tell children to resize to our new width
 	for ( int t=0; t<itemNum; t++ ) {
 		Fl_Widget *w = child(t);
-		w->resize(w->x(), w->y(), W-20, w->h());    // W-20: leave room for scrollbar
+		w->resize(w->x(), w->y(), W-18, w->h());    // W-18: leave room for scrollbar
 	}
 	// Tell scroll children changed in size
 	init_sizes();

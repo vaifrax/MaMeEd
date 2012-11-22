@@ -66,7 +66,7 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 			pathGroup->end();
 			pathGroup->resizable(pathTextEdit);
 		pathFilesGroup->end();
-		pathFilesGroup->resizable(fileList);
+//pathFilesGroup->resizable(fileList);
 	mainGroup->end();
 	resizable(mainGroup);
 	end(); //////////////////////
@@ -240,6 +240,7 @@ void Fltk13GUI::openDir(std::string path) {
 
 		fileList = new F13FileList(pathFilesGroup->x(), pathFilesGroup->y() + 26, pathFilesGroup->w(), pathFilesGroup->h()-26, mCore->getMDDir());
 		pathFilesGroup->add(fileList); // add to window
+pathFilesGroup->resizable(fileList);
 
 		//std::string const& selFileName = mCore->getMDDir()->getInitiallySelectedFileName();
 		//if (selFileName.size()) {
