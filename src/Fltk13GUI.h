@@ -33,6 +33,7 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	static void buttonCallback(Fl_Widget* widget, void* userData);
 	static void keyboardCallback(Fl_Widget* widget, void* userData);
 	static void changeDirCallback(Fl_Widget* widget, void* userData);
+	static void launchViewerCallback(Fl_Widget* widget, void* userData);
 
   protected:
 char antiMemCor1[100];

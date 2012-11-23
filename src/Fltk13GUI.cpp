@@ -187,6 +187,19 @@ void Fltk13GUI::saveDataBase() {
 	fgui->openSubDir(dirName);
 }
 
+/*static*/ void Fltk13GUI::launchViewerCallback(Fl_Widget* widget, void* userData) {
+	const char* fileName = (const char*) userData;
+	Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
+	if (!fgui) return; // TODO: error
+
+	std::string currentPath(fgui->mCore->getMDDir()->getDirPath());
+	std::string fullPath = currentPath + '/' + fileName;
+
+	#ifdef WIN32
+	ShellExecute(0, 0, fullPath.c_str(), 0, 0, SW_SHOW);
+	#endif // WIN32
+}
+
 void Fltk13GUI::showFileChooser(const char* initPath/* = NULL*/) {
 	if (!fileChooser) {
 		fileChooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
@@ -243,22 +256,24 @@ void Fltk13GUI::openDir(std::string path) {
 			Fl::delete_widget(fileList);
 		}
 		if (keyValueList) {
+			// remove what is displayed now; TODO: could this be somehow more efficient?
+			keyValueList->clear();
+			keyValueList->redraw();
+
 			remove(keyValueList);
 			Fl::delete_widget(keyValueList);
 			keyValueList = NULL;
-//window()->redraw(); // TODO: redraw, somehow (without crashing!)
 		}
 
 		fileList = new F13FileList(pathFilesGroup->x(), pathFilesGroup->y() + 26, pathFilesGroup->w(), pathFilesGroup->h()-26, mCore->getMDDir());
 		pathFilesGroup->add(fileList); // add to window
-pathFilesGroup->resizable(fileList);
+		pathFilesGroup->resizable(fileList); // must be here, doesn't work otherwise
 
 		//std::string const& selFileName = mCore->getMDDir()->getInitiallySelectedFileName();
 		//if (selFileName.size()) {
 		//	keyValueList = new F13KeyValueList(250, 30, 200, 600, selFileName);
 		//}
 		fileList->redraw();
-//redraw();
 	}
 }
 

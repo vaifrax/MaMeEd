@@ -14,23 +14,27 @@
 
 #include <assert.h>
 
+
+/*static*/ int F13FileList::thumbnailSize = 50;
+
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
 class FileGroup : public Fl_Group {
 	Fl_Button *thumbnailButton;
-	Fl_Box *nameDateBox;
+	Fl_Box *nameBox;
+	Fl_Box *dateTimeBox;
 public:
-	const char* getFileName() const {return nameDateBox->label();}
+	const char* getFileName() const {return nameBox->label();}
 
-	FileGroup(int X, int Y, int W, int H, const char* fileName, bool isDirectory, const char* L=0) : Fl_Group(X,Y,W,H,L) {
+	FileGroup(int X, int Y, int W, int H, const char* fileName, const char* dateStr, bool isDirectory, const char* L=0) : Fl_Group(X,Y,W,H,L) {
 		begin();
 			thumbnailButton = NULL;
 
 			if (isDirectory) {
 				// this is a directory
-				thumbnailButton = new Fl_Button(X,Y,40,40);
-				//thumbnailButton->type(FL_NORMAL_BUTTON);
+				thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
 				if (strcmp(fileName, "..") == 0) {
 					thumbnailButton->label("@8->");
 				} else {
@@ -54,7 +58,8 @@ public:
 
 				// test for .jpg or .jpeg
 				if ((ext == "JPG") || (ext == "JPEG")) {
-					thumbnailButton = new Fl_Button(X,Y,40,40);
+					thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
+					thumbnailButton->callback(Fltk13GUI::launchViewerCallback, (void*) fileName);
 					std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
 
 					// try to load exif thumbnail and use as image
@@ -63,7 +68,7 @@ public:
 					if (thumbData) {
 						Fl_JPEG_Image jpgImgThumb(NULL, thumbData);
 						//std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
-						float scDiv = 40.f / max(jpgImgThumb.w(), jpgImgThumb.h());
+						float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgThumb.w(), jpgImgThumb.h());
 						int newW = (int) (scDiv * jpgImgThumb.w() + 0.499);
 						int newH = (int) (scDiv * jpgImgThumb.h() + 0.499);
 						Fl_Image* jpgImg = jpgImgThumb.copy(newW, newH);
@@ -72,7 +77,7 @@ public:
 					} else {
 						// load full resolution and scale it down
 						Fl_JPEG_Image jpgImgBig(path.c_str());
-						float scDiv = 40.f / max(jpgImgBig.w(), jpgImgBig.h());
+						float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgBig.w(), jpgImgBig.h());
 						int newW = (int) (scDiv * jpgImgBig.w() + 0.499);
 						int newH = (int) (scDiv * jpgImgBig.h() + 0.499);
 						Fl_Image* jpgImg = jpgImgBig.copy(newW, newH);
@@ -82,15 +87,23 @@ public:
 				}
 			}
 
-			// box for name and date
-			nameDateBox = new Fl_Box(X+50,Y,W-50,40, fileName);
-			nameDateBox->align(FL_ALIGN_CENTER | FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-			resizable(nameDateBox);
+			// box for name
+			//nameBox = new Fl_Box(X+46,Y+4,W-46,16, fileName);
+			nameBox = new Fl_Box(X+F13FileList::thumbnailSize+6, Y, W-F13FileList::thumbnailSize-6-100,F13FileList::thumbnailSize, fileName);
+			nameBox->align(FL_ALIGN_CENTER | FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+			// box for date and time
+			//dateTimeBox = new Fl_Box(X+46,Y+20,W-46,16, dateStr);
+			dateTimeBox = new Fl_Box(nameBox->x()+nameBox->w()+6,Y,100,F13FileList::thumbnailSize, dateStr);
+			dateTimeBox->align(FL_ALIGN_CENTER | FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
+			dateTimeBox->labelcolor(0x77777700);
+
+			resizable(nameBox);
 		end();
 	}
 
 	int handle(int eventn) {
-Fl_Group::handle(eventn);
+//Fl_Group::handle(eventn);
 		switch (eventn) {
 			//case FL_PUSH:
 			case FL_RELEASE:
@@ -98,7 +111,7 @@ Fl_Group::handle(eventn);
 			//case FL_MOVE:
 				//return handle_mouse(eventn,Fl::event_button(), Fl::event_x(),Fl::event_y());
 			//case FL_FOCUS:
-			{
+				{
 				//label ("Gained focus");
 				assert(dynamic_cast<F13FileList*> (parent()));
 				F13FileList* fileList = (F13FileList*) parent();
@@ -121,17 +134,15 @@ Fl_Group::handle(eventn);
 				this->color(0xDDEEFF00);
 				this->box(FL_UP_BOX);
 				redraw();
-//return 0;
-//return Fl_Group::handle(eventn);
-				return 1;
- }
+				return Fl_Group::handle(eventn);
+				}
 			//case FL_UNFOCUS:
 			//	//label ("Lost focus");
 			//	//damage(1);
 			//	return 1;
 			default:
 				return Fl_Group::handle(eventn);
-				return 0;
+				//return 0;
 		};
 	}
 };
@@ -147,12 +158,12 @@ const char* F13FileList::getSelectedFileName() const {
 }
 
 
-void F13FileList::addItem(std::string const& fileName, bool isDirectory) {
+void F13FileList::addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory) {
 	int X = x(),
-		Y = y() - yposition() + (itemNum*41) + 1,
-		W = w() - 20,                           // -20: compensate for vscroll bar
-		H = 40;
-	add(new FileGroup(X,Y,W,H, fileName.c_str(), isDirectory));
+		Y = y() - yposition() + (itemNum*(F13FileList::thumbnailSize+1)) + 1,
+		W = w() - 18, // -18: compensate for vscroll bar
+		H = F13FileList::thumbnailSize;
+	add(new FileGroup(X,Y,W,H, fileName.c_str(), dateStr.c_str(), isDirectory));
 	redraw();
 	itemNum++;
 }
@@ -162,7 +173,7 @@ void F13FileList::fillList() {
 
 	std::vector<MDFile*> const& files = mddir->getFiles();
 	for (std::vector<MDFile*>::const_iterator i=files.begin(); i!=files.end(); ++i) {
-		addItem((*i)->getName(), (*i)->isDirectory());
+		addItem((*i)->getName(), (*i)->getDateStr(), (*i)->isDirectory());
 	}
 }
 

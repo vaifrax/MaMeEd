@@ -18,8 +18,10 @@ class F13FileList : public Fl_Scroll {
 
 	void resize(int X, int Y, int W, int H);
 
+	static int thumbnailSize;
+
   protected:
-	void addItem(std::string const& fileName, bool isDirectory);
+	void addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory);
 	void fillList();
 	int itemNum;
 	MDDir const* mddir;

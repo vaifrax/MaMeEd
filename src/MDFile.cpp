@@ -1,9 +1,30 @@
 #include "MDFile.h"
 #include "MDDir.h"
 #include "MDProperty.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+//#include <unistd.h>
+#include <time.h>
+#include <sstream>
+
+#ifndef S_ISDIR
+#define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
+#endif
+
 
 MDFile::MDFile(std::string fileName, std::string const& dirPath) : fileName(fileName) {
-	isDir = MDDir::isDirectory((dirPath + '/' + this->fileName).c_str());
+	//isDir = MDDir::isDirectory((dirPath + '/' + this->fileName).c_str());
+	struct stat myStat;
+	int sr = stat((dirPath + '/' + this->fileName).c_str(), &myStat);
+	isDir = ((sr == 0) && (S_ISDIR(myStat.st_mode)));
+
+	struct tm* clock = gmtime(&(myStat.st_mtime));	// Get the last modified time and put it into the time structure
+std::stringstream sstream;
+sstream << clock->tm_mday << '.' << clock->tm_mon << '.' << (clock->tm_year+1900);
+dateStr = sstream.str();//std::string("") + clock->tm_mday + '.' + clock->tm_mon + '.' + (clock->tm_year+1900);
+// clock->tm_year returns the year (since 1900)
+// clock->tm_mon returns the month (January = 0)
+// clock->tm_mday returns the day of the month
 }
 
 void MDFile::writeToFile(std::ofstream& os) {
