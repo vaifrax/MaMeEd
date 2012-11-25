@@ -1,6 +1,9 @@
 // MetaData Directory
 // all metadata for one set of files
 
+#ifndef MDDIR_HEADER_INCLUDED
+#define MDDIR_HEADER_INCLUDED
+
 #include <string>
 #include <vector>
 class MDFile;
@@ -31,3 +34,5 @@ class MDDir {
 
 	std::vector<MDFile*> files;
 };
+
+#endif // MDDIR_HEADER_INCLUDED

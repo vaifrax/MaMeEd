@@ -34,6 +34,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)..\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -77,6 +78,7 @@
     <ClCompile Include="..\src\ExifFile.cpp" />
     <ClCompile Include="..\src\F13FileList.cpp" />
     <ClCompile Include="..\src\F13KeyValueList.cpp" />
+    <ClCompile Include="..\src\MConfig.cpp" />
     <ClCompile Include="..\src\MCore.cpp" />
     <ClCompile Include="..\src\MDDir.cpp" />
     <ClCompile Include="..\src\mameed.cpp" />
@@ -88,6 +90,7 @@
     <ClInclude Include="..\src\ExifFile.h" />
     <ClInclude Include="..\src\F13FileList.h" />
     <ClInclude Include="..\src\F13KeyValueList.h" />
+    <ClInclude Include="..\src\MConfig.h" />
     <ClInclude Include="..\src\MCore.h" />
     <ClInclude Include="..\src\MDDir.h" />
     <ClInclude Include="..\src\MDFile.h" />
@@ -100,6 +103,7 @@
     <ResourceCompile Include="mameed.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\mammed.ini" />
     <None Include="..\div\mameed-icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
