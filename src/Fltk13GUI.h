@@ -29,6 +29,7 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	void saveDataBase();
 
 	//int Fltk13GUI::handle(int e);
+	static void closeWindowCallback(Fl_Widget* widget, void* userData);
 	static void menuCallback(Fl_Widget* widget, void* userData);
 	static void buttonCallback(Fl_Widget* widget, void* userData);
 	static void keyboardCallback(Fl_Widget* widget, void* userData);

@@ -13,7 +13,7 @@
 #include "MCore.h"
 
 int main(int argc, char* argv[]) {
-	MCore* mCore = new MCore();
+	MCore* mCore = new MCore(argv[0]);
 	MGUI* mGUI = (MGUI*) new Fltk13GUI(mCore);
 	mGUI->setCmdParams(argc, argv);
 

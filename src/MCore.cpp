@@ -1,11 +1,16 @@
 #include "MCore.h"
 #include "MDDir.h"
 
-MCore::MCore() : mddir(NULL) {
+MCore::MCore(char* argv0) : mddir(NULL) {
+	std::string configFileName(argv0);
+	configFileName = configFileName.substr(0, configFileName.size()-3) + "ini";
+	config = new MConfig(configFileName);
+	config->readFromFile();
 }
 
 MCore::~MCore() {
 	if (mddir) delete mddir;
+	delete config;
 }
 
 bool MCore::openDir(std::string const& path) {

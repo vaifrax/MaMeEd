@@ -1,9 +1,11 @@
 #include "F13KeyValueList.h"
 #include "MDFile.h"
 #include "MDProperty.h"
+#include "MConfig.h"
 
 #include "FL/Fl_Box.H"
 #include "FL/Fl_Input.H"
+#include "FL/Fl_Tooltip.H"
 
 //#include <FL/names.h> // defines fl_eventnames[]
 
@@ -17,15 +19,23 @@ class KeyValueGroup : public Fl_Group {
 public:
 	std::string /*const&*/ getKey() const {return keyInput->value();}
 	std::string /*const&*/ getValue() const {return valueInput->value();}
+	void setValue(const char* newValue) {valueInput->value(newValue);}
 
-	KeyValueGroup(int X, int Y, int W, int H, const char* key, const char* value, const char* L=0) : Fl_Group(X,Y,W,H,L) {
+	KeyValueGroup(int X, int Y, int W, int H, const char* key, const char* value, std::string const& keyDescription, F13KeyValueList::KeyType keyType = F13KeyValueList::USER_KEY) : Fl_Group(X,Y,W,H,0) {
 		begin();
 			keyInput = new Fl_Input(X,Y,90,25,"");
 			keyInput->value(key);
 			keyInput->box(FL_FLAT_BOX);
 			keyInput->color(0xFFFFFF00);
+			if (keyType == F13KeyValueList::DEFAULT_KEY) {
+				keyInput->deactivate();
+				keyInput->textcolor(0x00007700);
+			}
 			keyInput->callback(F13KeyValueList::keyCallback, this->parent());
-			keyInput->when(FL_WHEN_CHANGED |  FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
+			keyInput->when(FL_WHEN_CHANGED | FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
+			if (keyDescription.size()) {
+				keyInput->tooltip(keyDescription.c_str());
+			}
 
 			valueInput = new Fl_Input(X+90+1,Y,W-90-1,25);
 			valueInput->value(value);
@@ -68,15 +78,22 @@ public:
 				return Fl_Group::handle(eventn);
 		};
 	}
-};
+}; // KeyValueGroup
 
-F13KeyValueList::F13KeyValueList(int X, int Y, int W, int H, MDFile* mdfile) : Fl_Scroll(X,Y,W,H,0), mdfile(mdfile), selectedKeyValue(NULL), itemNum(0) {
+//////////////////////////////////////////////////////////////////////////////////
+
+F13KeyValueList::F13KeyValueList(int X, int Y, int W, int H, MDFile* mdfile, MConfig const* config) : Fl_Scroll(X,Y,W,H,0), mdfile(mdfile), selectedKeyValue(NULL), itemNum(0), config(config) {
 	if (mdfile) fillList();
+}
+
+F13KeyValueList::~F13KeyValueList() {
 }
 
 /*static*/ void F13KeyValueList::keyCallback(Fl_Widget *w, void *data) {
 	F13KeyValueList* kvl = (F13KeyValueList*) data;
 	//std::string s = ((KeyValueGroup*) (kvl->child(kvl->itemNum-1)))->getKey();
+
+	// add new row if necessary
 	if ((kvl->itemNum==0) || ((KeyValueGroup*) (kvl->child(kvl->itemNum-1)))->getKey().size()) {
 		kvl->addItem(emptyString, emptyString);
 	}
@@ -101,23 +118,49 @@ void F13KeyValueList::applyChangesOfSelectedKeyValue() {
 	}
 }
 
-void F13KeyValueList::addItem(std::string const& key, std::string const& value) {
+void F13KeyValueList::addItem(std::string const& key, std::string const& value, std::string const& keyDescription/* = emptyString*/, F13KeyValueList::KeyType keyType/* = USER_KEY*/) {
 	int X = x() + 1,
 		Y = y() - yposition() + (itemNum*26) + 1,
 		W = w() - 20,                           // -20: compensate for vscroll bar
 		H = 26;
-	add(new KeyValueGroup(X,Y,W,H, key.c_str(), value.c_str()));
+	add(new KeyValueGroup(X,Y,W,H, key.c_str(), value.c_str(), keyDescription, keyType));
 	redraw();
 	itemNum++;
+}
+
+void F13KeyValueList::setValueOrAddItem(std::string const& key, std::string const& value) {
+	for (int t=0; t<itemNum; t++) {
+		KeyValueGroup* kvg = dynamic_cast<KeyValueGroup*> (child(t));
+		if (kvg && (kvg->getKey()==key)) {
+			kvg->setValue(value.c_str());
+			return;
+		}
+	}
+
+	// does not yet exist, add it
+	addItem(key, value);
 }
 
 void F13KeyValueList::fillList() {
 	if (!mdfile) return;
 
+	// fill with top default keys
+	const std::vector<DefaultKey*> keys = config->getKeys();
+	for (std::vector<DefaultKey*>::const_iterator i=keys.begin(); i!=keys.end(); ++i) {	
+		if ((*i)->order==DefaultKey::TOP) addItem((*i)->name, emptyString, (*i)->description, DEFAULT_KEY);
+	}
+
 	for (std::vector<MDProperty*>::iterator i=mdfile->properties.begin(); i!=mdfile->properties.end(); ++i) {
-		addItem((*i)->key, (*i)->value);
+		setValueOrAddItem((*i)->key, (*i)->value);
 	}
 	addItem(emptyString, emptyString);
+/*
+	// fill with bottom default keys
+	const std::vector<DefaultKey*> keys = config->getKeys();
+	for (std::vector<DefaultKey*>::const_iterator i=keys.begin(); i!=keys.end(); ++i) {	
+		if ((*i)->order==DefaultKey::BOTTOM) addItem((*i)->name, emptyString, (*i)->description, DEFAULT_KEY);
+	}
+*/
 }
 
 void F13KeyValueList::resize(int X, int Y, int W, int H) {

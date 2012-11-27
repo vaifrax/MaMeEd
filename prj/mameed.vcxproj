@@ -103,7 +103,7 @@
     <ResourceCompile Include="mameed.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\mammed.ini" />
+    <None Include="..\bin\mameed.ini" />
     <None Include="..\div\mameed-icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

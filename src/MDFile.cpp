@@ -54,12 +54,20 @@ void MDFile::changeKeyValue(std::string const& oldKey, std::string const& newKey
 		if ((*i)->key == oldKey) {
 			(*i)->key = newKey;
 			(*i)->value = newValue;
+			return;
 		}
 	}
-
 	// for now, empty keys are kept; when storing, they are not written, i.e. get lost
+
+	// must be a predefined key, add it now
+	addKeyValue(newKey, newValue);
 }
 
 void MDFile::addKeyValue(std::string key, std::string value) {
-	properties.push_back(new MDProperty(key, value));
+//	MDProperty* existingProp = getPropertyByKey(key);
+//	if (existingProp) {
+//		existingProp->value = value;
+//	} else {
+		properties.push_back(new MDProperty(key, value));
+//	}
 }

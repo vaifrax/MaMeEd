@@ -44,6 +44,9 @@
     <ClCompile Include="..\src\ExifFile.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\MConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\F13FileList.h">
@@ -76,6 +79,9 @@
     <ClInclude Include="..\src\ExifFile.h">
       <Filter>Source Files\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\MConfig.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="mameed.rc">
@@ -85,6 +91,9 @@
   <ItemGroup>
     <None Include="..\div\mameed-icon.ico">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\bin\mameed.ini">
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>

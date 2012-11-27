@@ -27,6 +27,8 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 	fileList = NULL;
 	keyValueList = NULL;
 
+	callback(closeWindowCallback, this);
+
 	fl_register_images(); // init image lib
 
 	Fl_Menu_Item menuitems[] = {
@@ -119,6 +121,16 @@ void Fltk13GUI::saveDataBase() {
 //	fgui->openDir(dragDropEventText);
 //	delete[] dragDropEventText;
 //}
+
+// called when pressing 'Esc' or closing window via 'X' button
+/*static*/ void Fltk13GUI::closeWindowCallback(Fl_Widget* widget, void* userData) {
+	Fltk13GUI* fgui = (Fltk13GUI*) userData;
+
+	// always save before exiting
+	fgui->applyChangesOfSelectedKeyValue();
+	fgui->saveDataBase(); // auto-save on exit
+	exit(0);
+}
 
 /*static*/ void Fltk13GUI::menuCallback(Fl_Widget* widget, void* userData) {
 	Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
@@ -319,7 +331,7 @@ void Fltk13GUI::showFileMetaData() {
 	MDFile* mdfile = mddir->getMDFile(fileList->getSelectedFileName());
 	if (!mdfile) return;
 
-	keyValueList = new F13KeyValueList(mainGroup->x() + mainGroup->w()/3, mainGroup->y(), mainGroup->w()/3, mainGroup->h(), mdfile);
+	keyValueList = new F13KeyValueList(mainGroup->x() + mainGroup->w()/3, mainGroup->y(), mainGroup->w()/3, mainGroup->h(), mdfile, mCore->getConfig());
 	mainGroup->add(keyValueList);
 	keyValueList->redraw();
 }
