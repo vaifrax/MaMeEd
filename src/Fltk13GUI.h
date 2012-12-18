@@ -8,6 +8,7 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Native_File_Chooser.H>
 #include <FL/Fl_Box.H>
+#include <FL/Fl_Tile.H>
 //#include <FL/Fl_Button.H>
 #include <FL/Fl_Input.H>
 //#include <FL/Fl_Scroll.H>
@@ -35,11 +36,6 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	static void keyboardCallback(Fl_Widget* widget, void* userData);
 	static void changeDirCallback(Fl_Widget* widget, void* userData);
 	static void launchViewerCallback(Fl_Widget* widget, void* userData);
-	static void resizeDragCallback(Fl_Widget* widget, void* userData);
-
-	float widthLeftColumn, widthRightColumn; // in percent; middle column width depends on these two
-	Fl_Group* mainGroup; // put everything in a group for equal resizing
-	Fl_Group* pathFilesGroup; // left side
 
   protected:
 	F13FileList* fileList;
@@ -59,6 +55,8 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	static enum {FROM_PATHTEXTEDIT} KeyboardEnum;
 
 	Fl_Group* pathGroup; // top bar of left side
+	Fl_Tile* mainGroup; // put everything in a group for equal resizing/resizable columns
+	Fl_Group* pathFilesGroup; // left side
 
 	//char* dragDropEventText; // required for drag and drop
 	//static void dragDropCallbackDeferred(void* v);
