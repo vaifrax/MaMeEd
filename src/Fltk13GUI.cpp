@@ -9,6 +9,7 @@
 #include "Fltk13GUI.h"
 #include "F13FileList.h"
 #include "F13KeyValueList.h"
+#include "Fl_HResizeBar.h"
 
 #include "MCore.h"
 #include "MDDir.h"
@@ -20,12 +21,51 @@
 #include <FL/x.H> // to set icon in windows
 #include "../prj/resource.h" // for icon ID
 
+class Fl_HResizeBar : public Fl_Box {
+  public:
+	int movedBy;
+   protected:
+	int lastMouseXPos;
+  public:
+	Fl_HResizeBar(int x, int y, int w, int h, const char* label=NULL) : Fl_Box(x, y, w, h, label), lastMouseXPos(0), movedBy(0) {
+		//box(FL_UP_BOX);
+		box(FL_THIN_UP_FRAME);
+		//box(FL_BORDER_BOX);
+		Fl_Cursor(FL_CURSOR_WE);
+	}
+	int handle(int event) {
+		switch(event) {
+			case FL_PUSH:
+				lastMouseXPos = Fl::event_x();
+				return 1;//Fl_Widget::handle(event);
+			case FL_DRAG:
+				movedBy = Fl::event_x()-lastMouseXPos;
+				lastMouseXPos = Fl::event_x();
+				do_callback();
+				return 1;
+			case FL_ENTER:
+				window()->cursor(FL_CURSOR_WE);
+				return 1;
+			case FL_LEAVE:
+			case FL_UNFOCUS:
+				window()->cursor(FL_CURSOR_DEFAULT);
+				return 1;
+
+			default:
+				return Fl_Widget::handle(event);
+		}
+	}
+};
+
 Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Metadata Editor") {
 	Fl::scheme("gtk+");
 	//Fl::scheme("plastic");
 
 	fileList = NULL;
 	keyValueList = NULL;
+
+	widthLeftColumn = 0.4;
+	widthRightColumn = 0.1;
 
 	callback(closeWindowCallback, this);
 
@@ -54,7 +94,7 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 	// main group, containing all elements in the window
 	const int MAIN_GROUP_PADDING = 2;
 	mainGroup = new Fl_Group(MAIN_GROUP_PADDING, MENU_HEIGHT+MAIN_GROUP_PADDING, w()-2*MAIN_GROUP_PADDING, h()-MENU_HEIGHT-2*MAIN_GROUP_PADDING); // put everything in a group for equal resizing
-		pathFilesGroup = new Fl_Group(mainGroup->x(), mainGroup->y(), mainGroup->w()/3, mainGroup->h()); // left side
+		pathFilesGroup = new Fl_Group(mainGroup->x(), mainGroup->y(), widthLeftColumn*mainGroup->w(), mainGroup->h()); // left side
 			pathGroup = new Fl_Group(pathFilesGroup->x(), pathFilesGroup->y(), pathFilesGroup->w(), 25); // top bar of left side
 				const int PATH_BUTTON_WIDTH = 35;
 				pathTextEdit = new Fl_Input(pathGroup->x(), pathGroup->y(), pathGroup->w()-PATH_BUTTON_WIDTH-2, pathGroup->h());
@@ -69,6 +109,10 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 			pathGroup->resizable(pathTextEdit);
 		pathFilesGroup->end();
 //pathFilesGroup->resizable(fileList);
+		Fl_HResizeBar* hrb1 = new Fl_HResizeBar(mainGroup->x() + widthLeftColumn*mainGroup->w(), mainGroup->y(), 3, mainGroup->h());
+		hrb1->callback(resizeDragCallback, (void*) 1);
+		Fl_HResizeBar* hrb2 = new Fl_HResizeBar(mainGroup->x() + (1-widthRightColumn)*mainGroup->w()-3, mainGroup->y(), 3, mainGroup->h());
+		hrb2->callback(resizeDragCallback, (void*) 2);
 	mainGroup->end();
 	resizable(mainGroup);
 	end(); //////////////////////
@@ -212,6 +256,24 @@ void Fltk13GUI::saveDataBase() {
 	#endif // WIN32
 }
 
+/*static*/ void Fltk13GUI::resizeDragCallback(Fl_Widget* widget, void* userData) {
+	int id = (int) userData;
+	Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
+	if (!fgui) return; // TODO: error
+	Fl_HResizeBar* rb = dynamic_cast<Fl_HResizeBar*> (widget);
+	if (!rb) return; // TODO: error
+
+	if (id == 1) fgui->widthLeftColumn += rb->movedBy/(float)fgui->mainGroup->w();
+//fgui->widthLeftColumn -= 0.01;
+	if (fgui->widthLeftColumn < 0) fgui->widthLeftColumn = 0;
+	if (id == 2) fgui->widthRightColumn += rb->movedBy/(float)fgui->mainGroup->w();
+	if (fgui->widthRightColumn > 1) fgui->widthRightColumn = 1;
+
+	fgui->pathFilesGroup->size(fgui->widthLeftColumn*fgui->mainGroup->w(), fgui->mainGroup->h());
+	fgui->mainGroup->redraw();
+	//fgui->
+}
+
 void Fltk13GUI::showFileChooser(const char* initPath/* = NULL*/) {
 	if (!fileChooser) {
 		fileChooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
@@ -228,7 +290,7 @@ void Fltk13GUI::showFileChooser(const char* initPath/* = NULL*/) {
 		//fileChooser->preset_file(fileChooser->filename());
 		fileChooser->directory(fileChooser->filename());
 		openDir(fileChooser->filename());
-	break;
+		break;
 	}
 }
 
@@ -331,7 +393,7 @@ void Fltk13GUI::showFileMetaData() {
 	MDFile* mdfile = mddir->getMDFile(fileList->getSelectedFileName());
 	if (!mdfile) return;
 
-	keyValueList = new F13KeyValueList(mainGroup->x() + mainGroup->w()/3, mainGroup->y(), mainGroup->w()/3, mainGroup->h(), mdfile, mCore->getConfig());
+	keyValueList = new F13KeyValueList(mainGroup->x() + widthLeftColumn*mainGroup->w() + 3, mainGroup->y(), (1-widthLeftColumn-widthRightColumn)*mainGroup->w()-6, mainGroup->h(), mdfile, mCore->getConfig());
 	mainGroup->add(keyValueList);
 	keyValueList->redraw();
 }

@@ -35,12 +35,15 @@ class Fltk13GUI : public MGUI, public Fl_Window {
 	static void keyboardCallback(Fl_Widget* widget, void* userData);
 	static void changeDirCallback(Fl_Widget* widget, void* userData);
 	static void launchViewerCallback(Fl_Widget* widget, void* userData);
+	static void resizeDragCallback(Fl_Widget* widget, void* userData);
+
+	float widthLeftColumn, widthRightColumn; // in percent; middle column width depends on these two
+	Fl_Group* mainGroup; // put everything in a group for equal resizing
+	Fl_Group* pathFilesGroup; // left side
 
   protected:
-char antiMemCor1[100];
 	F13FileList* fileList;
 	F13KeyValueList* keyValueList;
-char antiMemCor2[100];
 
 	Fl_Input* pathTextEdit;
 	Fl_Native_File_Chooser *fileChooser;
@@ -55,8 +58,6 @@ char antiMemCor2[100];
 	static enum {BUTTON_PATH, BUTTON_ABOUT_OK, BUTTON_NO_SAVING_OK, BUTTON_NO_SAVING_CANCEL} ButtonEnum;
 	static enum {FROM_PATHTEXTEDIT} KeyboardEnum;
 
-	Fl_Group* mainGroup; // put everything in a group for equal resizing
-	Fl_Group* pathFilesGroup; // left side
 	Fl_Group* pathGroup; // top bar of left side
 
 	//char* dragDropEventText; // required for drag and drop
