@@ -82,11 +82,16 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////
 
-F13KeyValueList::F13KeyValueList(int X, int Y, int W, int H, MDFile* mdfile, MConfig const* config) : Fl_Scroll(X,Y,W,H,0), mdfile(mdfile), selectedKeyValue(NULL), itemNum(0), config(config) {
-	if (mdfile) fillList();
+F13KeyValueList::F13KeyValueList(int X, int Y, int W, int H, MConfig const* config) : Fl_Scroll(X,Y,W,H,0), selectedKeyValue(NULL), itemNum(0), config(config) {
 }
 
 F13KeyValueList::~F13KeyValueList() {
+}
+
+void F13KeyValueList::setMDFile(MDFile* mdfile) {
+	//clear();
+	this->mdfile = mdfile;
+	if (mdfile) fillList();
 }
 
 /*static*/ void F13KeyValueList::keyCallback(Fl_Widget *w, void *data) {

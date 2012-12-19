@@ -70,6 +70,12 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 			pathGroup->end();
 			pathGroup->resizable(pathTextEdit);
 		pathFilesGroup->end();
+		keyValueList = new F13KeyValueList(mainGroup->x() + 0.4*mainGroup->w(), mainGroup->y(), 0.3*mainGroup->w(), mainGroup->h(), mCore->getConfig());
+			box(FL_DOWN_BOX);
+		keyValueList->end();
+		Fl_Scroll* fls = new Fl_Scroll(mainGroup->x() + 0.7*mainGroup->w(), mainGroup->y(), 0.3*mainGroup->w(), mainGroup->h(), "test");
+			box(FL_DOWN_BOX);
+		fls->end();
 //pathFilesGroup->resizable(fileList);
 	mainGroup->end();
 	resizable(mainGroup);
@@ -274,9 +280,9 @@ void Fltk13GUI::openDir(std::string path) {
 			keyValueList->clear();
 			keyValueList->redraw();
 
-			remove(keyValueList);
-			Fl::delete_widget(keyValueList);
-			keyValueList = NULL;
+//			remove(keyValueList);
+//			Fl::delete_widget(keyValueList);
+//			keyValueList = NULL;
 		}
 
 		fileList = new F13FileList(pathFilesGroup->x(), pathFilesGroup->y() + 26, pathFilesGroup->w(), pathFilesGroup->h()-26, mCore->getMDDir());
@@ -320,12 +326,6 @@ int Fltk13GUI::showWindow() {
 }
 
 void Fltk13GUI::showFileMetaData() {
-	if (keyValueList) {
-		mainGroup->remove(keyValueList);
-		Fl::delete_widget(keyValueList); // todo: instead of deleting, clearing and refilling it should be good, too?!?
-		keyValueList = NULL;
-	}
-
 	if (!fileList) return;
 
 	MDDir const* mddir = mCore->getMDDir();
@@ -333,7 +333,16 @@ void Fltk13GUI::showFileMetaData() {
 	MDFile* mdfile = mddir->getMDFile(fileList->getSelectedFileName());
 	if (!mdfile) return;
 
-	keyValueList = new F13KeyValueList(mainGroup->x() + 0.4*mainGroup->w() + 3, mainGroup->y(), 0.7*mainGroup->w()-6, mainGroup->h(), mdfile, mCore->getConfig());
-	mainGroup->add(keyValueList);
+//	keyValueList->clear();
+	if (keyValueList) {
+		mainGroup->remove(keyValueList);
+		Fl::delete_widget(keyValueList); // todo: instead of deleting, clearing and refilling it should be good, too?!?
+		keyValueList = NULL;
+		keyValueList = new F13KeyValueList(mainGroup->x() + 0.4*mainGroup->w(), mainGroup->y(), 0.3*mainGroup->w(), mainGroup->h(), mCore->getConfig());
+		keyValueList->box(FL_DOWN_BOX);
+		mainGroup->add(keyValueList);
+	}
+
+	keyValueList->setMDFile(mdfile);
 	keyValueList->redraw();
 }

@@ -10,8 +10,9 @@ class MConfig;
 
 class F13KeyValueList : public Fl_Scroll {
   public:
-	F13KeyValueList(int X, int Y, int W, int H, MDFile* mdfile, MConfig const* config);
+	F13KeyValueList(int X, int Y, int W, int H, MConfig const* config);
 	~F13KeyValueList();
+	void setMDFile(MDFile* mdfile);
 
 	void applyChangesOfSelectedKeyValue(); // data from gui -> database
 	void setSelectedKeyValue(KeyValueGroup* selectedKeyValue);
