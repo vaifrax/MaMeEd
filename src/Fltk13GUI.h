@@ -3,7 +3,8 @@
 
 #include "MGUI.h"
 #include <FL/Fl.H>
-#include <FL/Fl_Window.H>
+//#include <FL/Fl_Window.H>
+#include <FL/Fl_Double_Window.H>
 
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Native_File_Chooser.H>
@@ -11,13 +12,13 @@
 #include <FL/Fl_Tile.H>
 //#include <FL/Fl_Button.H>
 #include <FL/Fl_Input.H>
-//#include <FL/Fl_Scroll.H>
+#include <FL/Fl_Scroll.H>
 
 class F13FileList;
 class F13KeyValueList;
 class MDFile;
 
-class Fltk13GUI : public MGUI, public Fl_Window {
+class Fltk13GUI : public MGUI, public Fl_Double_Window {
   public:
 	Fltk13GUI(MCore* mCore);
 	~Fltk13GUI();
@@ -40,6 +41,7 @@ class Fltk13GUI : public MGUI, public Fl_Window {
   protected:
 	F13FileList* fileList;
 	F13KeyValueList* keyValueList;
+	Fl_Scroll* moduleColumn;
 
 	Fl_Input* pathTextEdit;
 	Fl_Native_File_Chooser *fileChooser;

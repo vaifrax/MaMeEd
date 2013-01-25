@@ -90,6 +90,7 @@
     <ClInclude Include="..\src\ExifFile.h" />
     <ClInclude Include="..\src\F13FileList.h" />
     <ClInclude Include="..\src\F13KeyValueList.h" />
+    <ClInclude Include="..\src\Fltk13WorldMap.h" />
     <ClInclude Include="..\src\MConfig.h" />
     <ClInclude Include="..\src\MCore.h" />
     <ClInclude Include="..\src\MDDir.h" />

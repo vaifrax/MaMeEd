@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 	int retVal = mGUI->showWindow();
 
 	// clean up
-	delete mGUI;
-	delete mCore;
+	delete mGUI; mGUI = NULL;
+	delete mCore; mCore = NULL;
 	return retVal;
 }

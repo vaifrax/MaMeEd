@@ -14,19 +14,24 @@
 #include "MDDir.h"
 
 #include <FL/Fl_Button.H>
-
 #include <FL/Fl_Shared_Image.H>
 
 #include <FL/x.H> // to set icon in windows
 #include "../prj/resource.h" // for icon ID
+#include "Fltk13WorldMap.h"
 
 
-Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Metadata Editor") {
+Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marcel's Metadata Editor") {
 	Fl::scheme("gtk+");
 	//Fl::scheme("plastic");
 
 	fileList = NULL;
 	keyValueList = NULL;
+
+// test
+box(FL_BORDER_BOX);
+color(FL_RED);          // (shouldn't be seen)
+
 
 	callback(closeWindowCallback, this);
 
@@ -49,14 +54,13 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 	};
 
 	const int MENU_HEIGHT = 25;
-	Fl_Menu_Bar *menu = new Fl_Menu_Bar(0, 0, w(), MENU_HEIGHT);
+	Fl_Menu_Bar* menu = new Fl_Menu_Bar(0, 0, w(), MENU_HEIGHT);
 	menu->copy(menuitems);
 
 	// main group, containing all elements in the window
-	const int MAIN_GROUP_PADDING = 2;
+	const int MAIN_GROUP_PADDING = 0; // must be 0 otherwise tile doesn't work!
 	mainGroup = new Fl_Tile(MAIN_GROUP_PADDING, MENU_HEIGHT+MAIN_GROUP_PADDING, w()-2*MAIN_GROUP_PADDING, h()-MENU_HEIGHT-2*MAIN_GROUP_PADDING); // put everything in a group for equal resizing
 		pathFilesGroup = new Fl_Group(mainGroup->x(), mainGroup->y(), 0.4*mainGroup->w(), mainGroup->h()); // left side
-			box(FL_DOWN_BOX);
 			pathGroup = new Fl_Group(pathFilesGroup->x(), pathFilesGroup->y(), pathFilesGroup->w(), 25); // top bar of left side
 				const int PATH_BUTTON_WIDTH = 35;
 				pathTextEdit = new Fl_Input(pathGroup->x(), pathGroup->y(), pathGroup->w()-PATH_BUTTON_WIDTH-2, pathGroup->h());
@@ -69,14 +73,30 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Window(800,800,"Marcel's Me
 				pathButton->callback(buttonCallback, (void*) BUTTON_PATH);
 			pathGroup->end();
 			pathGroup->resizable(pathTextEdit);
+		pathFilesGroup->box(FL_DOWN_BOX);
+		pathFilesGroup->align(FL_ALIGN_CLIP);
 		pathFilesGroup->end();
-		keyValueList = new F13KeyValueList(mainGroup->x() + 0.4*mainGroup->w(), mainGroup->y(), 0.3*mainGroup->w(), mainGroup->h(), mCore->getConfig());
-			box(FL_DOWN_BOX);
-		keyValueList->end();
-		Fl_Scroll* fls = new Fl_Scroll(mainGroup->x() + 0.7*mainGroup->w(), mainGroup->y(), 0.3*mainGroup->w(), mainGroup->h(), "test");
-			box(FL_DOWN_BOX);
-		fls->end();
 //pathFilesGroup->resizable(fileList);
+
+		keyValueList = new F13KeyValueList(mainGroup->x() + 0.4*mainGroup->w(), mainGroup->y(), 0.3*mainGroup->w(), mainGroup->h(), mCore->getConfig());
+		keyValueList->box(FL_DOWN_BOX);
+		keyValueList->align(FL_ALIGN_CLIP);
+		keyValueList->end();
+
+		moduleColumn = new Fl_Scroll(mainGroup->x() + 0.7*mainGroup->w(), mainGroup->y(), 0.3*mainGroup->w(), mainGroup->h());
+			// TODO: include larger preview or scale up thumb in file list?
+			Fl_Box* largePreview = new Fl_Box(moduleColumn->x(), moduleColumn->y(), moduleColumn->w(), 200, "large preview");
+			largePreview->box(FL_DOWN_BOX);
+			//b->image(
+
+			// zoomable map
+			// topo map: http://opentopomap.org/tiles/14/8640/5755.png
+			Fl_Box* worldMap = new Fl_Box(moduleColumn->x(), largePreview->y()+largePreview->h(), moduleColumn->w(), 200, "world map");
+			worldMap->box(FL_DOWN_BOX);
+		moduleColumn->box(FL_DOWN_BOX);
+		moduleColumn->align(FL_ALIGN_CLIP);
+		moduleColumn->end();
+
 	mainGroup->end();
 	resizable(mainGroup);
 	end(); //////////////////////
