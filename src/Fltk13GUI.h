@@ -41,7 +41,7 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
   protected:
 	F13FileList* fileList;
 	F13KeyValueList* keyValueList;
-	Fl_Scroll* moduleColumn;
+	//Fl_Scroll* moduleColumn;
 
 	Fl_Input* pathTextEdit;
 	Fl_Native_File_Chooser *fileChooser;

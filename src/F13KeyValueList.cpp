@@ -23,7 +23,7 @@ public:
 
 	KeyValueGroup(int X, int Y, int W, int H, const char* key, const char* value, std::string const& keyDescription, F13KeyValueList::KeyType keyType = F13KeyValueList::USER_KEY) : Fl_Group(X,Y,W,H,0) {
 		begin();
-			keyInput = new Fl_Input(X,Y,90,25,"");
+			keyInput = new Fl_Input(X+2,Y+2,90,25,"");
 			keyInput->value(key);
 			keyInput->box(FL_FLAT_BOX);
 			keyInput->color(0xFFFFFF00);
@@ -37,7 +37,7 @@ public:
 				keyInput->tooltip(keyDescription.c_str());
 			}
 
-			valueInput = new Fl_Input(X+90+1,Y,W-90-1,25);
+			valueInput = new Fl_Input(X+90+3,Y+2,W-90-3-5,25);
 			valueInput->value(value);
 			valueInput->box(FL_FLAT_BOX);
 			valueInput->color(0xFFFFFF00);

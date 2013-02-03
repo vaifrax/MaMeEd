@@ -28,11 +28,6 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marc
 	fileList = NULL;
 	keyValueList = NULL;
 
-// test
-box(FL_BORDER_BOX);
-color(FL_RED);          // (shouldn't be seen)
-
-
 	callback(closeWindowCallback, this);
 
 	fl_register_images(); // init image lib
@@ -60,15 +55,24 @@ color(FL_RED);          // (shouldn't be seen)
 	// main group, containing all elements in the window
 	const int MAIN_GROUP_PADDING = 0; // must be 0 otherwise tile doesn't work!
 	mainGroup = new Fl_Tile(MAIN_GROUP_PADDING, MENU_HEIGHT+MAIN_GROUP_PADDING, w()-2*MAIN_GROUP_PADDING, h()-MENU_HEIGHT-2*MAIN_GROUP_PADDING); // put everything in a group for equal resizing
-		pathFilesGroup = new Fl_Group(mainGroup->x(), mainGroup->y(), 0.4*mainGroup->w(), mainGroup->h()); // left side
-			pathGroup = new Fl_Group(pathFilesGroup->x(), pathFilesGroup->y(), pathFilesGroup->w(), 25); // top bar of left side
+		int x0 = mainGroup->x(); // 0 [column 1] x1 [column 2] x2 [column 3] x3
+		int x1 = 0.4*mainGroup->w() + x0;
+		int x2 = 0.7*mainGroup->w() + x0;
+		int x3 = mainGroup->w() + x0;
+		int y0 = mainGroup->y(); // row positions
+		int y1 = 0.3*mainGroup->h() + y0;
+		int y2 = 0.6*mainGroup->h() + y0;
+		int y9 = mainGroup->h() + y0;
+		pathFilesGroup = new Fl_Group(x0, y0, x1-x0, mainGroup->h()); // left side
+			const int PATHFILESGROUP_PADDING = 2;
+			pathGroup = new Fl_Group(pathFilesGroup->x()+PATHFILESGROUP_PADDING, pathFilesGroup->y()+PATHFILESGROUP_PADDING, pathFilesGroup->w()-2*PATHFILESGROUP_PADDING, 29); // top bar of left side
 				const int PATH_BUTTON_WIDTH = 35;
-				pathTextEdit = new Fl_Input(pathGroup->x(), pathGroup->y(), pathGroup->w()-PATH_BUTTON_WIDTH-2, pathGroup->h());
+				pathTextEdit = new Fl_Input(pathGroup->x(), pathGroup->y(), pathGroup->w()-PATH_BUTTON_WIDTH-2, pathGroup->h()-4);
 				//pathTextEdit->value("C:");
 				pathTextEdit->callback(keyboardCallback, (void*) FROM_PATHTEXTEDIT);
 				pathTextEdit->when(FL_WHEN_ENTER_KEY); // FL_WHEN_RELEASE
 
-				Fl_Button* pathButton = new Fl_Button(pathGroup->x()+pathGroup->w()-PATH_BUTTON_WIDTH, pathGroup->y(), PATH_BUTTON_WIDTH, pathGroup->h(), "Path");
+				Fl_Button* pathButton = new Fl_Button(pathGroup->x()+pathGroup->w()-PATH_BUTTON_WIDTH, pathGroup->y(), PATH_BUTTON_WIDTH, pathGroup->h()-4, "Path");
 				pathButton->type(FL_NORMAL_BUTTON);
 				pathButton->callback(buttonCallback, (void*) BUTTON_PATH);
 			pathGroup->end();
@@ -76,26 +80,30 @@ color(FL_RED);          // (shouldn't be seen)
 		pathFilesGroup->box(FL_DOWN_BOX);
 		pathFilesGroup->align(FL_ALIGN_CLIP);
 		pathFilesGroup->end();
-//pathFilesGroup->resizable(fileList);
 
-		keyValueList = new F13KeyValueList(mainGroup->x() + 0.4*mainGroup->w(), mainGroup->y(), 0.3*mainGroup->w(), mainGroup->h(), mCore->getConfig());
+		keyValueList = new F13KeyValueList(x1, y0, x2-x1, mainGroup->h(), mCore->getConfig());
 		keyValueList->box(FL_DOWN_BOX);
 		keyValueList->align(FL_ALIGN_CLIP);
 		keyValueList->end();
 
-		moduleColumn = new Fl_Scroll(mainGroup->x() + 0.7*mainGroup->w(), mainGroup->y(), 0.3*mainGroup->w(), mainGroup->h());
-			// TODO: include larger preview or scale up thumb in file list?
-			Fl_Box* largePreview = new Fl_Box(moduleColumn->x(), moduleColumn->y(), moduleColumn->w(), 200, "large preview");
-			largePreview->box(FL_DOWN_BOX);
-			//b->image(
+		//moduleColumn = new Fl_Scroll(x2, y0, x3-x2, mainGroup->h());
+		// TODO: include larger preview or scale up thumb in file list?
+		Fl_Box* largePreview = new Fl_Box(x2, y0, x3-x2, y1-y0, "large preview");
+		largePreview->box(FL_DOWN_BOX);
+		//b->image(
 
-			// zoomable map
-			// topo map: http://opentopomap.org/tiles/14/8640/5755.png
-			Fl_Box* worldMap = new Fl_Box(moduleColumn->x(), largePreview->y()+largePreview->h(), moduleColumn->w(), 200, "world map");
-			worldMap->box(FL_DOWN_BOX);
-		moduleColumn->box(FL_DOWN_BOX);
-		moduleColumn->align(FL_ALIGN_CLIP);
-		moduleColumn->end();
+		// zoomable map
+		// topo map: http://opentopomap.org/tiles/14/8640/5755.png
+		//Fl_Box* worldMap = new Fl_Box(x2, y1, x3-x2, y2-y1, "world map");
+		Fltk13WorldMap* worldMap = new Fltk13WorldMap(x2, y1, x3-x2, y2-y1, "world map");
+		worldMap->box(FL_DOWN_BOX);
+		//moduleColumn->box(FL_DOWN_BOX);
+		//moduleColumn->align(FL_ALIGN_CLIP);
+		//moduleColumn->resizable(largePreview);
+		//moduleColumn->end();
+
+		Fl_Box* empty = new Fl_Box(x2, y2, x3-x2, y9-y2, "empty");
+		empty->box(FL_DOWN_BOX);
 
 	mainGroup->end();
 	resizable(mainGroup);
@@ -305,7 +313,7 @@ void Fltk13GUI::openDir(std::string path) {
 //			keyValueList = NULL;
 		}
 
-		fileList = new F13FileList(pathFilesGroup->x(), pathFilesGroup->y() + 26, pathFilesGroup->w(), pathFilesGroup->h()-26, mCore->getMDDir());
+		fileList = new F13FileList(pathFilesGroup->x()+2, pathFilesGroup->y() + 29, pathFilesGroup->w()-4, pathFilesGroup->h()-31, mCore->getMDDir());
 		pathFilesGroup->add(fileList); // add to window
 		pathFilesGroup->resizable(fileList); // must be here, doesn't work otherwise
 
@@ -355,10 +363,14 @@ void Fltk13GUI::showFileMetaData() {
 
 //	keyValueList->clear();
 	if (keyValueList) {
+		int x = keyValueList->x();
+		int y = keyValueList->y();
+		int w = keyValueList->w();
+		int h = keyValueList->h();
 		mainGroup->remove(keyValueList);
 		Fl::delete_widget(keyValueList); // todo: instead of deleting, clearing and refilling it should be good, too?!?
 		keyValueList = NULL;
-		keyValueList = new F13KeyValueList(mainGroup->x() + 0.4*mainGroup->w(), mainGroup->y(), 0.3*mainGroup->w(), mainGroup->h(), mCore->getConfig());
+		keyValueList = new F13KeyValueList(x, y, w, h, mCore->getConfig());
 		keyValueList->box(FL_DOWN_BOX);
 		mainGroup->add(keyValueList);
 	}
