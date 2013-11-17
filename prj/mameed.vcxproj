@@ -52,7 +52,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltkimages.lib;fltkjpeg.lib;fltkpng.lib;fltkzlib.lib;glu32.lib;opengl32.lib;fltkgl.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltkimages.lib;fltkjpeg.lib;fltkpng.lib;fltkzlib.lib;glu32.lib;opengl32.lib;fltkgl.lib;libcurl.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>E:\coding\_libs\fltk-1.3.1\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -70,7 +70,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltkimages.lib;fltkjpeg.lib;fltkpng.lib;fltkzlib.lib;glu32.lib;opengl32.lib;fltkgl.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltkimages.lib;fltkjpeg.lib;fltkpng.lib;fltkzlib.lib;glu32.lib;opengl32.lib;fltkgl.lib;libcurl.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>E:\coding\_libs\fltk-1.3.1\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -78,6 +78,9 @@
     <ClCompile Include="..\src\ExifFile.cpp" />
     <ClCompile Include="..\src\F13FileList.cpp" />
     <ClCompile Include="..\src\F13KeyValueList.cpp" />
+    <ClCompile Include="..\src\Fltk13WorldMap.cpp" />
+    <ClCompile Include="..\src\MapTile.cpp" />
+    <ClCompile Include="..\src\MapTileZoomLevel.cpp" />
     <ClCompile Include="..\src\MConfig.cpp" />
     <ClCompile Include="..\src\MCore.cpp" />
     <ClCompile Include="..\src\MDDir.cpp" />
@@ -85,12 +88,18 @@
     <ClCompile Include="..\src\MDFile.cpp" />
     <ClCompile Include="..\src\MDProperty.cpp" />
     <ClCompile Include="..\src\Fltk13GUI.cpp" />
+    <ClCompile Include="..\tools\ddsfile.cpp" />
+    <ClCompile Include="..\tools\GLee.c" />
+    <ClCompile Include="..\tools\MLOpenGLTex.cpp" />
+    <ClCompile Include="..\tools\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ExifFile.h" />
     <ClInclude Include="..\src\F13FileList.h" />
     <ClInclude Include="..\src\F13KeyValueList.h" />
     <ClInclude Include="..\src\Fltk13WorldMap.h" />
+    <ClInclude Include="..\src\MapTile.h" />
+    <ClInclude Include="..\src\MapTileZoomLevel.h" />
     <ClInclude Include="..\src\MConfig.h" />
     <ClInclude Include="..\src\MCore.h" />
     <ClInclude Include="..\src\MDDir.h" />
@@ -98,6 +107,11 @@
     <ClInclude Include="..\src\MDProperty.h" />
     <ClInclude Include="..\src\Fltk13GUI.h" />
     <ClInclude Include="..\src\MGUI.h" />
+    <ClInclude Include="..\tools\ddsfile.h" />
+    <ClInclude Include="..\tools\GLee.h" />
+    <ClInclude Include="..\tools\MLImage.h" />
+    <ClInclude Include="..\tools\MLOpenGLTex.h" />
+    <ClInclude Include="..\tools\shader.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
