@@ -26,6 +26,8 @@ MapTile::MapTile(int zoomLevel, int x, int y) {
 	this->y = y;
 	tex = NULL;
 	fileName = std::string(mapCachePath) + toZeroPaddedStr(zoomLevel, 2) + "/" + toZeroPaddedStr(x, 6) + "/" + toZeroPaddedStr(y, 6) + ".dds";
+
+	std::cout << fileName << std::endl;
 }
 
 MapTile::~MapTile() {

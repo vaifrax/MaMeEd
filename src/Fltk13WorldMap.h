@@ -15,11 +15,13 @@ class Fltk13WorldMap : public Fl_Gl_Window {
 	int handle(int event);
 
   protected:
+	void initGL();
 	void draw();
 	float angle1, angle2; // globe rotation
 	float zoom;
 
 	MapTileZoomLevel* tileLevels[19];
+	GLuint shaderProgram;
 
   private:
 	int oldX, oldY;

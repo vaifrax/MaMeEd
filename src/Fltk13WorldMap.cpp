@@ -9,6 +9,25 @@
 #define M_PI (3.1415926)
 #endif
 
+#include <assert.h>
+
+//GL_INVALID_ENUM                   0x0500
+//GL_INVALID_VALUE                  0x0501
+//GL_INVALID_OPERATION              0x0502
+//GL_STACK_OVERFLOW                 0x0503
+//GL_STACK_UNDERFLOW                0x0504
+//GL_OUT_OF_MEMORY                  0x0505
+//GL_INVALID_FRAMEBUFFER_OPERATION  0x0506
+//#define CHECK_GL_STATE {int tmperr = glGetError(); if (tmperr != GL_NO_ERROR) {std::cout << "GL error: " << tmperr; std::cout.unsetf(std::ios::dec); std::cout.setf(std::ios::hex); std::cout << " (" << tmperr << " hex)" << std::endl; assert(0); exit(1);}}
+
+// short version, stripped cout output
+#ifndef CHECK_GL_STATE
+#define CHECK_GL_STATE {int tmperr = glGetError(); if (tmperr != GL_NO_ERROR) {assert(0);}}
+#endif // CHECK_GL_STATE
+
+char* vertexShaderFileName = "../shader/Fltk13WorldMap.vertex";
+char* fragmentShaderFileName = "../shader/Fltk13WorldMap.fragment";
+
 Fltk13WorldMap::Fltk13WorldMap(int x, int y, int w, int h, char* l/*=0*/) : Fl_Gl_Window(x, y, w, h, l) {
 	angle1 = 0;
 	angle2 = 0;
@@ -23,23 +42,39 @@ Fltk13WorldMap::~Fltk13WorldMap() {
 	}
 }
 
+void Fltk13WorldMap::initGL() {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glViewport(0, 0, w(), h());
+	glOrtho(-w(), w(), -h(), h(), -400, 400);
+	glRotatef(-90, 1, 0, 0);
+	glMatrixMode(GL_MODELVIEW);
+
+	glEnable(GL_DEPTH_TEST);
+	CHECK_GL_STATE
+
+	for (int z=0; z<=18; z++) {
+		tileLevels[z] = new MapTileZoomLevel(z);
+	}
+	CHECK_GL_STATE
+
+	// load shader
+	shaderProgram = loadShader(vertexShaderFileName, fragmentShaderFileName);
+
+	CHECK_GL_STATE
+}
+
 void Fltk13WorldMap::draw() {
+	CHECK_GL_STATE
+
 	if (!valid()) {
 		// First time? init viewport, etc.
 		valid(1);
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glViewport(0, 0, w(), h());
-		glOrtho(-w(), w(), -h(), h(), -400, 400);
-		glRotatef(-90, 1, 0, 0);
-		glMatrixMode(GL_MODELVIEW);
-
-		glEnable(GL_DEPTH_TEST);
-
-		for (int z=0; z<=18; z++) {
-			tileLevels[z] = new MapTileZoomLevel(z);
-		}
+		initGL();
 	}
+
+	CHECK_GL_STATE
+
 	// Clear screen
 	//glClear(GL_COLOR_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -53,6 +88,8 @@ void Fltk13WorldMap::draw() {
 	glColor3f(0.2, 0.2, 0.2);
 	glBegin(GL_LINE_STRIP); glVertex2f(w(),  h()); glVertex2f(-w(), -h()); glEnd();
 	glBegin(GL_LINE_STRIP); glVertex2f(w(), -h()); glVertex2f(-w(),  h()); glEnd();
+
+	CHECK_GL_STATE
 /*
 	// Draw sphere
 	glColor3f(1.0, 1.0, 1.0);
@@ -73,6 +110,11 @@ void Fltk13WorldMap::draw() {
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1, 1, 1);
 	glDisable(GL_LIGHTING);
+	CHECK_GL_STATE
+	glUseProgram(shaderProgram);
+	CHECK_GL_STATE
+	setUniform1f(shaderProgram, "zoom", zoom);
+	CHECK_GL_STATE
 	MapTileZoomLevel* mtzl = tileLevels[rLevel];
 	for (int y=0; y<mtzl->tilesArraySize; y++) {
 		for (int x=0; x<mtzl->tilesArraySize; x++) {
@@ -90,8 +132,10 @@ void Fltk13WorldMap::draw() {
 			glEnd();
 		}
 	}
+	CHECK_GL_STATE
+	glUseProgram(0);
 	glDisable(GL_TEXTURE_2D);
-
+	CHECK_GL_STATE
 }
 
 

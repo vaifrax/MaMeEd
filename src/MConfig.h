@@ -1,4 +1,6 @@
 // configuration
+// by Marcel Lancelle
+
 
 #ifndef MCONFIG_HEADER_INCLUDED
 #define MCONFIG_HEADER_INCLUDED

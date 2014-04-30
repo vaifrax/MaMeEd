@@ -1,0 +1,9 @@
+varying vec3 worldPos;
+varying vec2 texCoord;
+
+void main(void) {
+	vec3 Pos = gl_Vertex.xyz * 1.0;
+	gl_Position = gl_ModelViewProjectionMatrix * vec4(Pos,1.0);
+	worldPos = Pos;
+	texCoord = gl_MultiTexCoord0.xy;
+}

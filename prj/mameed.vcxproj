@@ -51,7 +51,7 @@
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltkimages.lib;fltkjpeg.lib;fltkpng.lib;fltkzlib.lib;glu32.lib;opengl32.lib;fltkgl.lib;libcurl.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>E:\coding\_libs\fltk-1.3.1\lib</AdditionalLibraryDirectories>
     </Link>
@@ -120,6 +120,8 @@
   <ItemGroup>
     <None Include="..\bin\mameed.ini" />
     <None Include="..\div\mameed-icon.ico" />
+    <None Include="..\shader\Fltk13WorldMap.fragment" />
+    <None Include="..\shader\Fltk13WorldMap.vertex" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

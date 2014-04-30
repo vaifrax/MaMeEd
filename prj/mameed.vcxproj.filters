@@ -18,6 +18,9 @@
     <Filter Include="Source Files\tools">
       <UniqueIdentifier>{3b5d2b2a-4f3e-4790-9c4d-3916afee75ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\shader">
+      <UniqueIdentifier>{837b9ba2-ff18-492b-89c7-cd0ec8e14a6a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\mameed.cpp">
@@ -142,6 +145,12 @@
     </None>
     <None Include="..\bin\mameed.ini">
       <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\shader\Fltk13WorldMap.fragment">
+      <Filter>Source Files\shader</Filter>
+    </None>
+    <None Include="..\shader\Fltk13WorldMap.vertex">
+      <Filter>Source Files\shader</Filter>
     </None>
   </ItemGroup>
 </Project>

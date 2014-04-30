@@ -15,8 +15,9 @@
 //#define CHECK_GL_STATE {int tmperr = glGetError(); if (tmperr != GL_NO_ERROR) {std::cout << "GL error: " << tmperr; std::cout.unsetf(std::ios::dec); std::cout.setf(std::ios::hex); std::cout << " (" << tmperr << " hex)" << std::endl; assert(0); exit(1);}}
 
 // short version, stripped cout output
+#ifndef CHECK_GL_STATE
 #define CHECK_GL_STATE {int tmperr = glGetError(); if (tmperr != GL_NO_ERROR) {assert(0);}}
-
+#endif // CHECK_GL_STATE
 
 // source format is typically GL_RGB or GL_RGBA
 // target format is typically GL_COMPRESSED_RGBA or GL_COMPRESSED_RGB
