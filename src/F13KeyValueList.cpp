@@ -69,7 +69,7 @@ public:
 				//damage(1);
 // TODO: also do this before saving, or at return; maybe add a new empty key value pair at the end
 				((F13KeyValueList*) parent())->applyChangesOfSelectedKeyValue();
-//				propFile->addKeyValue(selectedKeyValue->fixedBox->value(), selectedKeyValue->stretchBox->value());
+//				propFile->setKeyValue(selectedKeyValue->fixedBox->value(), selectedKeyValue->stretchBox->value());
 // TODO: how to remove?
 				//return 1; 
 				return Fl_Group::handle(eventn);

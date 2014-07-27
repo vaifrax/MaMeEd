@@ -20,6 +20,8 @@ class MDDir {
 	bool readFromFile();
 	bool writeToFile() const;
 
+	void importMetadataFromFiles(); // EXIF, etc.
+
 	static bool isFile(const char const* pathName);
 	static bool isDirectory(const char const* pathName);
 

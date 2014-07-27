@@ -83,7 +83,15 @@ MDDir::MDDir(std::string const& path) {
 
 	// read properties from database
 	dbFileName = dirPath + "/.metadata.mmd";
-	readFromFile(); // Marcel's Metadata Database (file format)
+	if (!readFromFile()) { // Marcel's Metadata Database (file format)
+		// couldn't read/find meta data file
+		importMetadataFromFiles();
+	}
+
+// TODO : this is just for debugging ///
+else importMetadataFromFiles();
+//////
+
 }
 
 MDDir::~MDDir() {
@@ -132,8 +140,8 @@ bool MDDir::processLine(std::string line) {
 
 	if (value.size() && tmpFile) {
 		//properties[key] = value;
-		//tmpPropFile->addKeyValue(key, value);
-		tmpFile->addKeyValue(key, value);
+		//tmpPropFile->setKeyValue(key, value);
+		tmpFile->setKeyValue(key, value);
 		return true;
 	} else {
 		return false;
@@ -180,4 +188,13 @@ bool MDDir::writeToFile() const {
 	os.close();
 
 	return true;
+}
+
+void MDDir::importMetadataFromFiles() {
+	// import data from exif info
+	for (std::vector<MDFile*>::iterator f=files.begin(); f!=files.end(); ++f) {
+		if (!(*f)->isDirectory()) {
+			(*f)->importEmbeddedMetadata();
+		}
+	}
 }

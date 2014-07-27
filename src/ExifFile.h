@@ -6,24 +6,22 @@
 #include <string>
 using namespace std;
 
+class MDFile;
+
 class ExifFile {
   public:
-	ExifFile(const char* fileName);
+	ExifFile(const char* fileName, MDFile* mdf = NULL);
 	~ExifFile();
 
-	char* getUserCommentData();
-	bool hasUserComment() {return (userComment.length > 8);};
-	int getUserCommentLength() {return userComment.length;};
 	int getThumbnailLength() {return thumbnail.length;};
-	//bool setUserCommentData(char* newUserComment); // too long comments will be clipped automatically
 	unsigned char* getThumbnailData();
-	bool fileOk() {return exifFile;};
-	
-	FILETIME getLastModifiedTime() {return lastWriteTime;};
-	
+	bool fileOk() {return (exifFile!=NULL);};
+
+	//FILETIME getLastModifiedTime() {return lastWriteTime;};
+
   protected:
 	bool parseFile();
-	long readNum(FILE* file, bool bigEndian, int bytes);
+	long readNum(FILE* file, int bytes);
 
 	string fileName;
 	FILE* exifFile; // is NULL if exif data couldn't be read
@@ -31,11 +29,18 @@ class ExifFile {
 	struct ExifDataInfo {
 		long position, length; // in bytes from file start
 		void* data;
-	} userComment, thumbnail;
+	} thumbnail;
 
 	bool modified;
 
-	FILETIME creationTime, lastAccessTime, lastWriteTime;
+	void readGPS(long giLength, long giPosition);
+	char* getUserCommentData();
+	bool hasUserComment() {return (userComment.length > 8);};
+
+	bool bigEndian;
+	MDFile* mdf;
+
+	//FILETIME creationTime, lastAccessTime, lastWriteTime;
 };
 
 #endif //  EXIFFILE_HEADER_INCLUDED

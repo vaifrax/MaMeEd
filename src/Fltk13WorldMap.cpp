@@ -120,7 +120,8 @@ void Fltk13WorldMap::draw() {
 		for (int x=0; x<mtzl->tilesArraySize; x++) {
 			MapTile* mt = mtzl->tilesArray[x][y];
 			mt->tex->bind();
-			glBegin(GL_QUADS);
+			if (rLevel > 4) {
+				glBegin(GL_QUADS);
 				glTexCoord2f(0, 1);
 				glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
 				glTexCoord2f(1, 1);
@@ -129,7 +130,38 @@ void Fltk13WorldMap::draw() {
 				glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
 				glTexCoord2f(0, 0);
 				glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
-			glEnd();
+				glEnd();
+			} else {
+				int subDivNum = 8;
+				for (int sdy=0; sdy<subDivNum; sdy++) for (int sdx=0; sdx<subDivNum; sdx++) {
+					float fsdx1 = sdx/(float) subDivNum;
+					float fsdx2 = (sdx+1)/(float) subDivNum;
+					float fsdy1 = sdy/(float) subDivNum;
+					float fsdy2 = (sdy+1)/(float) subDivNum;
+					float lat1 = (mt->getLatTop() + fsdy1*(mt->getLatBottom()-mt->getLatTop()))*M_PI/180;
+					float lat2 = (mt->getLatTop() + fsdy2*(mt->getLatBottom()-mt->getLatTop()))*M_PI/180;
+					float long1 = (mt->getLongLeft() + fsdx1*(mt->getLongRight()-mt->getLongLeft()))*M_PI/180;
+					float long2 = (mt->getLongLeft() + fsdx2*(mt->getLongRight()-mt->getLongLeft()))*M_PI/180;
+					float cosLat1 = cos(lat1);
+					float sinLat1 = sin(lat1);
+					float cosLat2 = cos(lat2);
+					float sinLat2 = sin(lat2);
+					float cosLong1 = cos(long1);
+					float sinLong1 = sin(long1);
+					float cosLong2 = cos(long2);
+					float sinLong2 = sin(long2);
+					glBegin(GL_QUADS);
+					glTexCoord2f(fsdx1, fsdy1);
+					glVertex3f(zoom*cosLat1*cosLong1, zoom*cosLat1*sinLong1, zoom*sinLat1);
+					glTexCoord2f(fsdx2, fsdy1);
+					glVertex3f(zoom*cosLat1*cosLong2, zoom*cosLat1*sinLong2, zoom*sinLat1);
+					glTexCoord2f(fsdx2, fsdy2);
+					glVertex3f(zoom*cosLat2*cosLong2, zoom*cosLat2*sinLong2, zoom*sinLat2);
+					glTexCoord2f(fsdx1, fsdy2);
+					glVertex3f(zoom*cosLat2*cosLong1, zoom*cosLat2*sinLong1, zoom*sinLat2);
+					glEnd();
+				}
+			}
 		}
 	}
 	CHECK_GL_STATE

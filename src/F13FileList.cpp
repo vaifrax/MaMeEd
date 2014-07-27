@@ -32,6 +32,8 @@ public:
 		begin();
 			thumbnailButton = NULL;
 
+// TODO: much of the logic should be done/cached in the metadata updating/importing metho
+
 			if (isDirectory) {
 				// this is a directory
 				thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
@@ -52,7 +54,7 @@ public:
 					std::string::size_type p = fileNameStr.rfind('.', fileNameStrLen-1);
 					if (p != std::string::npos) {
 						ext = fileNameStr.substr(p+1);
-						for (int i=0; i<ext.length(); i++) ext[i] = toupper(ext[i]);
+						for (unsigned int i=0; i<ext.length(); i++) ext[i] = toupper(ext[i]);
 					}
 				}
 
@@ -63,6 +65,7 @@ public:
 					std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
 
 					// try to load exif thumbnail and use as image
+					// TODO: read position and length of thumbnail data in file from MDFile properties
 					ExifFile ef(path.c_str());
 					unsigned char* thumbData = ef.getThumbnailData();
 					if (thumbData) {
