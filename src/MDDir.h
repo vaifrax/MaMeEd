@@ -22,8 +22,8 @@ class MDDir {
 
 	void importMetadataFromFiles(); // EXIF, etc.
 
-	static bool isFile(const char const* pathName);
-	static bool isDirectory(const char const* pathName);
+	static bool isFile(const char* pathName);
+	static bool isDirectory(const char* pathName);
 
   protected:
 	bool processLine(std::string line);

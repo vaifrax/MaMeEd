@@ -4,6 +4,7 @@
 #include "FL/Fl_Scroll.H"
 #include <string>
 
+class MDFile;
 class MDDir;
 class FileGroup;
 
@@ -21,7 +22,7 @@ class F13FileList : public Fl_Scroll {
 	static int thumbnailSize;
 
   protected:
-	void addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory);
+	void addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory, MDFile* mdf);
 	void fillList();
 	int itemNum;
 	MDDir const* mddir;

@@ -16,7 +16,14 @@ class MDFile {
 	//std::string const& getAbsPath() {return path;} // return complete absolute path
 	void writeToFile(std::ofstream& os);
 	bool importEmbeddedMetadata();
+	void setKeyValue(std::string key, double value);
+	void setKeyValue(std::string key, long value);
 	void setKeyValue(std::string key, std::string value);
+
+	// if possible, provide a source where the information is coming from, e.g. "EXIF"
+	void setKeyValueSrc(std::string key, double value, std::string source);
+	void setKeyValueSrc(std::string key, long value, std::string source);
+	void setKeyValueSrc(std::string key, std::string value, std::string source);
 
 	void changeKeyValue(std::string const& oldKey, std::string const& newKey, std::string const& newValue);
 

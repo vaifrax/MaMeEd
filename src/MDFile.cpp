@@ -7,7 +7,7 @@
 #include <time.h>
 #include <sstream>
 
-#include "ExifFile.h"
+#include "ExifFileM.h"
 
 #ifndef S_ISDIR
 #define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
@@ -83,6 +83,33 @@ void MDFile::setKeyValue(std::string key, std::string value) {
 	}
 }
 
+void MDFile::setKeyValue(std::string key, double value) {
+	std::stringstream ss;
+	ss << value;
+	setKeyValue(key, ss.str());
+}
+
+void MDFile::setKeyValue(std::string key, long value) {
+	std::stringstream ss;
+	ss << value;
+	setKeyValue(key, ss.str());
+}
+
+void MDFile::setKeyValueSrc(std::string key, std::string value, std::string source) {
+	setKeyValue(key, value);
+	setKeyValue(key + "~SRC", source);
+}
+
+void MDFile::setKeyValueSrc(std::string key, long value, std::string source) {
+	setKeyValue(key, value);
+	setKeyValue(key + "~SRC", source);
+}
+
+void MDFile::setKeyValueSrc(std::string key, double value, std::string source) {
+	setKeyValue(key, value);
+	setKeyValue(key + "~SRC", source);
+}
+
 bool MDFile::importEmbeddedMetadata() {
 	// extract extension and convert to upper case
 	std::string ext;
@@ -97,7 +124,8 @@ bool MDFile::importEmbeddedMetadata() {
 
 	// extension is upper case now, test for .JPG or .JPEG
 	if ((ext == "JPG") || (ext == "JPEG")) {
-		ExifFile ex(fullPath.c_str(), this);
+		ExifFileM ex(fullPath.c_str(), this);
+		ex.parseFile();
 	}
 
 	return true;

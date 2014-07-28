@@ -8,7 +8,7 @@
 #include <FL/Fl_Shared_Image.H>
 #include <FL/Fl_JPEG_Image.H>
 
-#include "ExifFile.h"
+//#include "ExifFile.h"
 
 #include <iostream> // for cout, debugging only!?
 
@@ -28,11 +28,11 @@ class FileGroup : public Fl_Group {
 public:
 	const char* getFileName() const {return nameBox->label();}
 
-	FileGroup(int X, int Y, int W, int H, const char* fileName, const char* dateStr, bool isDirectory, const char* L=0) : Fl_Group(X,Y,W,H,L) {
+	FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, const char* L=0) : Fl_Group(X,Y,W,H,L) {
 		begin();
 			thumbnailButton = NULL;
 
-// TODO: much of the logic should be done/cached in the metadata updating/importing metho
+// TODO: much of the logic should be done/cached in the metadata updating/importing method
 
 			if (isDirectory) {
 				// this is a directory
@@ -47,6 +47,9 @@ public:
 				// this is a file
 				std::string fileNameStr(fileName);
 				int fileNameStrLen = fileNameStr.length();
+
+				MDProperty* thumbPos = mdf->getPropertyByKey("thumbnailPosition");
+				MDProperty* thumbSize = mdf->getPropertyByKey("thumbnailSize");
 
 				// extract extension and convert to upper case
 				std::string ext;
@@ -63,7 +66,7 @@ public:
 					thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
 					thumbnailButton->callback(Fltk13GUI::launchViewerCallback, (void*) fileName);
 					std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
-
+/*
 					// try to load exif thumbnail and use as image
 					// TODO: read position and length of thumbnail data in file from MDFile properties
 					ExifFile ef(path.c_str());
@@ -87,6 +90,7 @@ public:
 						if (jpgImg && (jpgImg->w() > 0))
 							thumbnailButton->image(jpgImg);
 					}
+*/
 				}
 			}
 
@@ -161,12 +165,12 @@ const char* F13FileList::getSelectedFileName() const {
 }
 
 
-void F13FileList::addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory) {
+void F13FileList::addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory, MDFile* mdf) {
 	int X = x(),
 		Y = y() - yposition() + (itemNum*(F13FileList::thumbnailSize+1)) + 1,
 		W = w() - 18, // -18: compensate for vscroll bar
 		H = F13FileList::thumbnailSize;
-	add(new FileGroup(X,Y,W,H, fileName.c_str(), dateStr.c_str(), isDirectory));
+	add(new FileGroup(X,Y,W,H, fileName.c_str(), mdf, dateStr.c_str(), isDirectory));
 	redraw();
 	itemNum++;
 }
@@ -176,7 +180,7 @@ void F13FileList::fillList() {
 
 	std::vector<MDFile*> const& files = mddir->getFiles();
 	for (std::vector<MDFile*>::const_iterator i=files.begin(); i!=files.end(); ++i) {
-		addItem((*i)->getName(), (*i)->getDateStr(), (*i)->isDirectory());
+		addItem((*i)->getName(), (*i)->getDateStr(), (*i)->isDirectory(), *i);
 	}
 }
 
