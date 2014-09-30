@@ -49,7 +49,7 @@ void MDFile::writeToFile(std::ofstream& os) {
 
 MDProperty* MDFile::getPropertyByKey(std::string key) {
 	for (std::vector<MDProperty*>::iterator i=properties.begin(); i!=properties.end(); ++i) { // todo: use additional map for faster access?
-		if ((*i)->key == key) return *i;
+		if ((*i)->key == key) return (*i);
 	}
 	return NULL;
 }

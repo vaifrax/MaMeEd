@@ -12,7 +12,7 @@ class MDProperty {
 	std::string key;
 	std::string value;
 
-	enum MDPropertyType {UNKNOWN, FLOAT32, INT32, UINT32, STRING, DATETIME} type;
+	enum MDPropertyType {UNKNOWN, FLOAT32, INT32, UINT32, STRING, DATETIME} type; // TODO: is this used?
 
   protected:
 	//MDFile& file;

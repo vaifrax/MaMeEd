@@ -15,7 +15,10 @@ class MDFile {
 	std::string const& getDateStr() {return dateStr;}
 	//std::string const& getAbsPath() {return path;} // return complete absolute path
 	void writeToFile(std::ofstream& os);
-	bool importEmbeddedMetadata();
+	bool importEmbeddedMetadata(); // embedded infos, e.g. from file header or EXIF data
+
+	MDProperty* MDFile::getPropertyByKey(std::string key);
+
 	void setKeyValue(std::string key, double value);
 	void setKeyValue(std::string key, long value);
 	void setKeyValue(std::string key, std::string value);
@@ -30,8 +33,6 @@ class MDFile {
 	std::vector<MDProperty*> properties;
 
   protected:
-	MDProperty* MDFile::getPropertyByKey(std::string key);
-
 	std::string fileName;
 	std::string fullPath;
 	std::string dateStr;

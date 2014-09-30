@@ -28,6 +28,8 @@ ExifFileM::~ExifFileM() {
 bool ExifFileM::parseFile() {
 	if (exifFile == NULL) return false;
 
+	int ifdNum = 0;
+
 	// if it's a jpg file 'start of image' (soi) should be 0xFFD8
 	unsigned char soi[2];
 	if (fread(&soi, 1, 2, exifFile) < 2) return false;
@@ -100,14 +102,17 @@ bool ExifFileM::parseFile() {
 				mdf->setKeyValueSrc("height", (long) data, "EXIF");
 				break;
 */
+
+			case 0x0201:
+				mdf->setKeyValueSrc("thumbnailPosition", exifStartPos + data, "EXIF");
+//todo: is this correct: exifStartPos + data ?
+				break;
+			case 0x0202:
+				mdf->setKeyValueSrc("thumbnailSize", data, "EXIF");
+				break;
+
 			case 0x0112: // orientation
 				mdf->setKeyValueSrc("storageOrientation", data, "EXIF");
-				break;
-			case 0x201:
-				mdf->setKeyValueSrc("thumbnailPosition", readString(data + exifStartPos, count), "EXIF");
-				break;
-			case 0x202:
-				mdf->setKeyValueSrc("thumbnailSize", readString(data + exifStartPos, count), "EXIF");
 				break;
 			case 0x132:
 				mdf->setKeyValueSrc("dateTime", readString(data + exifStartPos, count), "EXIF");
@@ -130,24 +135,26 @@ bool ExifFileM::parseFile() {
 		}
 
 		fieldCount--;
-/*
+
+		// next idf
 		if (fieldCount == 0) {
+			ifdNum++;
 			int nextIfdOffset = readNum(4);
 			if (nextIfdOffset) {
 				fseek(exifFile, exifStartPos + nextIfdOffset, SEEK_SET);
 				fieldCount = readNum(2);
 			}
+
+			if (ifdPointer) {
+				// most of parsing is done but this ifd pointer thing is not read yet
+				fseek(exifFile, exifStartPos + ifdPointer, SEEK_SET);
+				fieldCount = readNum(2);
+				ifdPointer = 0;
+			}
 		}
 
-		if ((fieldCount == 0) && ifdPointer) {
-			// most of parsing is done but this ifd pointer thing is not read yet
-			fseek(exifFile, exifStartPos + ifdPointer, SEEK_SET);
-			fieldCount = readNum(2);
-			ifdPointer = 0;
-		}
-*/
 //	} while ((!uc_position) || (!thumbnailPos) || (!thumbnailLength)); // TODO
-	} while (fieldCount); // TODO
+	} while (fieldCount && (ifdNum < 2)); // TODO
 
 	if (exifIFDPosition) {
 		if (!readExifIFD(exifIFDPosition)) return false;
@@ -184,7 +191,6 @@ bool ExifFileM::readExifIFD(long position) {
 
 		// parse tag
 		switch (tag) {
-
 			case 0x829A:
 				mdf->setKeyValueSrc("ExposureTime", readRational(data + exifStartPos), "EXIF");
 				break;
@@ -195,9 +201,6 @@ bool ExifFileM::readExifIFD(long position) {
 				mdf->setKeyValueSrc("ISOSpeed", data, "EXIF");
 				break;
 
-//			case 0x9201:
-//				mdf->setKeyValueSrc("ShutterSpeed", readRational(data + exifStartPos, count), "EXIF");
-//				break;
 			case 0x9204:
 				mdf->setKeyValueSrc("ExposureBias", readRational(data + exifStartPos), "EXIF");
 				break;

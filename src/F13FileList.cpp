@@ -2,6 +2,7 @@
 #include "Fltk13GUI.h"
 #include "MDDir.h"
 #include "MDFile.h"
+#include "MDProperty.h"
 #include "FL/Fl_Box.H"
 #include "FL/Fl_Button.H"
 
@@ -45,12 +46,69 @@ public:
 				thumbnailButton->callback(Fltk13GUI::changeDirCallback, (void*) fileName);
 			} else {
 				// this is a file
+				thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
+				thumbnailButton->callback(Fltk13GUI::launchViewerCallback, (void*) fileName);
+
 				std::string fileNameStr(fileName);
-				int fileNameStrLen = fileNameStr.length();
+				std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
+				bool thumbLoaded = false;
 
-				MDProperty* thumbPos = mdf->getPropertyByKey("thumbnailPosition");
-				MDProperty* thumbSize = mdf->getPropertyByKey("thumbnailSize");
+				MDProperty* thumbPosProp = mdf->getPropertyByKey("thumbnailPosition");
+				MDProperty* thumbSizeProp = mdf->getPropertyByKey("thumbnailSize");
 
+				if (thumbPosProp && thumbSizeProp) {
+					long thumbPos  = atoi(thumbPosProp->value.c_str());
+					long thumbSize  = atoi(thumbSizeProp->value.c_str());
+
+					if ((thumbSize > 0) && (thumbSize < 100000)) { // sanity check
+
+						// TODO: move this to another file away from user interface!!
+						FILE* tf = fopen(path.c_str(), "rb");
+						fseek(tf, thumbPos, SEEK_SET);
+						unsigned char* thumbData = new unsigned char[thumbSize];
+						fread(thumbData, 1, thumbSize, tf);
+
+						Fl_JPEG_Image jpgImgThumb(NULL, thumbData);
+						//std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
+						float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgThumb.w(), jpgImgThumb.h());
+						int newW = (int) (scDiv * jpgImgThumb.w() + 0.499);
+						int newH = (int) (scDiv * jpgImgThumb.h() + 0.499);
+						Fl_Image* jpgImg = jpgImgThumb.copy(newW, newH);
+						if (jpgImg && (jpgImg->w() > 0)) {
+							thumbnailButton->image(jpgImg);
+							thumbLoaded = true;
+						}
+
+						delete[] thumbData;
+						fclose(tf);
+					}
+				}
+/*
+// extract extension and convert to upper case
+std::string ext;
+int fileNameStrLen = fileNameStr.length();
+if (fileNameStrLen > 1) {
+	std::string::size_type p = fileNameStr.rfind('.', fileNameStrLen-1);
+	if (p != std::string::npos) {
+		ext = fileNameStr.substr(p+1);
+		for (unsigned int i=0; i<ext.length(); i++) ext[i] = toupper(ext[i]);
+	}
+}
+
+				if (!thumbLoaded) {
+					if ((ext == "JPG") || (ext == "JPEG")) {
+						// load full resolution and scale it down
+						Fl_JPEG_Image jpgImgBig(path.c_str());
+						float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgBig.w(), jpgImgBig.h());
+						int newW = (int) (scDiv * jpgImgBig.w() + 0.499);
+						int newH = (int) (scDiv * jpgImgBig.h() + 0.499);
+						Fl_Image* jpgImg = jpgImgBig.copy(newW, newH);
+						if (jpgImg && (jpgImg->w() > 0))
+							thumbnailButton->image(jpgImg);
+					}
+				}
+*/
+/*
 				// extract extension and convert to upper case
 				std::string ext;
 				if (fileNameStrLen > 1) {
@@ -66,7 +124,7 @@ public:
 					thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
 					thumbnailButton->callback(Fltk13GUI::launchViewerCallback, (void*) fileName);
 					std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
-/*
+
 					// try to load exif thumbnail and use as image
 					// TODO: read position and length of thumbnail data in file from MDFile properties
 					ExifFile ef(path.c_str());
@@ -90,8 +148,9 @@ public:
 						if (jpgImg && (jpgImg->w() > 0))
 							thumbnailButton->image(jpgImg);
 					}
-*/
+
 				}
+*/
 			}
 
 			// box for name
