@@ -32,6 +32,7 @@ Fltk13WorldMap::Fltk13WorldMap(int x, int y, int w, int h, char* l/*=0*/) : Fl_G
 	angle1 = 0;
 	angle2 = 0;
 	zoom = 200;
+	showFlag = false;
 
 	end();
 }
@@ -40,6 +41,13 @@ Fltk13WorldMap::~Fltk13WorldMap() {
 	for (int z=0; z<=18; z++) {
 		delete tileLevels[z];
 	}
+}
+
+// convert, save in cX, cY, cZ
+void Fltk13WorldMap::longLatToXYZ(double longitude, double latitude) {
+	cX = cos(latitude*M_PI/180)*cos(longitude*M_PI/180);
+	cY = cos(latitude*M_PI/180)*sin(longitude*M_PI/180);
+	cZ = sin(latitude*M_PI/180);
 }
 
 void Fltk13WorldMap::initGL() {
@@ -62,6 +70,16 @@ void Fltk13WorldMap::initGL() {
 	shaderProgram = loadShader(vertexShaderFileName, fragmentShaderFileName);
 
 	CHECK_GL_STATE
+}
+
+// set a GPS marker at the specified coordinates
+void Fltk13WorldMap::setFlag(double longitude, double latitude) {
+	flagLongitude = longitude;
+	flagLatitude = latitude;
+	showFlag = true;
+}
+void Fltk13WorldMap::setFlag() {
+	showFlag=false;
 }
 
 void Fltk13WorldMap::draw() {
@@ -106,7 +124,7 @@ void Fltk13WorldMap::draw() {
 		}
 	}
 */
-	int rLevel = 2;
+	int rLevel = 3;
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1, 1, 1);
 	glDisable(GL_LIGHTING);
@@ -123,43 +141,71 @@ void Fltk13WorldMap::draw() {
 			if (rLevel > 4) {
 				glBegin(GL_QUADS);
 				glTexCoord2f(0, 1);
-				glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
+				//glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
+				longLatToXYZ(mt->getLongLeft(), mt->getLatBottom());
+				glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+
 				glTexCoord2f(1, 1);
-				glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
+				longLatToXYZ(mt->getLongRight(), mt->getLatBottom());
+				glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+				//glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
+
 				glTexCoord2f(1, 0);
-				glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
+				longLatToXYZ(mt->getLongRight(), mt->getLatTop());
+				glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+				//glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
+
 				glTexCoord2f(0, 0);
-				glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
+				longLatToXYZ(mt->getLongLeft(), mt->getLatTop());
+				glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+				//glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
 				glEnd();
 			} else {
-				int subDivNum = 8;
-				for (int sdy=0; sdy<subDivNum; sdy++) for (int sdx=0; sdx<subDivNum; sdx++) {
-					float fsdx1 = sdx/(float) subDivNum;
-					float fsdx2 = (sdx+1)/(float) subDivNum;
+				int subDivNum = 4;
+				for (int sdy=0; sdy<subDivNum; sdy++) {
 					float fsdy1 = sdy/(float) subDivNum;
 					float fsdy2 = (sdy+1)/(float) subDivNum;
-					float lat1 = (mt->getLatTop() + fsdy1*(mt->getLatBottom()-mt->getLatTop()))*M_PI/180;
-					float lat2 = (mt->getLatTop() + fsdy2*(mt->getLatBottom()-mt->getLatTop()))*M_PI/180;
-					float long1 = (mt->getLongLeft() + fsdx1*(mt->getLongRight()-mt->getLongLeft()))*M_PI/180;
-					float long2 = (mt->getLongLeft() + fsdx2*(mt->getLongRight()-mt->getLongLeft()))*M_PI/180;
-					float cosLat1 = cos(lat1);
-					float sinLat1 = sin(lat1);
-					float cosLat2 = cos(lat2);
-					float sinLat2 = sin(lat2);
-					float cosLong1 = cos(long1);
-					float sinLong1 = sin(long1);
-					float cosLong2 = cos(long2);
-					float sinLong2 = sin(long2);
-					glBegin(GL_QUADS);
-					glTexCoord2f(fsdx1, fsdy1);
-					glVertex3f(zoom*cosLat1*cosLong1, zoom*cosLat1*sinLong1, zoom*sinLat1);
-					glTexCoord2f(fsdx2, fsdy1);
-					glVertex3f(zoom*cosLat1*cosLong2, zoom*cosLat1*sinLong2, zoom*sinLat1);
-					glTexCoord2f(fsdx2, fsdy2);
-					glVertex3f(zoom*cosLat2*cosLong2, zoom*cosLat2*sinLong2, zoom*sinLat2);
-					glTexCoord2f(fsdx1, fsdy2);
-					glVertex3f(zoom*cosLat2*cosLong1, zoom*cosLat2*sinLong1, zoom*sinLat2);
-					glEnd();
+					float lat1 = mt->getLatTop() + fsdy1*(mt->getLatBottom()-mt->getLatTop());
+					float lat2 = mt->getLatTop() + fsdy2*(mt->getLatBottom()-mt->getLatTop());
+					for (int sdx=0; sdx<subDivNum; sdx++) {
+						float fsdx1 = sdx/(float) subDivNum;
+						float fsdx2 = (sdx+1)/(float) subDivNum;
+						float long1 = mt->getLongLeft() + fsdx1*(mt->getLongRight()-mt->getLongLeft());
+						float long2 = mt->getLongLeft() + fsdx2*(mt->getLongRight()-mt->getLongLeft());
+						glBegin(GL_QUADS);
+
+						glTexCoord2f(fsdx1, fsdy2);
+						longLatToXYZ(long1, lat2);
+						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+
+						glTexCoord2f(fsdx2, fsdy2);
+						longLatToXYZ(long2, lat2);
+						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+
+						glTexCoord2f(fsdx2, fsdy1);
+						longLatToXYZ(long2, lat1);
+						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+
+						glTexCoord2f(fsdx1, fsdy1);
+						longLatToXYZ(long1, lat1);
+						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+
+/*
+						glTexCoord2f(fsdx1, fsdy1);
+						longLatToXYZ(long1, lat1);
+						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+						glTexCoord2f(fsdx2, fsdy1);
+						longLatToXYZ(long2, lat1);
+						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+						glTexCoord2f(fsdx2, fsdy2);
+						longLatToXYZ(long2, lat2);
+						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+						glTexCoord2f(fsdx1, fsdy2);
+						longLatToXYZ(long1, lat2);
+						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+*/
+						glEnd();
+					}
 				}
 			}
 		}
@@ -168,6 +214,16 @@ void Fltk13WorldMap::draw() {
 	glUseProgram(0);
 	glDisable(GL_TEXTURE_2D);
 	CHECK_GL_STATE
+
+	if (showFlag) {
+		longLatToXYZ(flagLongitude, flagLatitude);
+		glColor3f(1, 0, 0);
+		glPointSize(3.0);
+		glBegin(GL_POINTS);
+		glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+		glEnd();
+	}
+
 }
 
 

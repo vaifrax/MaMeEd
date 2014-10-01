@@ -48,7 +48,8 @@ void MapTile::loadFromFile() {
 }
  
 /*static*/ int MapTile::lat2tiley(double lat, int z) { 
-	return (int)(floor((1.0 - log( tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0)) / M_PI) / 2.0 * pow(2.0, z))); 
+	double latRad = lat * M_PI/180.0;
+	return (int)(floor((1.0 - log( tan(latRad) + 1.0/cos(latRad)) / M_PI) / 2.0 * pow(2.0, z))); 
 }
  
 /*static*/ double MapTile::tilex2long(int x, int z) {

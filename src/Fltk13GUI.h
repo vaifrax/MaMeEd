@@ -17,6 +17,7 @@
 class F13FileList;
 class F13KeyValueList;
 class MDFile;
+class Fltk13WorldMap;
 
 class Fltk13GUI : public MGUI, public Fl_Double_Window {
   public:
@@ -42,6 +43,7 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
 	F13FileList* fileList;
 	F13KeyValueList* keyValueList;
 	//Fl_Scroll* moduleColumn;
+	Fltk13WorldMap* worldMap;
 
 	Fl_Input* pathTextEdit;
 	Fl_Native_File_Chooser *fileChooser;

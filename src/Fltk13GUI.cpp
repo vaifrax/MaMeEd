@@ -12,6 +12,8 @@
 
 #include "MCore.h"
 #include "MDDir.h"
+#include "MDFile.h"
+#include "MDProperty.h"
 
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Shared_Image.H>
@@ -95,7 +97,7 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marc
 		// zoomable map
 		// topo map: http://opentopomap.org/tiles/14/8640/5755.png
 		//Fl_Box* worldMap = new Fl_Box(x2, y1, x3-x2, y2-y1, "world map");
-		Fltk13WorldMap* worldMap = new Fltk13WorldMap(x2, y1, x3-x2, y2-y1, "world map");
+		worldMap = new Fltk13WorldMap(x2, y1, x3-x2, y2-y1, "world map");
 		worldMap->box(FL_DOWN_BOX);
 		//moduleColumn->box(FL_DOWN_BOX);
 		//moduleColumn->align(FL_ALIGN_CLIP);
@@ -373,6 +375,18 @@ void Fltk13GUI::showFileMetaData() {
 		keyValueList = new F13KeyValueList(x, y, w, h, mCore->getConfig());
 		keyValueList->box(FL_DOWN_BOX);
 		mainGroup->add(keyValueList);
+
+		MDProperty* longProp = mdfile->getPropertyByKey("longitude");
+		MDProperty* latProp = mdfile->getPropertyByKey("latitude");
+
+		if (longProp && latProp) {
+			double longitude  = atof(longProp->value.c_str());
+			double latitude  = atof(latProp->value.c_str());
+			worldMap->setFlag(longitude, latitude);
+		} else {
+			worldMap->setFlag();
+		}
+		worldMap->redraw();
 	}
 
 	keyValueList->setMDFile(mdfile);
