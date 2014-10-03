@@ -52,11 +52,11 @@ void MapTile::loadFromFile() {
 	return (int)(floor((1.0 - log( tan(latRad) + 1.0/cos(latRad)) / M_PI) / 2.0 * pow(2.0, z))); 
 }
  
-/*static*/ double MapTile::tilex2long(int x, int z) {
+/*static*/ double MapTile::tilex2long(double x, int z) {
 	return x / pow(2.0, z) * 360.0 - 180;
 }
  
-/*static*/ double MapTile::tiley2lat(int y, int z) {
+/*static*/ double MapTile::tiley2lat(double y, int z) {
 	double n = M_PI - 2.0 * M_PI * y / pow(2.0, z);
 	return 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
 }

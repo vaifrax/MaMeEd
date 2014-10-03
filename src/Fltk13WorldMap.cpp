@@ -5,6 +5,8 @@
 #include "MapTileZoomLevel.h"
 #include "../tools/MLOpenGLTex.h"
 
+//#include <iostream> // purely for debugging
+
 #ifndef M_PI
 #define M_PI (3.1415926)
 #endif
@@ -124,7 +126,8 @@ void Fltk13WorldMap::draw() {
 		}
 	}
 */
-	int rLevel = 3;
+//	int rLevel = 3;
+	int rLevel = (int) ((w()+h())/80000.0 * zoom); // todo: also take width/height into account
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1, 1, 1);
 	glDisable(GL_LIGHTING);
@@ -137,74 +140,62 @@ void Fltk13WorldMap::draw() {
 	for (int y=0; y<mtzl->tilesArraySize; y++) {
 		for (int x=0; x<mtzl->tilesArraySize; x++) {
 			MapTile* mt = mtzl->tilesArray[x][y];
-			mt->tex->bind();
-			if (rLevel > 4) {
-				glBegin(GL_QUADS);
-				glTexCoord2f(0, 1);
-				//glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
-				longLatToXYZ(mt->getLongLeft(), mt->getLatBottom());
-				glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+			if (mt) {
+				mt->tex->bind();
+				if (rLevel > 4) {
+					glBegin(GL_QUADS);
+					glTexCoord2f(0, 1);
+					//glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
+					longLatToXYZ(mt->getLongLeft(), mt->getLatBottom());
+					glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
 
-				glTexCoord2f(1, 1);
-				longLatToXYZ(mt->getLongRight(), mt->getLatBottom());
-				glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
-				//glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
+					glTexCoord2f(1, 1);
+					longLatToXYZ(mt->getLongRight(), mt->getLatBottom());
+					glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+					//glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
 
-				glTexCoord2f(1, 0);
-				longLatToXYZ(mt->getLongRight(), mt->getLatTop());
-				glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
-				//glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
+					glTexCoord2f(1, 0);
+					longLatToXYZ(mt->getLongRight(), mt->getLatTop());
+					glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+					//glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
 
-				glTexCoord2f(0, 0);
-				longLatToXYZ(mt->getLongLeft(), mt->getLatTop());
-				glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
-				//glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
-				glEnd();
-			} else {
-				int subDivNum = 4;
-				for (int sdy=0; sdy<subDivNum; sdy++) {
-					float fsdy1 = sdy/(float) subDivNum;
-					float fsdy2 = (sdy+1)/(float) subDivNum;
-					float lat1 = mt->getLatTop() + fsdy1*(mt->getLatBottom()-mt->getLatTop());
-					float lat2 = mt->getLatTop() + fsdy2*(mt->getLatBottom()-mt->getLatTop());
-					for (int sdx=0; sdx<subDivNum; sdx++) {
-						float fsdx1 = sdx/(float) subDivNum;
-						float fsdx2 = (sdx+1)/(float) subDivNum;
-						float long1 = mt->getLongLeft() + fsdx1*(mt->getLongRight()-mt->getLongLeft());
-						float long2 = mt->getLongLeft() + fsdx2*(mt->getLongRight()-mt->getLongLeft());
-						glBegin(GL_QUADS);
+					glTexCoord2f(0, 0);
+					longLatToXYZ(mt->getLongLeft(), mt->getLatTop());
+					glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+					//glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
+					glEnd();
+				} else {
+					int subDivNum = 8 - 2*rLevel; //4
+					for (int sdy=0; sdy<subDivNum; sdy++) {
+						float fsdy1 = sdy/(float) subDivNum;
+						float fsdy2 = (sdy+1)/(float) subDivNum;
+						float lat1 = mt->tiley2lat(mt->y+fsdy1, mt->zoomLevel);
+						float lat2 = mt->tiley2lat(mt->y+fsdy2, mt->zoomLevel);
+						for (int sdx=0; sdx<subDivNum; sdx++) {
+							float fsdx1 = sdx/(float) subDivNum;
+							float fsdx2 = (sdx+1)/(float) subDivNum;
+							float long1 = mt->tilex2long(mt->x+fsdx1, mt->zoomLevel);
+							float long2 = mt->tilex2long(mt->x+fsdx2, mt->zoomLevel);
+							glBegin(GL_QUADS);
 
-						glTexCoord2f(fsdx1, fsdy2);
-						longLatToXYZ(long1, lat2);
-						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+							glTexCoord2f(fsdx1, fsdy2);
+							longLatToXYZ(long1, lat2);
+							glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
 
-						glTexCoord2f(fsdx2, fsdy2);
-						longLatToXYZ(long2, lat2);
-						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+							glTexCoord2f(fsdx2, fsdy2);
+							longLatToXYZ(long2, lat2);
+							glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
 
-						glTexCoord2f(fsdx2, fsdy1);
-						longLatToXYZ(long2, lat1);
-						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+							glTexCoord2f(fsdx2, fsdy1);
+							longLatToXYZ(long2, lat1);
+							glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
 
-						glTexCoord2f(fsdx1, fsdy1);
-						longLatToXYZ(long1, lat1);
-						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+							glTexCoord2f(fsdx1, fsdy1);
+							longLatToXYZ(long1, lat1);
+							glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
 
-/*
-						glTexCoord2f(fsdx1, fsdy1);
-						longLatToXYZ(long1, lat1);
-						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
-						glTexCoord2f(fsdx2, fsdy1);
-						longLatToXYZ(long2, lat1);
-						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
-						glTexCoord2f(fsdx2, fsdy2);
-						longLatToXYZ(long2, lat2);
-						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
-						glTexCoord2f(fsdx1, fsdy2);
-						longLatToXYZ(long1, lat2);
-						glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
-*/
-						glEnd();
+							glEnd();
+						}
 					}
 				}
 			}
@@ -275,7 +266,7 @@ int Fltk13WorldMap::handle(int event) {
 		//	}
 		//	return 0;
 		case FL_MOUSEWHEEL:
-			zoom *= pow(1.1, Fl::event_dy());
+			zoom *= pow(1.1, -Fl::event_dy());
 			redraw();
 			break;
 		default:

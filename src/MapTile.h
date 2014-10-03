@@ -20,8 +20,8 @@ class MapTile {
 	// transformations provided by openstreetmap wiki
 	static int MapTile::long2tilex(double lon, int z);
 	static int MapTile::lat2tiley(double lat, int z);
-	static double MapTile::tilex2long(int x, int z);
-	static double MapTile::tiley2lat(int y, int z);
+	static double MapTile::tilex2long(double x, int z);
+	static double MapTile::tiley2lat(double y, int z);
 
 	int zoomLevel;
 	int x, y; // tile coordinates
