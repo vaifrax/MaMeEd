@@ -17,6 +17,9 @@ class MapTile {
 	double getLatTop() {return tiley2lat(y, zoomLevel);}
 	double getLatBottom() {return tiley2lat(y+1, zoomLevel);}
 
+	void draw(double zoom);
+	//void drawFromParent(zoom);
+
 	// transformations provided by openstreetmap wiki
 	static int MapTile::long2tilex(double lon, int z);
 	static int MapTile::lat2tiley(double lat, int z);

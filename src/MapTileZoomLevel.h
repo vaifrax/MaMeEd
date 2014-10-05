@@ -3,6 +3,7 @@
 
 #include "MapTile.h"
 //#include <vector>
+#include <map>
 
 class MapTileZoomLevel {
   public:
@@ -11,9 +12,13 @@ class MapTileZoomLevel {
 
 	int level; // 0 .. 18
 	MapTile*** tilesArray; // 2D array with MapTile pointers
-	int tilesArraySize; // in both x and y directions
+	int tilesArraySize; // in both x and y directions; equals 2^level
 
-	// std::vector<
+TODO: use tilesMap instead of tilesArray
+	std::map<int, MapTile*> tilesMap; // use x+y*tilesArraySize to access
+
+
+	void draw(int w, int h, double zoom, double angle1, double angle2);
 };
 
 #endif // MAPTILEZOOMLEVEL_HEADER_INCLUDED
