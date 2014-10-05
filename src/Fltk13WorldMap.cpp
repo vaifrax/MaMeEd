@@ -5,7 +5,7 @@
 #include "MapTileZoomLevel.h"
 #include "../tools/MLOpenGLTex.h"
 
-//#include <iostream> // purely for debugging
+#include <iostream> // purely for debugging
 
 #ifndef M_PI
 #define M_PI (3.1415926)
@@ -35,6 +35,7 @@ Fltk13WorldMap::Fltk13WorldMap(int x, int y, int w, int h, char* l/*=0*/) : Fl_G
 	angle2 = 0;
 	zoom = 200;
 	showFlag = false;
+	init1stTime = true;
 
 	end();
 }
@@ -63,15 +64,19 @@ void Fltk13WorldMap::initGL() {
 	glEnable(GL_DEPTH_TEST);
 	CHECK_GL_STATE
 
-	for (int z=0; z<=18; z++) {
-		tileLevels[z] = new MapTileZoomLevel(z);
+	if (init1stTime) {
+		init1stTime = false;
+
+		for (int z=0; z<=18; z++) {
+			tileLevels[z] = new MapTileZoomLevel(z);
+		}
+		CHECK_GL_STATE
+
+		// load shader
+		shaderProgram = loadShader(vertexShaderFileName, fragmentShaderFileName);
+
+		CHECK_GL_STATE
 	}
-	CHECK_GL_STATE
-
-	// load shader
-	shaderProgram = loadShader(vertexShaderFileName, fragmentShaderFileName);
-
-	CHECK_GL_STATE
 }
 
 // set a GPS marker at the specified coordinates
@@ -126,8 +131,11 @@ void Fltk13WorldMap::draw() {
 		}
 	}
 */
-//	int rLevel = 3;
-	int rLevel = (int) ((w()+h())/80000.0 * zoom); // todo: also take width/height into account
+//	int tileLevel = 3;
+//	int tileLevel = (int) ((w()+h())/2800.0 * std::log(zoom)/std::log(2.0));
+	float tileLevelF = std::log(0.03 * zoom)/std::log(2.0); // zoom is earth diameter in pixels, independent of window size
+std::cout << tileLevelF << std::endl;
+	int tileLevel = (int) tileLevelF;
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1, 1, 1);
 	glDisable(GL_LIGHTING);
@@ -136,36 +144,33 @@ void Fltk13WorldMap::draw() {
 	CHECK_GL_STATE
 	setUniform1f(shaderProgram, "zoom", zoom);
 	CHECK_GL_STATE
-	MapTileZoomLevel* mtzl = tileLevels[rLevel];
+	MapTileZoomLevel* mtzl = tileLevels[tileLevel];
 	for (int y=0; y<mtzl->tilesArraySize; y++) {
 		for (int x=0; x<mtzl->tilesArraySize; x++) {
 			MapTile* mt = mtzl->tilesArray[x][y];
+//todo: if not available, use previous level's texture
 			if (mt) {
 				mt->tex->bind();
-				if (rLevel > 4) {
+				if (tileLevel > 3) {
 					glBegin(GL_QUADS);
 					glTexCoord2f(0, 1);
-					//glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
 					longLatToXYZ(mt->getLongLeft(), mt->getLatBottom());
 					glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
 
 					glTexCoord2f(1, 1);
 					longLatToXYZ(mt->getLongRight(), mt->getLatBottom());
 					glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
-					//glVertex3f(zoom*cos(mt->getLatBottom()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatBottom()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatBottom()*M_PI/180));
 
 					glTexCoord2f(1, 0);
 					longLatToXYZ(mt->getLongRight(), mt->getLatTop());
 					glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
-					//glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongRight()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongRight()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
 
 					glTexCoord2f(0, 0);
 					longLatToXYZ(mt->getLongLeft(), mt->getLatTop());
 					glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
-					//glVertex3f(zoom*cos(mt->getLatTop()*M_PI/180)*cos(mt->getLongLeft()*M_PI/180), zoom*cos(mt->getLatTop()*M_PI/180)*sin(mt->getLongLeft()*M_PI/180), zoom*sin(mt->getLatTop()*M_PI/180));
 					glEnd();
 				} else {
-					int subDivNum = 8 - 2*rLevel; //4
+					int subDivNum = 9 - 2*tileLevel; //4
 					for (int sdy=0; sdy<subDivNum; sdy++) {
 						float fsdy1 = sdy/(float) subDivNum;
 						float fsdy2 = (sdy+1)/(float) subDivNum;
@@ -180,7 +185,7 @@ void Fltk13WorldMap::draw() {
 
 							glTexCoord2f(fsdx1, fsdy2);
 							longLatToXYZ(long1, lat2);
-							glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+							glVertex3f(zoom*cX, zoom*cY, zoom*cZ); // zoom = earth diameter in pixels
 
 							glTexCoord2f(fsdx2, fsdy2);
 							longLatToXYZ(long2, lat2);
@@ -215,6 +220,12 @@ void Fltk13WorldMap::draw() {
 		glEnd();
 	}
 
+	glLoadIdentity();
+	// draw crosshair
+	glColor3f(0.2, 0.2, 0.2);
+	glBegin(GL_LINE_STRIP); glVertex3f(0, 0, 0.1*h()); glVertex3f(0, 0, -0.1*h()); glEnd();
+	glBegin(GL_LINE_STRIP); glVertex3f(0.1*w(), 0, 0); glVertex3f(-0.1*w(), 0, 0); glEnd();
+
 }
 
 
@@ -237,8 +248,10 @@ int Fltk13WorldMap::handle(int event) {
 			int dx = Fl::event_x() - oldX;
 			int dy = Fl::event_y() - oldY;
 
-			angle1 += dx;
-			angle2 += dy;
+			//double df = std::log(0.01 * zoom)/std::log(2.0);
+			double df = 0.07 * std::log(zoom)/std::log(2.0);
+			angle1 += dx * df;
+			angle2 += dy * df;
 
 			if (angle2 < -90) angle2 = -90;
 			if (angle2 > 90) angle2 = 90;
@@ -266,7 +279,7 @@ int Fltk13WorldMap::handle(int event) {
 		//	}
 		//	return 0;
 		case FL_MOUSEWHEEL:
-			zoom *= pow(1.1, -Fl::event_dy());
+			zoom *= pow(1.1, -Fl::event_dy()); // zoom = earth diameter in pixels
 			redraw();
 			break;
 		default:

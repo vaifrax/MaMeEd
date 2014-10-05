@@ -11,7 +11,7 @@ MapTileZoomLevel::MapTileZoomLevel(int level) {
 		for (int x=0; x<tilesArraySize; x++) {
 			tilesArray[x] = new MapTile*[tilesArraySize];
 			for (int y=0; y<tilesArraySize; y++) {
-				if (level <= 3) {
+				if (level < 4) {
 					tilesArray[x][y] = new MapTile(level, x, y);
 					tilesArray[x][y]->loadFromFile();
 				} else {

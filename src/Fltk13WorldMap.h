@@ -19,8 +19,8 @@ class Fltk13WorldMap : public Fl_Gl_Window {
   protected:
 	void initGL();
 	void draw();
-	float angle1, angle2; // globe rotation
-	float zoom;
+	double angle1, angle2; // globe rotation
+	float zoom; // zoom = earth diameter in pixels
 
 	void longLatToXYZ(double longitude, double latitude); // convert, save in cX, cY, cZ
 	double cX, cY, cZ; // results from last computation
@@ -32,6 +32,7 @@ class Fltk13WorldMap : public Fl_Gl_Window {
 	int oldX, oldY;
 	double flagLongitude, flagLatitude;
 	bool showFlag;
+	bool init1stTime;
 };
 
 #endif // FLTK13WORLDMAP_HEADER_INCLUDED
