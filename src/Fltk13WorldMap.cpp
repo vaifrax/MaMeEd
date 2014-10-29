@@ -39,10 +39,14 @@ Fltk13WorldMap::Fltk13WorldMap(int x, int y, int w, int h, char* l/*=0*/) : Fl_G
 	showFlag = false;
 	init1stTime = true;
 
+	MapTile::initCurl();
+
 	end();
 }
 
 Fltk13WorldMap::~Fltk13WorldMap() {
+	MapTile::deinitCurl();
+
 	for (int z=0; z<=18; z++) {
 		delete tileLevels[z];
 	}
@@ -92,6 +96,8 @@ void Fltk13WorldMap::setFlag() {
 }
 
 void Fltk13WorldMap::draw() {
+	MapTile::updateCurl(); // todo: move this to some other place??
+
 	CHECK_GL_STATE
 
 	if (!valid()) {

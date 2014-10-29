@@ -11,11 +11,9 @@ class MapTileZoomLevel {
 	~MapTileZoomLevel();
 
 	int level; // 0 .. 18
-	MapTile*** tilesArray; // 2D array with MapTile pointers
-	int tilesArraySize; // in both x and y directions; equals 2^level
-
-TODO: use tilesMap instead of tilesArray
-	std::map<int, MapTile*> tilesMap; // use x+y*tilesArraySize to access
+	//MapTile*** tilesArray; // 2D array with MapTile pointers
+	int tileNum; // in both x and y directions; equals 2^level
+	std::map<int, MapTile*> tilesMap; // use x+y*tileNum to access
 
 
 	void draw(int w, int h, double zoom, double angle1, double angle2);

@@ -22,6 +22,7 @@
 #include "../prj/resource.h" // for icon ID
 #include "Fltk13WorldMap.h"
 
+#include <curl/curl.h>
 
 Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marcel's Metadata Editor") {
 	Fl::scheme("gtk+");
@@ -115,6 +116,9 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marc
 	fileChooser = NULL;
 	aboutDialog = NULL;
 	exitNoSavingDialog = NULL;
+
+	// libcurl
+	curl_global_init(CURL_GLOBAL_ALL);
 }
 
 Fltk13GUI::~Fltk13GUI() {

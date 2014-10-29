@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <curl/curl.h>
+
 class MLOpenGLTex;
 
 class MapTile {
@@ -10,7 +12,12 @@ class MapTile {
 	MapTile(int zoomLevel, int x, int y); // x and y: tile coordinates
 	~MapTile();
 
-	void loadFromFile();
+	static void initCurl();
+	static void deinitCurl();
+	static void updateCurl();
+
+	bool loadFromFile();
+	void loadFromInternet();
 
 	double getLongLeft() {return tilex2long(x, zoomLevel);}
 	double getLongRight() {return tilex2long(x+1, zoomLevel);}
@@ -18,7 +25,7 @@ class MapTile {
 	double getLatBottom() {return tiley2lat(y+1, zoomLevel);}
 
 	void draw(double zoom);
-	//void drawFromParent(zoom);
+	void drawFromParent(double zoom);
 
 	// transformations provided by openstreetmap wiki
 	static int MapTile::long2tilex(double lon, int z);
@@ -31,6 +38,8 @@ class MapTile {
 	int cacheState; // not loaded, downloading, loading, available, unloading???
 	MLOpenGLTex* tex;
 	std::string fileName;
+
+
 };
 
 #endif // MAPTILE_HEADER_INCLUDED
