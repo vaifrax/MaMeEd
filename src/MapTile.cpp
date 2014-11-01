@@ -5,7 +5,7 @@
 #include <math.h>
 #include <iomanip>
 #include <sstream>
-#include <vector>
+#include <list>
 
 #include "../tools/MLOpenGLTex.h"
 #include "../tools/ddsfile.h"
@@ -17,7 +17,7 @@
 #endif
 
 // TODO
-char* mapCachePath = "E:\\coding\\2012\\MarcelsMetadataEditor\\map-cache\\";
+char* mapCachePath = "E:\\coding\\2012\\MarcelsMetadataEditor\\map-cache\\"; // including trailing backslash
 
 
 ///////////////////////////////////
@@ -25,9 +25,12 @@ struct OngoingDownload {
 	int x, y, level;
 	CURL* httpHandle;
 	FILE* outFile;
+	std::string outFileName;
+	MapTile* mapTilePtr;
 };
-static std::vector<OngoingDownload> ongoingDownloads;
+static std::list<OngoingDownload> ongoingDownloads;
 static CURLM* multiHandle;
+typedef std::list<OngoingDownload>::iterator ogdi;
 ///////////////////////////////////
 
 
@@ -60,10 +63,10 @@ bool MapTile::loadFromFile() {
 	return true;
 }
 
-size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
-if (stream == NULL) return 0; // does this work?
+size_t write_data(void *ptr, size_t size, size_t nmemb, FILE* outFile) {
+//if (odi == NULL) return 0; // does this work?
 
-	size_t written = fwrite(ptr, size, nmemb, stream);
+	size_t written = fwrite(ptr, size, nmemb, outFile);
 	return written;
 }
 
@@ -73,30 +76,32 @@ void MapTile::loadFromInternet() {
 	od.y = y;
 	od.level = zoomLevel;
 	od.httpHandle = curl_easy_init();
+	od.mapTilePtr = this;
 
 	std::string url = std::string("http://otile4.mqcdn.com/tiles/1.0.0/osm/") + toZeroPaddedStr(zoomLevel, 2) + "/" + toZeroPaddedStr(x, 6) + "/" + toZeroPaddedStr(y, 6) + ".png";
 	std::cout << url << std::endl;
 	curl_easy_setopt(od.httpHandle, CURLOPT_URL, url.c_str());
 
-	std::string outpath1 = std::string("http://otile4.mqcdn.com/tiles/1.0.0/osm/") + toZeroPaddedStr(zoomLevel, 2);
+	std::string outpath1 = std::string(mapCachePath) + toZeroPaddedStr(zoomLevel, 2);
 
 if (!MDDir::isDirectory(outpath1.c_str())) {
 	CreateDirectory(outpath1.c_str(), NULL);
-
-TODO: doesn't work?
-
 }
 
-	std::string outpath2 = outpath1 + "/" + toZeroPaddedStr(x, 6);
+	std::string outpath2 = outpath1 + "\\" + toZeroPaddedStr(x, 6);
 
 if (!MDDir::isDirectory(outpath2.c_str())) {
 	CreateDirectory(outpath2.c_str(), NULL);
 }
 
-	std::string outfilename = outpath2 + "/" + toZeroPaddedStr(y, 6) + ".png"; //std::string("http://otile4.mqcdn.com/tiles/1.0.0/osm/") + toZeroPaddedStr(zoomLevel, 2) + "/" + toZeroPaddedStr(x, 6) + "/" + toZeroPaddedStr(y, 6) + ".png";
-	std::cout << url << std::endl;
-	od.outFile = fopen(outfilename.c_str(), "wb");
+	od.outFileName = outpath2 + "\\" + toZeroPaddedStr(y, 6) + ".jpg"; //std::string("http://otile4.mqcdn.com/tiles/1.0.0/osm/") + toZeroPaddedStr(zoomLevel, 2) + "/" + toZeroPaddedStr(x, 6) + "/" + toZeroPaddedStr(y, 6) + ".png";
+	std::cout << od.outFileName << std::endl;
+	od.outFile = fopen(od.outFileName.c_str(), "wb");
 	curl_easy_setopt(od.httpHandle, CURLOPT_WRITEFUNCTION, write_data);
+	//curl_easy_setopt(od.httpHandle, CURLOPT_WRITEDATA, od.outFile);
+//ongoingDownloads.push_back(od);
+//ogdi iter = ongoingDownloads.end();
+//--iter;
 	curl_easy_setopt(od.httpHandle, CURLOPT_WRITEDATA, od.outFile);
 
 	curl_multi_add_handle(multiHandle, od.httpHandle);
@@ -104,6 +109,34 @@ if (!MDDir::isDirectory(outpath2.c_str())) {
 	ongoingDownloads.push_back(od);
 	int stillRunning;
 	curl_multi_perform(multiHandle, &stillRunning);
+
+	while (1) {
+		int msgInQueue;
+		CURLMsg* msg = curl_multi_info_read(multiHandle, &msgInQueue);
+		if (msg == NULL) break;
+		if (msg->msg == CURLMSG_DONE) { // transfer done
+			// find entry
+			auto i=ongoingDownloads.begin();
+			for (; i!=ongoingDownloads.end(); ++i) {
+				if (msg->easy_handle == i->httpHandle) {
+					// close file
+					fclose(i->outFile);
+
+					// convert to dds
+					std::string cmdComp = std::string(mapCachePath) + "nvidiaTextureTools\\nvcompress.exe -nomips -bc1 " + i->outFileName + " " + i->outFileName.substr(0, i->outFileName.length()-3) + "dds";
+					system(cmdComp.c_str());
+
+					// load texture
+					i->mapTilePtr->loadFromFile();
+
+					// clean up
+					ongoingDownloads.erase(i);
+					break;
+				}
+			}
+		}
+	}
+
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -145,7 +178,8 @@ void MapTile::draw(double zoom) {
 	}
 
 	tex->bind();
-	if (zoomLevel > 3) {
+//std::cout << zoomLevel << std::endl;
+	if (zoomLevel > 4) {
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
 		Fltk13WorldMap::longLatToXYZ(getLongLeft(), getLatBottom());
@@ -164,7 +198,8 @@ void MapTile::draw(double zoom) {
 		glVertex3f(zoom*Fltk13WorldMap::cX, zoom*Fltk13WorldMap::cY, zoom*Fltk13WorldMap::cZ);
 		glEnd();
 	} else {
-		int subDivNum = 9 - 2*zoomLevel; //4
+		int subDivNum = 10 - 2*zoomLevel; //4
+//std::cout << " " << subDivNum << std::endl;
 		for (int sdy=0; sdy<subDivNum; sdy++) {
 			float fsdy1 = sdy/(float) subDivNum;
 			float fsdy2 = (sdy+1)/(float) subDivNum;

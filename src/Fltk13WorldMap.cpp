@@ -5,7 +5,9 @@
 #include "MapTileZoomLevel.h"
 #include "../tools/MLOpenGLTex.h"
 
-//#include <iostream> // purely for debugging
+#include <iostream> // purely for debugging with std::cout
+
+#define MAX_LEVEL 18
 
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
@@ -47,7 +49,7 @@ Fltk13WorldMap::Fltk13WorldMap(int x, int y, int w, int h, char* l/*=0*/) : Fl_G
 Fltk13WorldMap::~Fltk13WorldMap() {
 	MapTile::deinitCurl();
 
-	for (int z=0; z<=18; z++) {
+	for (int z=0; z<=MAX_LEVEL; z++) {
 		delete tileLevels[z];
 	}
 }
@@ -73,7 +75,7 @@ void Fltk13WorldMap::initGL() {
 	if (init1stTime) {
 		init1stTime = false;
 
-		for (int z=0; z<=18; z++) {
+		for (int z=0; z<=MAX_LEVEL; z++) {
 			tileLevels[z] = new MapTileZoomLevel(z);
 		}
 		CHECK_GL_STATE
@@ -127,7 +129,11 @@ void Fltk13WorldMap::draw() {
 
 //	int tileLevel = 3;
 //	int tileLevel = (int) ((w()+h())/2800.0 * std::log(zoom)/std::log(2.0));
-	float tileLevelF = std::log(0.03 * zoom)/std::log(2.0) * cos(angle2*M_PI/180); // zoom is earth diameter in pixels, independent of window size
+//	float tileLevelF = std::log(0.03 * zoom)/std::log(2.0) * cos(angle2*M_PI/180); // zoom is earth diameter in pixels, independent of window size
+//	float tileLevelF = std::log(0.1 * zoom -100)/std::log(2.0) * cos(angle2*M_PI/180); // zoom is earth diameter in pixels, independent of window size
+float tileLevelF = 1.37*std::log(zoom) -5.8;
+std::cout << zoom << "   " << tileLevelF << "   " << zoom/tileLevelF << std::endl;
+if (tileLevelF > MAX_LEVEL+0.5) tileLevelF = MAX_LEVEL+0.5;
 	int tileLevel = (int) tileLevelF;
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1, 1, 1);
@@ -175,7 +181,8 @@ int Fltk13WorldMap::handle(int event) {
 			int dx = Fl::event_x() - oldX;
 			int dy = Fl::event_y() - oldY;
 
-			double df = 0.07 * std::log(zoom)/std::log(2.0);
+			double df = 200.0 / zoom;//std::log(zoom)/std::log(2.0);
+//std::cout << zoom << "   " << df << std::endl;
 			angle1 -= dx * df;
 			angle2 += dy * df;
 
