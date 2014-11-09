@@ -1,6 +1,8 @@
 #include <FL/Fl.H>
 #include "Fltk13WorldMap.h"
 #include <math.h>
+#include <FL/Fl_Menu_Button.H>
+#include "Fltk13GUI.h"
 
 #include "MapTileZoomLevel.h"
 #include "../tools/MLOpenGLTex.h"
@@ -38,7 +40,7 @@ Fltk13WorldMap::Fltk13WorldMap(int x, int y, int w, int h, char* l/*=0*/) : Fl_G
 	angle1 = 0;
 	angle2 = 0;
 	zoom = 200;
-	showFlag = false;
+	updateRadius();
 	init1stTime = true;
 
 	MapTile::initCurl();
@@ -71,6 +73,7 @@ void Fltk13WorldMap::initGL() {
 
 	glEnable(GL_DEPTH_TEST);
 	CHECK_GL_STATE
+	updateRadius();
 
 	if (init1stTime) {
 		init1stTime = false;
@@ -88,13 +91,15 @@ void Fltk13WorldMap::initGL() {
 }
 
 // set a GPS marker at the specified coordinates
-void Fltk13WorldMap::setFlag(double longitude, double latitude) {
-	flagLongitude = longitude;
-	flagLatitude = latitude;
-	showFlag = true;
+void Fltk13WorldMap::addFlag(double longitude, double latitude, float radius) {
+	Flag f;
+	f.longitude = longitude;
+	f.latitude = latitude;
+	f.radius = radius;
+	mflags.push_back(f);
 }
-void Fltk13WorldMap::setFlag() {
-	showFlag=false;
+void Fltk13WorldMap::clearFlags() {
+	mflags.clear();
 }
 
 void Fltk13WorldMap::draw() {
@@ -123,7 +128,7 @@ void Fltk13WorldMap::draw() {
 	glColor3f(0.2, 0.2, 0.2);
 	//glBegin(GL_LINE_STRIP); glVertex2f(w(),  h()); glVertex2f(-w(), -h()); glEnd();
 	//glBegin(GL_LINE_STRIP); glVertex2f(w(), -h()); glVertex2f(-w(),  h()); glEnd();
-	glBegin(GL_LINE_STRIP); glVertex2f(-w(), 0); glVertex2f(w(), 0); glEnd();
+	//glBegin(GL_LINE_STRIP); glVertex2f(-w(), 0); glVertex2f(w(), 0); glEnd();
 
 	CHECK_GL_STATE
 
@@ -131,9 +136,8 @@ void Fltk13WorldMap::draw() {
 //	int tileLevel = (int) ((w()+h())/2800.0 * std::log(zoom)/std::log(2.0));
 //	float tileLevelF = std::log(0.03 * zoom)/std::log(2.0) * cos(angle2*M_PI/180); // zoom is earth diameter in pixels, independent of window size
 //	float tileLevelF = std::log(0.1 * zoom -100)/std::log(2.0) * cos(angle2*M_PI/180); // zoom is earth diameter in pixels, independent of window size
-float tileLevelF = 1.37*std::log(zoom) -5.8;
-std::cout << zoom << "   " << tileLevelF << "   " << zoom/tileLevelF << std::endl;
-if (tileLevelF > MAX_LEVEL+0.5) tileLevelF = MAX_LEVEL+0.5;
+	float tileLevelF = 1.37*std::log(zoom) -5.8;
+	if (tileLevelF > MAX_LEVEL+0.5) tileLevelF = MAX_LEVEL+0.5;
 	int tileLevel = (int) tileLevelF;
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1, 1, 1);
@@ -149,8 +153,8 @@ if (tileLevelF > MAX_LEVEL+0.5) tileLevelF = MAX_LEVEL+0.5;
 	glDisable(GL_TEXTURE_2D);
 	CHECK_GL_STATE
 
-	if (showFlag) {
-		longLatToXYZ(flagLongitude, flagLatitude);
+	for (auto f=mflags.begin(); f!=mflags.end(); ++f) {
+		longLatToXYZ(f->longitude, f->latitude);
 		glColor3f(1, 0, 0);
 		glPointSize(3.0);
 		glBegin(GL_POINTS);
@@ -170,12 +174,25 @@ if (tileLevelF > MAX_LEVEL+0.5) tileLevelF = MAX_LEVEL+0.5;
 int Fltk13WorldMap::handle(int event) {
 	switch(event) {
 		case FL_PUSH:
-			//	if (FL::event_button() == FL_LEFT_MOUSE) ...
-			//		Fl::event_x() and Fl::event_y()
-			//		redraw();
-			oldX = Fl::event_x();
-			oldY = Fl::event_y();
-			return 1;
+			if (Fl::event_button() == FL_LEFT_MOUSE) {
+				//		Fl::event_x() and Fl::event_y()
+				//		redraw();
+				oldX = Fl::event_x();
+				oldY = Fl::event_y();
+				return 1;
+			} else if (Fl::event_button() == FL_RIGHT_MOUSE) {
+char tmp[80];
+time_t t = time(NULL);
+sprintf(tmp, "Time is %s %i %i", ctime(&t), Fl::event_x_root(), Fl::event_y_root());
+// Dynamically create menu, pop it up
+//Fl_Menu_Button menu(Fl::event_x_root(), Fl::event_y_root(), 80, 1);
+Fl_Menu_Button menu(0, 0, 80, 1);
+menu.add(tmp);      // dynamic -- changes each time popup opens..
+menu.add("Apply Position to Selection",  0, Fltk13WorldMap::Menu_CB, (void*)&menu);
+menu.add("Cancel",       0, Fltk13WorldMap::Menu_CB, (void*)&menu);
+menu.popup();
+				return 1;
+			}
 			return 0;
 		case FL_DRAG: {
 			int dx = Fl::event_x() - oldX;
@@ -212,9 +229,26 @@ int Fltk13WorldMap::handle(int event) {
 		//	return 0;
 		case FL_MOUSEWHEEL:
 			zoom *= pow(1.1, -Fl::event_dy()); // zoom = earth diameter in pixels
+			updateRadius();
 			redraw();
 			break;
 		default:
 			return Fl_Gl_Window::handle(event);
+	}
+}
+
+void Fltk13WorldMap::updateRadius() {
+	radius = min(w(), h()) / zoom;
+}
+
+/*static*/ void Fltk13WorldMap::Menu_CB(Fl_Widget* widget, void *data) {
+	char name[80];
+	((Fl_Menu_Button*)data)->item_pathname(name, sizeof(name)-1);
+	fprintf(stderr, "Menu Callback: %s\n", name);
+
+	//Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->top_window());
+	//if (!fgui) return; // TODO: error
+	if (std::string(name) == "/Apply Position to Selection") {
+		Fltk13GUI::fgui->setGPSPosition(Fltk13GUI::fgui->worldMap->angle1, Fltk13GUI::fgui->worldMap->angle2, Fltk13GUI::fgui->worldMap->radius);
 	}
 }

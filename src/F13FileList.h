@@ -2,18 +2,33 @@
 #define F13FILELIST_HEADER_INCLUDED
 
 #include "FL/Fl_Scroll.H"
+#include "FL/Fl_Box.H"
+#include "FL/Fl_Button.H"
 #include <string>
+#include <list>
 
 class MDFile;
 class MDDir;
-class FileGroup;
+
+class FileGroup : public Fl_Group {
+  public:
+	FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, const char* L=0);
+	const char* getFileName() const {return nameBox->label();}
+	int handle(int eventn);
+	MDFile* mdf;
+  protected:
+	Fl_Button *thumbnailButton;
+	Fl_Box *nameBox;
+	Fl_Box *dateTimeBox;
+};
 
 class F13FileList : public Fl_Scroll {
   public:
 	F13FileList(int X, int Y, int W, int H, MDDir const* mddir = NULL);
-	FileGroup* getSelectedFile() {return selectedFile;}
-	const char* getSelectedFileName() const;
-	void setSelectedFile(FileGroup* sel) {selectedFile = sel;}
+	FileGroup* getActiveFile() {return activeFile;}
+	const char* getActiveFileName() const;
+	void setActiveFile(FileGroup* sel);
+	const std::list<FileGroup*>& getSelectedFiles() {return selectedFiles;};
 
 	MDDir const* getMDDir() const {return mddir;};
 
@@ -26,7 +41,8 @@ class F13FileList : public Fl_Scroll {
 	void fillList();
 	int itemNum;
 	MDDir const* mddir;
-	FileGroup* selectedFile;
+	FileGroup* activeFile;
+	std::list<FileGroup*> selectedFiles;
 };
 
 #endif // F13FILELIST_HEADER_INCLUDED

@@ -3,8 +3,6 @@
 #include "MDDir.h"
 #include "MDFile.h"
 #include "MDProperty.h"
-#include "FL/Fl_Box.H"
-#include "FL/Fl_Button.H"
 
 #include <FL/Fl_Shared_Image.H>
 #include <FL/Fl_JPEG_Image.H>
@@ -12,6 +10,8 @@
 //#include "ExifFile.h"
 
 #include <iostream> // for cout, debugging only!?
+
+#include <algorithm> // for std::find
 
 #include <assert.h>
 
@@ -22,205 +22,118 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
-class FileGroup : public Fl_Group {
-	Fl_Button *thumbnailButton;
-	Fl_Box *nameBox;
-	Fl_Box *dateTimeBox;
-public:
-	const char* getFileName() const {return nameBox->label();}
-
-	FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, const char* L=0) : Fl_Group(X,Y,W,H,L) {
-		begin();
-			thumbnailButton = NULL;
+FileGroup::FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, const char* L/*=0*/) : Fl_Group(X,Y,W,H,L) {
+	begin();
+		thumbnailButton = NULL;
+		this->mdf = mdf;
 
 // TODO: much of the logic should be done/cached in the metadata updating/importing method
 
-			if (isDirectory) {
-				// this is a directory
-				thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
-				if (strcmp(fileName, "..") == 0) {
-					thumbnailButton->label("@8->");
-				} else {
-					thumbnailButton->label("@->");
-				}
-				thumbnailButton->callback(Fltk13GUI::changeDirCallback, (void*) fileName);
+		if (isDirectory) {
+			// this is a directory
+			thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
+			if (strcmp(fileName, "..") == 0) {
+				thumbnailButton->label("@8->");
 			} else {
-				// this is a file
-				thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
-				thumbnailButton->callback(Fltk13GUI::launchViewerCallback, (void*) fileName);
+				thumbnailButton->label("@->");
+			}
+			thumbnailButton->callback(Fltk13GUI::changeDirCallback, (void*) fileName);
+		} else {
+			// this is a file
+			thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
+			thumbnailButton->callback(Fltk13GUI::launchViewerCallback, (void*) fileName);
 
-				std::string fileNameStr(fileName);
-				std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
-				bool thumbLoaded = false;
+			std::string fileNameStr(fileName);
+			std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
+			bool thumbLoaded = false;
 
-				MDProperty* thumbPosProp = mdf->getPropertyByKey("thumbnailPosition");
-				MDProperty* thumbSizeProp = mdf->getPropertyByKey("thumbnailSize");
+			MDProperty* thumbPosProp = mdf->getPropertyByKey("thumbnailPosition");
+			MDProperty* thumbSizeProp = mdf->getPropertyByKey("thumbnailSize");
 
-				if (thumbPosProp && thumbSizeProp) {
-					long thumbPos  = atoi(thumbPosProp->value.c_str());
-					long thumbSize  = atoi(thumbSizeProp->value.c_str());
+			if (thumbPosProp && thumbSizeProp) {
+				long thumbPos  = atoi(thumbPosProp->value.c_str());
+				long thumbSize  = atoi(thumbSizeProp->value.c_str());
 
-					if ((thumbSize > 0) && (thumbSize < 100000)) { // sanity check
+				if ((thumbSize > 0) && (thumbSize < 100000)) { // sanity check
 
-						// TODO: move this to another file away from user interface!!
-						FILE* tf = fopen(path.c_str(), "rb");
-						fseek(tf, thumbPos, SEEK_SET);
-						unsigned char* thumbData = new unsigned char[thumbSize];
-						fread(thumbData, 1, thumbSize, tf);
+					// TODO: move this to another file away from user interface!!
+					FILE* tf = fopen(path.c_str(), "rb");
+					fseek(tf, thumbPos, SEEK_SET);
+					unsigned char* thumbData = new unsigned char[thumbSize];
+					fread(thumbData, 1, thumbSize, tf);
 
-						Fl_JPEG_Image jpgImgThumb(NULL, thumbData);
-						//std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
-						float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgThumb.w(), jpgImgThumb.h());
-						int newW = (int) (scDiv * jpgImgThumb.w() + 0.499);
-						int newH = (int) (scDiv * jpgImgThumb.h() + 0.499);
-						Fl_Image* jpgImg = jpgImgThumb.copy(newW, newH);
-						if (jpgImg && (jpgImg->w() > 0)) {
-							thumbnailButton->image(jpgImg);
-							thumbLoaded = true;
-						}
-
-						delete[] thumbData;
-						fclose(tf);
+					Fl_JPEG_Image jpgImgThumb(NULL, thumbData);
+					//std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
+					float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgThumb.w(), jpgImgThumb.h());
+					int newW = (int) (scDiv * jpgImgThumb.w() + 0.499);
+					int newH = (int) (scDiv * jpgImgThumb.h() + 0.499);
+					Fl_Image* jpgImg = jpgImgThumb.copy(newW, newH);
+					if (jpgImg && (jpgImg->w() > 0)) {
+						thumbnailButton->image(jpgImg);
+						thumbLoaded = true;
 					}
+
+					delete[] thumbData;
+					fclose(tf);
 				}
-/*
-// extract extension and convert to upper case
-std::string ext;
-int fileNameStrLen = fileNameStr.length();
-if (fileNameStrLen > 1) {
-	std::string::size_type p = fileNameStr.rfind('.', fileNameStrLen-1);
-	if (p != std::string::npos) {
-		ext = fileNameStr.substr(p+1);
-		for (unsigned int i=0; i<ext.length(); i++) ext[i] = toupper(ext[i]);
-	}
+			}
+		}
+
+		// box for name
+		//nameBox = new Fl_Box(X+46,Y+4,W-46,16, fileName);
+		nameBox = new Fl_Box(X+F13FileList::thumbnailSize+6, Y, W-F13FileList::thumbnailSize-6-100,F13FileList::thumbnailSize, fileName);
+		nameBox->align(FL_ALIGN_CENTER | FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+		// box for date and time
+		//dateTimeBox = new Fl_Box(X+46,Y+20,W-46,16, dateStr);
+		dateTimeBox = new Fl_Box(nameBox->x()+nameBox->w()+6,Y,100,F13FileList::thumbnailSize, dateStr);
+		dateTimeBox->align(FL_ALIGN_CENTER | FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
+		dateTimeBox->labelcolor(0x77777700);
+
+		resizable(nameBox);
+	end();
 }
 
-				if (!thumbLoaded) {
-					if ((ext == "JPG") || (ext == "JPEG")) {
-						// load full resolution and scale it down
-						Fl_JPEG_Image jpgImgBig(path.c_str());
-						float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgBig.w(), jpgImgBig.h());
-						int newW = (int) (scDiv * jpgImgBig.w() + 0.499);
-						int newH = (int) (scDiv * jpgImgBig.h() + 0.499);
-						Fl_Image* jpgImg = jpgImgBig.copy(newW, newH);
-						if (jpgImg && (jpgImg->w() > 0))
-							thumbnailButton->image(jpgImg);
-					}
-				}
-*/
-/*
-				// extract extension and convert to upper case
-				std::string ext;
-				if (fileNameStrLen > 1) {
-					std::string::size_type p = fileNameStr.rfind('.', fileNameStrLen-1);
-					if (p != std::string::npos) {
-						ext = fileNameStr.substr(p+1);
-						for (unsigned int i=0; i<ext.length(); i++) ext[i] = toupper(ext[i]);
-					}
-				}
-
-				// test for .jpg or .jpeg
-				if ((ext == "JPG") || (ext == "JPEG")) {
-					thumbnailButton = new Fl_Button(X, Y, F13FileList::thumbnailSize, F13FileList::thumbnailSize);
-					thumbnailButton->callback(Fltk13GUI::launchViewerCallback, (void*) fileName);
-					std::string path = ((F13FileList*) (parent()))->getMDDir()->getDirPath() + '/' + fileName;
-
-					// try to load exif thumbnail and use as image
-					// TODO: read position and length of thumbnail data in file from MDFile properties
-					ExifFile ef(path.c_str());
-					unsigned char* thumbData = ef.getThumbnailData();
-					if (thumbData) {
-						Fl_JPEG_Image jpgImgThumb(NULL, thumbData);
-						//std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
-						float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgThumb.w(), jpgImgThumb.h());
-						int newW = (int) (scDiv * jpgImgThumb.w() + 0.499);
-						int newH = (int) (scDiv * jpgImgThumb.h() + 0.499);
-						Fl_Image* jpgImg = jpgImgThumb.copy(newW, newH);
-						if (jpgImg && (jpgImg->w() > 0))
-							thumbnailButton->image(jpgImg);
-					} else {
-						// load full resolution and scale it down
-						Fl_JPEG_Image jpgImgBig(path.c_str());
-						float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgBig.w(), jpgImgBig.h());
-						int newW = (int) (scDiv * jpgImgBig.w() + 0.499);
-						int newH = (int) (scDiv * jpgImgBig.h() + 0.499);
-						Fl_Image* jpgImg = jpgImgBig.copy(newW, newH);
-						if (jpgImg && (jpgImg->w() > 0))
-							thumbnailButton->image(jpgImg);
-					}
-
-				}
-*/
-			}
-
-			// box for name
-			//nameBox = new Fl_Box(X+46,Y+4,W-46,16, fileName);
-			nameBox = new Fl_Box(X+F13FileList::thumbnailSize+6, Y, W-F13FileList::thumbnailSize-6-100,F13FileList::thumbnailSize, fileName);
-			nameBox->align(FL_ALIGN_CENTER | FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-
-			// box for date and time
-			//dateTimeBox = new Fl_Box(X+46,Y+20,W-46,16, dateStr);
-			dateTimeBox = new Fl_Box(nameBox->x()+nameBox->w()+6,Y,100,F13FileList::thumbnailSize, dateStr);
-			dateTimeBox->align(FL_ALIGN_CENTER | FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
-			dateTimeBox->labelcolor(0x77777700);
-
-			resizable(nameBox);
-		end();
-	}
-
-	int handle(int eventn) {
+int FileGroup::handle(int eventn) {
 //Fl_Group::handle(eventn);
-		switch (eventn) {
-			//case FL_PUSH:
-			case FL_RELEASE:
-			//case FL_DRAG:
-			//case FL_MOVE:
-				//return handle_mouse(eventn,Fl::event_button(), Fl::event_x(),Fl::event_y());
-			//case FL_FOCUS:
-				{
-				//label ("Gained focus");
-				assert(dynamic_cast<F13FileList*> (parent()));
-				F13FileList* fileList = (F13FileList*) parent();
-				FileGroup* prevSelectedFile = fileList->getSelectedFile(); // previously selected file
-				//if (this == prevSelectedFile) return 1; // same file: do nothing (no FL_FOCUS event anyway, right?)
-				if (prevSelectedFile) {
-					//prevSelectedFile->color(0xDDDDDD00); // TODO
-					prevSelectedFile->color(FL_BACKGROUND_COLOR); // TODO
-					prevSelectedFile->box(FL_FLAT_BOX);
-					prevSelectedFile->redraw();
-					//selectedFile->box(FL_NO_BOX);
-					//selectedFile->window()->redraw(); // redraw parent because this is transparent :-( -> performance not optimal
-				}
+//std::cout << eventn << std::endl;
+	switch (eventn) {
+		case FL_PUSH:
+			return 1; // to enable FL_RELEASE
+		case FL_RELEASE:
+		//case FL_DRAG:
+		//case FL_MOVE:
+			//return handle_mouse(eventn,Fl::event_button(), Fl::event_x(),Fl::event_y());
+		//case FL_FOCUS:
+			{
+			//label ("Gained focus");
+			assert(dynamic_cast<F13FileList*> (parent()));
+			F13FileList* fileList = (F13FileList*) parent();
 
-				fileList->setSelectedFile(this);
-				assert(dynamic_cast<Fltk13GUI*> (fileList->window()));
-				Fltk13GUI* fgui = (Fltk13GUI*) fileList->window();
-				fgui->showFileMetaData();
-
-				this->color(0xDDEEFF00);
-				this->box(FL_UP_BOX);
-				redraw();
-				return Fl_Group::handle(eventn);
-				}
-			//case FL_UNFOCUS:
-			//	//label ("Lost focus");
-			//	//damage(1);
-			//	return 1;
-			default:
-				return Fl_Group::handle(eventn);
-				//return 0;
-		};
-	}
+			fileList->setActiveFile(this);
+			//assert(dynamic_cast<Fltk13GUI*> (fileList->window()));
+			//Fltk13GUI* fgui = (Fltk13GUI*) fileList->window();
+			Fltk13GUI::fgui->showFileMetaData();
+			return Fl_Group::handle(eventn);
+			}
+		//case FL_UNFOCUS:
+		//	//label ("Lost focus");
+		//	//damage(1);
+		//	return 1;
+		default:
+			return Fl_Group::handle(eventn);
+			//return 0;
+	};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-F13FileList::F13FileList(int X, int Y, int W, int H, MDDir const* mddir/* = NULL*/) : Fl_Scroll(X,Y,W,H,0), mddir(mddir), selectedFile(NULL), itemNum(0) {
+F13FileList::F13FileList(int X, int Y, int W, int H, MDDir const* mddir/* = NULL*/) : Fl_Scroll(X,Y,W,H,0), mddir(mddir), activeFile(NULL), itemNum(0) {
 	if (mddir) fillList();
 }
 
-const char* F13FileList::getSelectedFileName() const {
-	return selectedFile->getFileName();
+const char* F13FileList::getActiveFileName() const {
+	return activeFile->getFileName();
 }
 
 
@@ -252,4 +165,68 @@ void F13FileList::resize(int X, int Y, int W, int H) {
 	// Tell scroll children changed in size
 	init_sizes();
 	Fl_Scroll::resize(X,Y,W,H);
+}
+
+void F13FileList::setActiveFile(FileGroup* sel) {
+	FileGroup* prevActiveFile = activeFile;
+	activeFile = sel;
+
+	if (Fl::event_ctrl()) {
+		// control: toggle state
+		auto sp = std::find(selectedFiles.begin(), selectedFiles.end(), activeFile);
+		if (sp == selectedFiles.end()) { // not yet in list?
+			// is not yet in list, add to list
+			selectedFiles.push_back(activeFile);
+			// mark as selected
+			activeFile->color(0xDDEEFF00);
+			activeFile->box(FL_UP_BOX);
+		} else {
+			// is already in list, remove from list
+			selectedFiles.erase(sp);
+			// mark as deselected
+			activeFile->color(FL_BACKGROUND_COLOR);
+			activeFile->box(FL_FLAT_BOX);
+		}
+		activeFile->redraw();
+	} else {
+		// TODO: the following method might redraw items twice, is not optimal!
+
+		// deselect old selection
+		for (auto sp=selectedFiles.begin(); sp!=selectedFiles.end(); ++sp) {
+			(*sp)->color(FL_BACKGROUND_COLOR);
+			(*sp)->box(FL_FLAT_BOX);
+			(*sp)->redraw();
+		}
+		selectedFiles.clear();
+
+		// make new selection
+		if (Fl::event_shift()) {
+			// shift
+			bool act = false;
+			bool lastAct = false;
+			for (int i=0; i<this->children() && !lastAct; i++) {
+				FileGroup* lePtr = (FileGroup*) this->child(i);
+				//std::cout << lePtr->getFileName() << std::endl;
+				if ((lePtr == prevActiveFile) || (lePtr == activeFile)) {
+					if (!act) act = true; else lastAct = true;
+				}
+				if (act) {
+					selectedFiles.push_back(lePtr);
+					lePtr->color(0xDDEEFF00);
+					lePtr->box(FL_UP_BOX);
+					lePtr->redraw();
+				}
+				//lePtr++;
+			}
+		} else {
+			// no keys pressed
+			activeFile->color(0xDDEEFF00);
+			activeFile->box(FL_UP_BOX);
+			activeFile->redraw();
+			selectedFiles.push_back(activeFile);
+		}
+	}
+
+//TODO: update flags from worldmap
+
 }

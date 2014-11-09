@@ -9,6 +9,7 @@
 #include "Fltk13GUI.h"
 #include "F13FileList.h"
 #include "F13KeyValueList.h"
+#include <FL/fl_ask.H>
 
 #include "MCore.h"
 #include "MDDir.h"
@@ -24,7 +25,12 @@
 
 #include <curl/curl.h>
 
+#include <iostream> // for cout, debugging only!?
+
+/*static*/ Fltk13GUI* Fltk13GUI::fgui = NULL;
+
 Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marcel's Metadata Editor") {
+	fgui = this;
 	Fl::scheme("gtk+");
 	//Fl::scheme("plastic");
 
@@ -175,8 +181,8 @@ void Fltk13GUI::saveDataBase() {
 }
 
 /*static*/ void Fltk13GUI::menuCallback(Fl_Widget* widget, void* userData) {
-	Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
-	if (!fgui) return; // TODO: error
+	//Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
+	//if (!fgui) return; // TODO: error
 
 	switch ((int) userData) {
 		case FILE_OPEN:
@@ -204,8 +210,8 @@ void Fltk13GUI::saveDataBase() {
 /*static*/ void Fltk13GUI::buttonCallback(Fl_Widget* widget, void* userData) {
 	switch ((int) userData) {
 		case BUTTON_PATH: {
-			Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
-			if (!fgui) return; // TODO: error
+			//Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
+			//if (!fgui) return; // TODO: error
 			//fgui->fileChooser->preset_file(fgui->pathTextEdit->value());
 			fgui->showFileChooser(fgui->pathTextEdit->value());
 			} break;
@@ -225,26 +231,55 @@ void Fltk13GUI::saveDataBase() {
 /*static*/ void Fltk13GUI::keyboardCallback(Fl_Widget* widget, void* userData) {
 	switch ((int) userData) {
 		case FROM_PATHTEXTEDIT:
-			Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
-			if (!fgui) return; // TODO: error
+			//Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
+			//if (!fgui) return; // TODO: error
 			fgui->openDir(fgui->pathTextEdit->value());
 			break;
+	}
+}
+
+// set current map coordinates and radius as GPS position of selected photos
+void Fltk13GUI::setGPSPosition(double lon, double lat, float radius) {
+	bool overwriteExisting = false;
+	bool alreadyAskedOverwrite = false;
+
+	// for all selected files
+	for (auto sp=fileList->getSelectedFiles().begin(); sp!=fileList->getSelectedFiles().end(); ++sp) {
+std::cout << (*sp)->getFileName() << std::endl;
+		bool dataExists = (*sp)->mdf->getPropertyByKey("longitude");
+		if (dataExists && !alreadyAskedOverwrite) {
+			switch(fl_choice("Overwrite all existing position data?", "Yes to all", "No to all", "Cancel")) {
+				case 0: // first button
+					overwriteExisting = true;
+					break;
+				case 1: // second button
+					overwriteExisting = false;
+					break;
+				default:
+					return;
+			}
+		}
+		if (!dataExists || overwriteExisting) {
+			(*sp)->mdf->setKeyValueSrc("longitude", lon, "manual");
+			(*sp)->mdf->setKeyValueSrc("latitude", lat, "manual");
+			(*sp)->mdf->setKeyValueSrc("PositionUncertaintyRadius", radius, "manual");
+		}
 	}
 }
 
 // callback for the button next to a directory in fileList
 /*static*/ void Fltk13GUI::changeDirCallback(Fl_Widget* widget, void* userData) {
 	const char* dirName = (const char*) userData;
-	Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
-	if (!fgui) return; // TODO: error
+	//Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
+	//if (!fgui) return; // TODO: error
 
 	fgui->openSubDir(dirName);
 }
 
 /*static*/ void Fltk13GUI::launchViewerCallback(Fl_Widget* widget, void* userData) {
 	const char* fileName = (const char*) userData;
-	Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
-	if (!fgui) return; // TODO: error
+	//Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
+	//if (!fgui) return; // TODO: error
 
 	std::string currentPath(fgui->mCore->getMDDir()->getDirPath());
 	std::string fullPath = currentPath + '/' + fileName;
@@ -364,7 +399,7 @@ void Fltk13GUI::showFileMetaData() {
 
 	MDDir const* mddir = mCore->getMDDir();
 	if (!mddir) return;
-	MDFile* mdfile = mddir->getMDFile(fileList->getSelectedFileName());
+	MDFile* mdfile = mddir->getMDFile(fileList->getActiveFileName());
 	if (!mdfile) return;
 
 //	keyValueList->clear();
@@ -382,13 +417,15 @@ void Fltk13GUI::showFileMetaData() {
 
 		MDProperty* longProp = mdfile->getPropertyByKey("longitude");
 		MDProperty* latProp = mdfile->getPropertyByKey("latitude");
+//TODO		MDProperty* radProp = mdfile->getPropertyByKey("");
 
 		if (longProp && latProp) {
 			double longitude  = atof(longProp->value.c_str());
 			double latitude  = atof(latProp->value.c_str());
-			worldMap->setFlag(longitude, latitude);
+float radius = 0; // TODO
+			worldMap->addFlag(longitude, latitude, radius);
 		} else {
-			worldMap->setFlag();
+			worldMap->clearFlags();
 		}
 		worldMap->redraw();
 	}

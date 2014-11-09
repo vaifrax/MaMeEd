@@ -38,12 +38,16 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
 	static void keyboardCallback(Fl_Widget* widget, void* userData);
 	static void changeDirCallback(Fl_Widget* widget, void* userData);
 	static void launchViewerCallback(Fl_Widget* widget, void* userData);
+	void setGPSPosition(double lon, double lat, float radius);
+
+	Fltk13WorldMap* worldMap;
+
+	static Fltk13GUI* fgui;
 
   protected:
 	F13FileList* fileList;
 	F13KeyValueList* keyValueList;
 	//Fl_Scroll* moduleColumn;
-	Fltk13WorldMap* worldMap;
 
 	Fl_Input* pathTextEdit;
 	Fl_Native_File_Chooser *fileChooser;
