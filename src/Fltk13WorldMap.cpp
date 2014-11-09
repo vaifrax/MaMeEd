@@ -238,7 +238,7 @@ menu.popup();
 }
 
 void Fltk13WorldMap::updateRadius() {
-	radius = min(w(), h()) / zoom;
+	radius = 2*6371000.0 * min(w(), h()) / zoom;
 }
 
 /*static*/ void Fltk13WorldMap::Menu_CB(Fl_Widget* widget, void *data) {
