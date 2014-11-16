@@ -22,6 +22,7 @@
 #include <FL/x.H> // to set icon in windows
 #include "../prj/resource.h" // for icon ID
 #include "Fltk13WorldMap.h"
+#include "Fltk13Widgets.h"
 
 #include <curl/curl.h>
 
@@ -110,8 +111,11 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marc
 		//moduleColumn->resizable(largePreview);
 		//moduleColumn->end();
 
-		Fl_Box* empty = new Fl_Box(x2, y2, x3-x2, y9-y2, "empty");
-		empty->box(FL_DOWN_BOX);
+		widgets = new Fltk13Widgets(x2, y2, x3-x2, y9-y2, "widgets");
+		widgets->box(FL_DOWN_BOX);
+
+		//Fl_Box* empty = new Fl_Box(x2, y2, x3-x2, y9-y2, "empty");
+		//empty->box(FL_DOWN_BOX);
 
 	mainGroup->end();
 	resizable(mainGroup);
@@ -435,5 +439,19 @@ void Fltk13GUI::updateFlags() {
 			worldMap->addFlag(longitude, latitude, radius);
 		}
 		worldMap->redraw();
+	}
+}
+
+void Fltk13GUI::setStarRating(int stars) { // 0 to 5
+	if ((stars < 0) || (stars > 5)) return;
+	char r[2];
+	r[0] = '0' + stars;
+	r[1] = 0;
+
+	FileGroup* fg = fileList->getActiveFile();
+	if (fg) {
+		fg->mdf->setKeyValueSrc("rating", std::string(r), "manual");
+// TODO here: update property list
+// TODO: show rating with star color
 	}
 }

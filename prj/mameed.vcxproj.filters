@@ -74,6 +74,9 @@
     <ClCompile Include="..\src\ExifFileM.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Fltk13Widgets.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\F13FileList.h">
@@ -132,6 +135,9 @@
     </ClInclude>
     <ClInclude Include="..\src\ExifFileM.h">
       <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Fltk13Widgets.h">
+      <Filter>Source Files\gui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

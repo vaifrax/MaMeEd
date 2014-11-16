@@ -79,6 +79,7 @@
     <ClCompile Include="..\src\ExifFileM.cpp" />
     <ClCompile Include="..\src\F13FileList.cpp" />
     <ClCompile Include="..\src\F13KeyValueList.cpp" />
+    <ClCompile Include="..\src\Fltk13Widgets.cpp" />
     <ClCompile Include="..\src\Fltk13WorldMap.cpp" />
     <ClCompile Include="..\src\MapTile.cpp" />
     <ClCompile Include="..\src\MapTileZoomLevel.cpp" />
@@ -98,6 +99,7 @@
     <ClInclude Include="..\src\ExifFileM.h" />
     <ClInclude Include="..\src\F13FileList.h" />
     <ClInclude Include="..\src\F13KeyValueList.h" />
+    <ClInclude Include="..\src\Fltk13Widgets.h" />
     <ClInclude Include="..\src\Fltk13WorldMap.h" />
     <ClInclude Include="..\src\MapTile.h" />
     <ClInclude Include="..\src\MapTileZoomLevel.h" />

@@ -18,6 +18,7 @@ class F13FileList;
 class F13KeyValueList;
 class MDFile;
 class Fltk13WorldMap;
+class Fltk13Widgets;
 
 class Fltk13GUI : public MGUI, public Fl_Double_Window {
   public:
@@ -40,8 +41,10 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
 	static void changeDirCallback(Fl_Widget* widget, void* userData);
 	static void launchViewerCallback(Fl_Widget* widget, void* userData);
 	void setGPSPosition(double lon, double lat, float radius);
+	void setStarRating(int stars); // 0 to 5
 
 	Fltk13WorldMap* worldMap;
+	Fltk13Widgets* widgets;
 
 	static Fltk13GUI* fgui;
 
