@@ -15,6 +15,8 @@
 #define M_PI (3.14159265358979323846)
 #endif
 
+#define RADSIZE (0.45)
+
 #include <assert.h>
 
 //GL_INVALID_ENUM                   0x0500
@@ -137,6 +139,7 @@ void Fltk13WorldMap::draw() {
 //	float tileLevelF = std::log(0.03 * zoom)/std::log(2.0) * cos(angle2*M_PI/180); // zoom is earth diameter in pixels, independent of window size
 //	float tileLevelF = std::log(0.1 * zoom -100)/std::log(2.0) * cos(angle2*M_PI/180); // zoom is earth diameter in pixels, independent of window size
 	float tileLevelF = 1.37*std::log(zoom) -5.8;
+	if (tileLevelF < 0.1) tileLevelF = 0.1;
 	if (tileLevelF > MAX_LEVEL+0.5) tileLevelF = MAX_LEVEL+0.5;
 	int tileLevel = (int) tileLevelF;
 	glEnable(GL_TEXTURE_2D);
@@ -147,29 +150,175 @@ void Fltk13WorldMap::draw() {
 	CHECK_GL_STATE
 	setUniform1f(shaderProgram, "zoom", zoom);
 	CHECK_GL_STATE
+	//glEnable(GL_POLYGON_OFFSET_FILL);
+	//glPolygonOffset(5, 1); push depth values of map tile polygons back a little so that flags will appear on top without z-fighting: didn't work yet
 	tileLevels[tileLevel]->draw(w(), h(), zoom, angle1, angle2);
+	//glDisable(GL_POLYGON_OFFSET_FILL);
 	CHECK_GL_STATE
 	glUseProgram(0);
 	glDisable(GL_TEXTURE_2D);
 	CHECK_GL_STATE
 
-	for (auto f=mflags.begin(); f!=mflags.end(); ++f) {
-		longLatToXYZ(f->longitude, f->latitude);
-		glColor3f(1, 0, 0);
+	if (mflags.size()) {
+		float zoomRatio = zoom / min(w(), h());
+
 		glPointSize(3.0);
+		glColor4f(1, 0, 0, 2/mflags.size() + 0.3);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBegin(GL_POINTS);
-		glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+		for (auto f=mflags.begin(); f!=mflags.end(); ++f) {
+			longLatToXYZ(f->longitude, f->latitude);
+/*
+			if (f->radius < 10*zoomRatio) {
+				// show a sphere
+//				drawSolidSphere(zoom*cX, zoom*cY, zoom*cZ, zoom*f->radius);
+				drawSolidSphere(zoom*cX, zoom*cY, zoom*cZ, zoom*f->radius/radius);
+				//std::cout << zoom*f->radius/radius << std::endl;
+//				drawSolidSphere(zoom*cX, zoom*cY, zoom*cZ, 10);
+			} else {
+				// show just a dot
+			}
+*/
+			glVertex3f(zoom*cX, zoom*cY, zoom*cZ);
+		}
 		glEnd();
+		glDisable(GL_BLEND);
 	}
 
 	glLoadIdentity();
 	// draw crosshair
-	glColor3f(0.2, 0.2, 0.2);
-	glBegin(GL_LINE_STRIP); glVertex3f(0, 0, 0.1*h()); glVertex3f(0, 0, -0.1*h()); glEnd();
-	glBegin(GL_LINE_STRIP); glVertex3f(0.1*w(), 0, 0); glVertex3f(-0.1*w(), 0, 0); glEnd();
+	//glColor3f(0.2, 0.2, 0.2);
+	//glBegin(GL_LINE_STRIP); glVertex3f(0, 0, 0.1*h()); glVertex3f(0, 0, -0.1*h()); glEnd();
+	//glBegin(GL_LINE_STRIP); glVertex3f(0.1*w(), 0, 0); glVertex3f(-0.1*w(), 0, 0); glEnd();
 
+	// show radius when there are no flags to display
+	if (mflags.size() == 0) {
+		glColor3f(0.2, 0.2, 0.2);
+		glBegin(GL_LINES);
+		for (int i=0; i<16; i++) {
+			float fi = i/16.0 * 2*M_PI;
+			float r = RADSIZE * min(w(), h())/2;
+			glVertex3f(r*cos(fi), 0, r*sin(fi));
+		}
+		glEnd();
+	}
 }
 
+void Fltk13WorldMap::drawSolidSphere(double x, double y, double z, float radius) {
+	const float X = 0.525731112119133606f;
+	const float Z = 0.850650808352039932f;
+
+	glPushMatrix();
+	//glTranslated(-x, -y, -z);
+	glTranslated(x, y, z);
+	glScalef(radius, radius, radius);
+glColor4f(0, 1, 0, 1);
+glBegin(GL_POINTS);
+glVertex3f(0,0,0);
+glEnd();
+	// from OpenGLEAN code:
+	glBegin(GL_POLYGON);
+		glNormal3d (0, 0.525731112119, 0.850650808354);
+		glVertex3d (0, 1.61803398875, 0.61803398875);
+		glVertex3d (-1, 1, 1);
+		glVertex3d (-0.61803398875, 0, 1.61803398875);
+		glVertex3d (0.61803398875, 0, 1.61803398875);
+		glVertex3d (1, 1, 1);
+	glEnd();
+	glBegin (GL_POLYGON);
+		glNormal3d (0, 0.525731112119, -0.850650808354);
+		glVertex3d (0, 1.61803398875, -0.61803398875);
+		glVertex3d (1, 1, -1);
+		glVertex3d (0.61803398875, 0, -1.61803398875);
+		glVertex3d (-0.61803398875, 0, -1.61803398875);
+		glVertex3d (-1, 1, -1);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glNormal3d (0, -0.525731112119, 0.850650808354);
+		glVertex3d (0, -1.61803398875, 0.61803398875);
+		glVertex3d (1, -1, 1);
+		glVertex3d (0.61803398875, 0, 1.61803398875);
+		glVertex3d (-0.61803398875, 0, 1.61803398875);
+		glVertex3d (-1, -1, 1);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glNormal3d (0, -0.525731112119, -0.850650808354);
+		glVertex3d (0, -1.61803398875, -0.61803398875);
+		glVertex3d (-1, -1, -1);
+		glVertex3d (-0.61803398875, 0, -1.61803398875);
+		glVertex3d (0.61803398875, 0, -1.61803398875);
+		glVertex3d (1, -1, -1);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+		glNormal3d (0.850650808354, 0, 0.525731112119);
+		glVertex3d (0.61803398875, 0, 1.61803398875);
+		glVertex3d (1, -1, 1);
+		glVertex3d (1.61803398875, -0.61803398875, 0);
+		glVertex3d (1.61803398875, 0.61803398875, 0);
+		glVertex3d (1, 1, 1);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glNormal3d (-0.850650808354, 0, 0.525731112119);
+		glVertex3d (-0.61803398875, 0, 1.61803398875);
+		glVertex3d (-1, 1, 1);
+		glVertex3d (-1.61803398875, 0.61803398875, 0);
+		glVertex3d (-1.61803398875, -0.61803398875, 0);
+		glVertex3d (-1, -1, 1);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glNormal3d (0.850650808354, 0, -0.525731112119);
+		glVertex3d (0.61803398875, 0, -1.61803398875);
+		glVertex3d (1, 1, -1);
+		glVertex3d (1.61803398875, 0.61803398875, 0);
+		glVertex3d (1.61803398875, -0.61803398875, 0);
+		glVertex3d (1, -1, -1);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glNormal3d (-0.850650808354, 0, -0.525731112119);
+		glVertex3d (-0.61803398875, 0, -1.61803398875);
+		glVertex3d (-1, -1, -1);
+		glVertex3d (-1.61803398875, -0.61803398875, 0);
+		glVertex3d (-1.61803398875, 0.61803398875, 0);
+		glVertex3d (-1, 1, -1);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+		glNormal3d (0.525731112119, 0.850650808354, 0);
+		glVertex3d (1.61803398875, 0.61803398875, 0);
+		glVertex3d (1, 1, -1);
+		glVertex3d (0, 1.61803398875, -0.61803398875);
+		glVertex3d (0, 1.61803398875, 0.61803398875);
+		glVertex3d (1, 1, 1);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glNormal3d (0.525731112119, -0.850650808354, 0);
+		glVertex3d (1.61803398875, -0.61803398875, 0);
+		glVertex3d (1, -1, 1);
+		glVertex3d (0, -1.61803398875, 0.61803398875);
+		glVertex3d (0, -1.61803398875, -0.61803398875);
+		glVertex3d (1, -1, -1);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glNormal3d (-0.525731112119, 0.850650808354, 0);
+		glVertex3d (-1.61803398875, 0.61803398875, 0);
+		glVertex3d (-1, 1, 1);
+		glVertex3d (0, 1.61803398875, 0.61803398875);
+		glVertex3d (0, 1.61803398875, -0.61803398875);
+		glVertex3d (-1, 1, -1);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glNormal3d (-0.525731112119, -0.850650808354, 0);
+		glVertex3d (-1.61803398875, -0.61803398875, 0);
+		glVertex3d (-1, -1, -1);
+		glVertex3d (0, -1.61803398875, -0.61803398875);
+		glVertex3d (0, -1.61803398875, 0.61803398875);
+		glVertex3d (-1, -1, 1);
+	glEnd();
+
+	glPopMatrix();
+}
 
 int Fltk13WorldMap::handle(int event) {
 	switch(event) {
@@ -238,7 +387,7 @@ menu.popup();
 }
 
 void Fltk13WorldMap::updateRadius() {
-	radius = 2*6371000.0 * min(w(), h()) / zoom;
+	radius = 6371000.0 * RADSIZE * 0.5*min(w(), h()) / zoom;
 }
 
 /*static*/ void Fltk13WorldMap::Menu_CB(Fl_Widget* widget, void *data) {

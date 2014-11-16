@@ -103,7 +103,6 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marc
 
 		// zoomable map
 		// topo map: http://opentopomap.org/tiles/14/8640/5755.png
-		//Fl_Box* worldMap = new Fl_Box(x2, y1, x3-x2, y2-y1, "world map");
 		worldMap = new Fltk13WorldMap(x2, y1, x3-x2, y2-y1, "world map");
 		worldMap->box(FL_DOWN_BOX);
 		//moduleColumn->box(FL_DOWN_BOX);
@@ -414,22 +413,27 @@ void Fltk13GUI::showFileMetaData() {
 		keyValueList = new F13KeyValueList(x, y, w, h, mCore->getConfig());
 		keyValueList->box(FL_DOWN_BOX);
 		mainGroup->add(keyValueList);
-
-		MDProperty* longProp = mdfile->getPropertyByKey("longitude");
-		MDProperty* latProp = mdfile->getPropertyByKey("latitude");
-//TODO		MDProperty* radProp = mdfile->getPropertyByKey("");
-
-		if (longProp && latProp) {
-			double longitude  = atof(longProp->value.c_str());
-			double latitude  = atof(latProp->value.c_str());
-float radius = 0; // TODO
-			worldMap->addFlag(longitude, latitude, radius);
-		} else {
-			worldMap->clearFlags();
-		}
-		worldMap->redraw();
 	}
 
 	keyValueList->setMDFile(mdfile);
 	keyValueList->redraw();
+}
+
+// update Flag list from world map according to selection
+void Fltk13GUI::updateFlags() {
+	worldMap->clearFlags();
+	for (auto sp=fileList->getSelectedFiles().begin(); sp!=fileList->getSelectedFiles().end(); ++sp) {
+		MDFile* mdfile = (*sp)->mdf;
+		MDProperty* longProp = mdfile->getPropertyByKey("longitude");
+		MDProperty* latProp = mdfile->getPropertyByKey("latitude");
+		MDProperty* radProp = mdfile->getPropertyByKey("PositionUncertaintyRadius");
+
+		if (longProp && latProp) {
+			double longitude  = atof(longProp->value.c_str());
+			double latitude  = atof(latProp->value.c_str());
+			float radius = atof(radProp->value.c_str());
+			worldMap->addFlag(longitude, latitude, radius);
+		}
+		worldMap->redraw();
+	}
 }

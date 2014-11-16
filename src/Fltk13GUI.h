@@ -27,6 +27,7 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
 	void openDir(std::string path); // absolute path
 	void openSubDir(std::string subDirName); // relative to currently opened path
 	void showFileMetaData(); // update/show new file meta data window (of selected file)
+	void updateFlags(); // update Flag list from world map according to selection
 	int showWindow();
 	void applyChangesOfSelectedKeyValue();
 	void saveDataBase();

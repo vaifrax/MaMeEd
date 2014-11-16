@@ -98,8 +98,10 @@ int FileGroup::handle(int eventn) {
 //Fl_Group::handle(eventn);
 //std::cout << eventn << std::endl;
 	switch (eventn) {
-		case FL_PUSH:
-			return 1; // to enable FL_RELEASE
+		case FL_PUSH: {
+			int r = Fl_Group::handle(eventn);
+			if (r) return r;
+			return 1;} // to enable FL_RELEASE
 		case FL_RELEASE:
 		//case FL_DRAG:
 		//case FL_MOVE:
@@ -227,6 +229,6 @@ void F13FileList::setActiveFile(FileGroup* sel) {
 		}
 	}
 
-//TODO: update flags from worldmap
-
+	// update flags from worldmap
+	Fltk13GUI::fgui->updateFlags();
 }

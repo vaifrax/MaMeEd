@@ -129,6 +129,10 @@ if (!MDDir::isDirectory(outpath2.c_str())) {
 					// load texture
 					i->mapTilePtr->loadFromFile();
 
+					// remove .jpg
+					std::string cmdDel = std::string("del ") + i->outFileName;
+					system(cmdDel.c_str());
+
 					// clean up
 					ongoingDownloads.erase(i);
 					break;

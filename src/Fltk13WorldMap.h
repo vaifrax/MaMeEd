@@ -24,10 +24,11 @@ class Fltk13WorldMap : public Fl_Gl_Window {
 	void initGL();
 	void draw();
 	static void Menu_CB(Fl_Widget*, void *data);
+	void drawSolidSphere(double x, double y, double z, float radius);
 
 	double angle1, angle2; // globe rotation
 	float zoom; // zoom = earth diameter in pixels
-	float radius; // automatically computed; radius of visible map area
+	float radius; // automatically computed; radius of inner area of visible map
 	void updateRadius();
 
 	MapTileZoomLevel* tileLevels[19];
