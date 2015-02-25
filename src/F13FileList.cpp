@@ -231,4 +231,7 @@ void F13FileList::setActiveFile(FileGroup* sel) {
 
 	// update flags from worldmap
 	Fltk13GUI::fgui->updateFlags();
+
+	// update star rating in widgets
+	Fltk13GUI::fgui->updateStars();
 }

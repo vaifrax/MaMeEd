@@ -442,6 +442,21 @@ void Fltk13GUI::updateFlags() {
 	}
 }
 
+// update star rating according to selection
+void Fltk13GUI::updateStars() {
+	if (fileList->getSelectedFiles().size() == 1) {
+		widgets->starRating->activate();
+		MDFile* mdfile = fileList->getSelectedFiles().front()->mdf;
+		MDProperty* ratingProp = mdfile->getPropertyByKey("rating");
+		int stars = 0;
+		if (ratingProp) stars = atoi(ratingProp->value.c_str());
+		widgets->starRating->value(stars);
+	} else {
+		widgets->starRating->deactivate();
+	}
+}
+
+// process click on stars
 void Fltk13GUI::setStarRating(int stars) { // 0 to 5
 	if ((stars < 0) || (stars > 5)) return;
 	char r[2];
@@ -454,7 +469,5 @@ void Fltk13GUI::setStarRating(int stars) { // 0 to 5
 
 		// trigger repainting of property list
 		keyValueList->setValueOrAddItem("rating", std::string(r));
-
-// TODO: show rating with star color
 	}
 }

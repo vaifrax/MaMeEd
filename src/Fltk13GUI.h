@@ -29,6 +29,7 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
 	void openSubDir(std::string subDirName); // relative to currently opened path
 	void showFileMetaData(); // update/show new file meta data window (of selected file)
 	void updateFlags(); // update Flag list from world map according to selection
+	void updateStars(); // update star rating according to selection
 	int showWindow();
 	void applyChangesOfSelectedKeyValue();
 	void saveDataBase();
@@ -41,7 +42,7 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
 	static void changeDirCallback(Fl_Widget* widget, void* userData);
 	static void launchViewerCallback(Fl_Widget* widget, void* userData);
 	void setGPSPosition(double lon, double lat, float radius);
-	void setStarRating(int stars); // 0 to 5
+	void setStarRating(int stars); // 0 to 5, to process click on stars
 
 	Fltk13WorldMap* worldMap;
 	Fltk13Widgets* widgets;
