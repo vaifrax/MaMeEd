@@ -24,9 +24,11 @@ class F13KeyValueList : public Fl_Scroll {
 
 	enum KeyType {DEFAULT_KEY, USER_KEY};
 
+//protected:
+	void setValueOrAddItem(std::string const& key, std::string const& value);
+
   protected:
 	void addItem(std::string const& key, std::string const& value, std::string const& keyDescription = emptyString, KeyType keyType = USER_KEY);
-	void setValueOrAddItem(std::string const& key, std::string const& value);
 
 	void fillList();
 	int itemNum;
