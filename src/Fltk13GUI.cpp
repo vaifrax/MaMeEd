@@ -18,11 +18,13 @@
 
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Shared_Image.H>
+#include <FL/Fl_JPEG_Image.H> // for large preview img
 
 #include <FL/x.H> // to set icon in windows
 #include "../prj/resource.h" // for icon ID
 #include "Fltk13WorldMap.h"
 #include "Fltk13Widgets.h"
+#include "Fltk13Preview.h"
 
 #include <curl/curl.h>
 
@@ -96,11 +98,10 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marc
 		keyValueList->align(FL_ALIGN_CLIP);
 		keyValueList->end();
 
-		//moduleColumn = new Fl_Scroll(x2, y0, x3-x2, mainGroup->h());
 		// TODO: include larger preview or scale up thumb in file list?
-		Fl_Box* largePreview = new Fl_Box(x2, y0, x3-x2, y1-y0, "large preview");
-		largePreview->box(FL_DOWN_BOX);
-		//b->image(
+		//largePreview = new Fl_Box(x2, y0, x3-x2, y1-y0, "large preview");
+		largePreview = new Fltk13Preview(x2, y0, x3-x2, y1-y0);
+		//largePreview->box(FL_DOWN_BOX);
 
 		// zoomable map
 		// topo map: http://opentopomap.org/tiles/14/8640/5755.png
@@ -421,6 +422,10 @@ void Fltk13GUI::showFileMetaData() {
 
 	keyValueList->setMDFile(mdfile);
 	keyValueList->redraw();
+
+	std::string currentPath(fgui->mCore->getMDDir()->getDirPath());
+	std::string fullPath = currentPath + '/' + fileList->getActiveFileName();
+	largePreview->setImg(fullPath);
 }
 
 // update Flag list from world map according to selection

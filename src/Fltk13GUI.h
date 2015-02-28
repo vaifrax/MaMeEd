@@ -19,6 +19,7 @@ class F13KeyValueList;
 class MDFile;
 class Fltk13WorldMap;
 class Fltk13Widgets;
+class Fltk13Preview;
 
 class Fltk13GUI : public MGUI, public Fl_Double_Window {
   public:
@@ -46,6 +47,7 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
 
 	Fltk13WorldMap* worldMap;
 	Fltk13Widgets* widgets;
+	Fltk13Preview* largePreview;
 
 	static Fltk13GUI* fgui;
 
