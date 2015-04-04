@@ -51,8 +51,9 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
 
 	static Fltk13GUI* fgui;
 
-  protected:
 	F13FileList* fileList;
+
+  protected:
 	F13KeyValueList* keyValueList;
 	//Fl_Scroll* moduleColumn;
 

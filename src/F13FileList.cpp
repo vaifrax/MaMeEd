@@ -22,7 +22,9 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
-FileGroup::FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, const char* L/*=0*/) : Fl_Group(X,Y,W,H,L) {
+FileGroup::FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, int index, const char* L/*=0*/) : Fl_Group(X,Y,W,H,L) {
+	this->index = index;
+
 	begin();
 		thumbnailButton = NULL;
 		this->mdf = mdf;
@@ -134,17 +136,25 @@ F13FileList::F13FileList(int X, int Y, int W, int H, MDDir const* mddir/* = NULL
 	if (mddir) fillList();
 }
 
-const char* F13FileList::getActiveFileName() const {
-	return activeFile->getFileName();
+FileGroup* F13FileList::getActiveFile(int offset/* = 0*/) const {
+	if (offset == 0) return activeFile;
+	FileGroup* ret = (FileGroup*) Fltk13GUI::fgui->fileList->child( activeFile->index + offset ) ;
+	if (ret->mdf) return ret;
+	return NULL;
 }
-
+/*
+const char* F13FileList::getActiveFileName(int offset/ * = 0* /) const {
+	//return activeFile->getFileName();
+	return getActiveFile(offset)->getFileName();
+}
+*/
 
 void F13FileList::addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory, MDFile* mdf) {
 	int X = x(),
 		Y = y() - yposition() + (itemNum*(F13FileList::thumbnailSize+1)) + 1,
 		W = w() - 18, // -18: compensate for vscroll bar
 		H = F13FileList::thumbnailSize;
-	add(new FileGroup(X,Y,W,H, fileName.c_str(), mdf, dateStr.c_str(), isDirectory));
+	add(new FileGroup(X,Y,W,H, fileName.c_str(), mdf, dateStr.c_str(), isDirectory, itemNum));
 	redraw();
 	itemNum++;
 }

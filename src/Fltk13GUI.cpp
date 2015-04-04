@@ -403,7 +403,7 @@ void Fltk13GUI::showFileMetaData() {
 
 	MDDir const* mddir = mCore->getMDDir();
 	if (!mddir) return;
-	MDFile* mdfile = mddir->getMDFile(fileList->getActiveFileName());
+	MDFile* mdfile = mddir->getMDFile(fileList->getActiveFile()->getFileName());
 	if (!mdfile) return;
 
 //	keyValueList->clear();
@@ -424,8 +424,13 @@ void Fltk13GUI::showFileMetaData() {
 	keyValueList->redraw();
 
 	std::string currentPath(fgui->mCore->getMDDir()->getDirPath());
-	std::string fullPath = currentPath + '/' + fileList->getActiveFileName();
-	largePreview->setImg(fullPath);
+	std::string fullPath = currentPath + '/' + fileList->getActiveFile()->getFileName();
+	FileGroup* prevFile = fileList->getActiveFile(-1);
+	std::string prevFileName = (prevFile && !prevFile->mdf->isDirectory()) ? currentPath + '/' + prevFile->getFileName() : "";
+	FileGroup* nextFile = fileList->getActiveFile(1);
+	std::string nextFileName = (nextFile && !nextFile->mdf->isDirectory()) ? currentPath + '/' + nextFile->getFileName() : "";
+
+	largePreview->setImg(fullPath, prevFileName, nextFileName);
 }
 
 // update Flag list from world map according to selection

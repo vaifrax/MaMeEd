@@ -12,10 +12,11 @@ class MDDir;
 
 class FileGroup : public Fl_Group {
   public:
-	FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, const char* L=0);
+	FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, int index, const char* L=0);
 	const char* getFileName() const {return nameBox->label();}
 	int handle(int eventn);
 	MDFile* mdf;
+	int index; // index of item list, assuming no files are removed
   protected:
 	Fl_Button *thumbnailButton;
 	Fl_Box *nameBox;
@@ -25,8 +26,8 @@ class FileGroup : public Fl_Group {
 class F13FileList : public Fl_Scroll {
   public:
 	F13FileList(int X, int Y, int W, int H, MDDir const* mddir = NULL);
-	FileGroup* getActiveFile() {return activeFile;}
-	const char* getActiveFileName() const;
+	FileGroup* getActiveFile(int offset = 0) const; // offset for previous/next file, returns NULL if it doesn't exist
+//	const char* getActiveFileName(int offset = 0) const;
 	void setActiveFile(FileGroup* sel);
 	const std::list<FileGroup*>& getSelectedFiles() {return selectedFiles;};
 

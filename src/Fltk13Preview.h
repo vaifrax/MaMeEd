@@ -9,11 +9,19 @@ class Fltk13Preview : public Fl_Box {
   public:
 	Fltk13Preview(int X, int Y, int W, int H);
 
-	// TODO: cache 3 images and load in extra thread
-	void setImg(std::string fileName);
+	// show 1st image, cache other two
+//TODO: load other images in extra thread
+	void setImg(std::string fileName, std::string prevFileName, std::string nextFileName);
 
   protected:
 	Fl_Image* img;
+
+	struct ImgCacheStruct {
+		std::string fileName;
+		Fl_Image* img;
+	} cache[3];
+
+	Fl_Image* loadImg(std::string fileName);
 };
 
 
