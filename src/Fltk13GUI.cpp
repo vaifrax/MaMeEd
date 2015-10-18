@@ -32,7 +32,7 @@
 
 /*static*/ Fltk13GUI* Fltk13GUI::fgui = NULL;
 
-Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marcel's Metadata Editor") {
+Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(1000,800,"Marcel's Metadata Editor") {
 	fgui = this;
 	Fl::scheme("gtk+");
 	//Fl::scheme("plastic");
@@ -68,12 +68,12 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(800,800,"Marc
 	const int MAIN_GROUP_PADDING = 0; // must be 0 otherwise tile doesn't work!
 	mainGroup = new Fl_Tile(MAIN_GROUP_PADDING, MENU_HEIGHT+MAIN_GROUP_PADDING, w()-2*MAIN_GROUP_PADDING, h()-MENU_HEIGHT-2*MAIN_GROUP_PADDING); // put everything in a group for equal resizing
 		int x0 = mainGroup->x(); // 0 [column 1] x1 [column 2] x2 [column 3] x3
-		int x1 = 0.4*mainGroup->w() + x0;
-		int x2 = 0.7*mainGroup->w() + x0;
+		int x1 = 0.25*mainGroup->w() + x0;
+		int x2 = 0.5*mainGroup->w() + x0;
 		int x3 = mainGroup->w() + x0;
 		int y0 = mainGroup->y(); // row positions
-		int y1 = 0.3*mainGroup->h() + y0;
-		int y2 = 0.6*mainGroup->h() + y0;
+		int y1 = 0.5*mainGroup->h() + y0;
+		int y2 = 0.9*mainGroup->h() + y0;
 		int y9 = mainGroup->h() + y0;
 		pathFilesGroup = new Fl_Group(x0, y0, x1-x0, mainGroup->h()); // left side
 			const int PATHFILESGROUP_PADDING = 2;
@@ -250,7 +250,7 @@ void Fltk13GUI::setGPSPosition(double lon, double lat, float radius) {
 	// for all selected files
 	for (auto sp=fileList->getSelectedFiles().begin(); sp!=fileList->getSelectedFiles().end(); ++sp) {
 std::cout << (*sp)->getFileName() << std::endl;
-		bool dataExists = (*sp)->mdf->getPropertyByKey("longitude");
+		bool dataExists = (*sp)->mdf->getPropertyByKey("Longitude");
 		if (dataExists && !alreadyAskedOverwrite) {
 			switch(fl_choice("Overwrite all existing position data?", "Yes to all", "No to all", "Cancel")) {
 				case 0: // first button
@@ -264,8 +264,8 @@ std::cout << (*sp)->getFileName() << std::endl;
 			}
 		}
 		if (!dataExists || overwriteExisting) {
-			(*sp)->mdf->setKeyValueSrc("longitude", lon, "manual");
-			(*sp)->mdf->setKeyValueSrc("latitude", lat, "manual");
+			(*sp)->mdf->setKeyValueSrc("Longitude", lon, "manual");
+			(*sp)->mdf->setKeyValueSrc("Latitude", lat, "manual");
 			(*sp)->mdf->setKeyValueSrc("PositionUncertaintyRadius", radius, "manual");
 		}
 	}
@@ -438,8 +438,8 @@ void Fltk13GUI::updateFlags() {
 	worldMap->clearFlags();
 	for (auto sp=fileList->getSelectedFiles().begin(); sp!=fileList->getSelectedFiles().end(); ++sp) {
 		MDFile* mdfile = (*sp)->mdf;
-		MDProperty* longProp = mdfile->getPropertyByKey("longitude");
-		MDProperty* latProp = mdfile->getPropertyByKey("latitude");
+		MDProperty* longProp = mdfile->getPropertyByKey("Longitude");
+		MDProperty* latProp = mdfile->getPropertyByKey("Latitude");
 		MDProperty* radProp = mdfile->getPropertyByKey("PositionUncertaintyRadius");
 
 		if (longProp && latProp) {
