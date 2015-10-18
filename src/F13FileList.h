@@ -29,7 +29,9 @@ class F13FileList : public Fl_Scroll {
 	FileGroup* getActiveFile(int offset = 0) const; // offset for previous/next file, returns NULL if it doesn't exist
 //	const char* getActiveFileName(int offset = 0) const;
 	void setActiveFile(FileGroup* sel);
+	void setActiveFileNext();
 	const std::list<FileGroup*>& getSelectedFiles() {return selectedFiles;};
+	//int handle(int eventn);
 
 	MDDir const* getMDDir() const {return mddir;};
 

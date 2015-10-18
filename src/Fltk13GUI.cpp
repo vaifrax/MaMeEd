@@ -479,5 +479,9 @@ void Fltk13GUI::setStarRating(int stars) { // 0 to 5
 
 		// trigger repainting of property list
 		keyValueList->setValueOrAddItem("rating", std::string(r));
+
+		// auto advance to next file
+		fileList->setActiveFileNext();
+		Fltk13GUI::fgui->showFileMetaData();
 	}
 }

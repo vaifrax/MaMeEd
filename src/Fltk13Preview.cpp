@@ -1,5 +1,6 @@
 #include "Fltk13Preview.h"
 
+#include <FL/Fl.H>
 #include <FL/Fl_Shared_Image.H>
 #include <FL/Fl_JPEG_Image.H> // for large preview img
 
@@ -47,6 +48,15 @@ void Fltk13Preview::setImg(std::string fileName, std::string prevFileName, std::
 std::cout << "START" << std::endl;
 	// load missing images
 	if (!img) img = loadImg(fileName);
+	// refresh preview
+	if (img && (img->w() > 0)) {
+		image(img);
+		redraw();
+	}
+	Fl::check();
+std::cout << "END REDRAW" << std::endl;
+
+	// load missing images
 	if (!prevImg) prevImg = loadImg(prevFileName);
 	if (!nextImg) nextImg = loadImg(nextFileName);
 
@@ -58,12 +68,6 @@ std::cout << "START" << std::endl;
 	cache[2].img = nextImg;
 std::cout << "END LOADING" << std::endl;
 
-	// refresh preview
-	if (img && (img->w() > 0)) {
-		image(img);
-		redraw();
-	}
-std::cout << "END REDRAW" << std::endl;
 }
 
 // TODO: do this in a different thread!

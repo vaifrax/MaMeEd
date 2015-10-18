@@ -138,7 +138,10 @@ F13FileList::F13FileList(int X, int Y, int W, int H, MDDir const* mddir/* = NULL
 
 FileGroup* F13FileList::getActiveFile(int offset/* = 0*/) const {
 	if (offset == 0) return activeFile;
-	FileGroup* ret = (FileGroup*) Fltk13GUI::fgui->fileList->child( activeFile->index + offset ) ;
+	int newIndex = activeFile->index + offset;
+	if (newIndex < 0) newIndex = 0;
+	if (newIndex >= children()) newIndex = children()-1;
+	FileGroup* ret = (FileGroup*) Fltk13GUI::fgui->fileList->child( newIndex ) ;
 	if (ret->mdf) return ret;
 	return NULL;
 }
@@ -177,6 +180,10 @@ void F13FileList::resize(int X, int Y, int W, int H) {
 	// Tell scroll children changed in size
 	init_sizes();
 	Fl_Scroll::resize(X,Y,W,H);
+}
+
+void F13FileList::setActiveFileNext() {
+	setActiveFile(getActiveFile(1));
 }
 
 void F13FileList::setActiveFile(FileGroup* sel) {
@@ -245,3 +252,22 @@ void F13FileList::setActiveFile(FileGroup* sel) {
 	// update star rating in widgets
 	Fltk13GUI::fgui->updateStars();
 }
+
+/*
+// to enable keyboard events?
+int F13FileList::handle(int eventn) {
+//std::cout << eventn << std::endl;
+	switch (eventn) {
+		case FL_KEYBOARD: {
+			setActiveFileNext();
+			Fltk13GUI::fgui->showFileMetaData();
+			return 1;//Fl_Group::handle(eventn);
+			}
+		case FL_FOCUS:
+		case FL_UNFOCUS:
+			return 1;
+		default:
+			return Fl_Scroll::handle(eventn);
+	};
+};
+*/
