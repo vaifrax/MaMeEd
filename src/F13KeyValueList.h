@@ -4,9 +4,9 @@
 #include "FL/Fl_Scroll.H"
 #include <string>
 
-class KeyValueGroup;
 class MDFile;
 class MConfig;
+class KeyValueGroup;
 
 class F13KeyValueList : public Fl_Scroll {
   public:

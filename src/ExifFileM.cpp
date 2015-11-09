@@ -244,9 +244,11 @@ bool ExifFileM::readGPS(long position) {
 
 	double longitude = 0; // west (negative), east (positive) in -180..180 degrees
 	bool longitudeEast = true;
+	bool hasLongitudeTag = false;
 
 	double latitude = 0; // south (negative), north (positive) in -90..90 degrees
 	bool latitudeNorth = true;
+	bool hasLatitudeTag = false;
 
 	double altitude = 0;
 	bool altitudeAboveSeaLevel = true;
@@ -281,6 +283,7 @@ bool ExifFileM::readGPS(long position) {
 				double min = readRational(data + exifStartPos + 8);
 				double sec = readRational(data + exifStartPos + 16);
 				latitude = deg + min/60.0 + sec/3600.0;
+				hasLatitudeTag = true;
 				break;}
 			case 0x0003:
 				latitudeNorth = (data != 'W');
@@ -290,6 +293,7 @@ bool ExifFileM::readGPS(long position) {
 				double min = readRational(data + exifStartPos + 8);
 				double sec = readRational(data + exifStartPos + 16);
 				longitude = deg + min/60.0 + sec/3600.0;
+				hasLongitudeTag = true;
 				break;}
 			case 0x0005:
 				altitudeAboveSeaLevel = (data != 1);
@@ -301,7 +305,7 @@ bool ExifFileM::readGPS(long position) {
 			case 0x000A: // '2' or '3'
 				if (data == '2') measureMode3D = false;
 				break;
-			case 0x000B: // GPS degree of precision  (using some const, hopefully good)
+			case 0x000B: // GPS degree of precision (using some const, hopefully good)
 				mdf->setKeyValueSrc("PositionUncertaintyRadius", (long) (12.3456 * readRational(data + exifStartPos)), "EXIF");
 				break;
 		}
@@ -313,8 +317,8 @@ bool ExifFileM::readGPS(long position) {
 	if (!latitudeNorth) latitude *= -1;
 	if (!altitudeAboveSeaLevel) altitude *= -1;
 
-	mdf->setKeyValueSrc("Longitude", longitude, "EXIF");
-	mdf->setKeyValueSrc("Latitude", latitude, "EXIF");
+	if (hasLongitudeTag) mdf->setKeyValueSrc("Longitude", longitude, "EXIF");
+	if (hasLatitudeTag) mdf->setKeyValueSrc("Latitude", latitude, "EXIF");
 	if (hasAltitudeTag && measureMode3D) mdf->setKeyValueSrc("Altitude", altitude, "EXIF");
 
 	return true;

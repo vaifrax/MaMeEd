@@ -74,40 +74,40 @@ void MDFile::changeKeyValue(std::string const& oldKey, std::string const& newKey
 	setKeyValue(newKey, newValue);
 }
 
-void MDFile::setKeyValue(std::string key, std::string value) {
+void MDFile::setKeyValue(std::string key, std::string value, bool overwriteExisting/*=false*/) {
 	MDProperty* existingProp = getPropertyByKey(key);
-	if (existingProp) {
+	if (existingProp && overwriteExisting) {
 		existingProp->value = value;
 	} else {
 		properties.push_back(new MDProperty(key, value));
 	}
 }
 
-void MDFile::setKeyValue(std::string key, double value) {
+void MDFile::setKeyValue(std::string key, double value, bool overwriteExisting/*=false*/) {
 	std::stringstream ss;
 	ss << value;
-	setKeyValue(key, ss.str());
+	setKeyValue(key, ss.str(), overwriteExisting);
 }
 
-void MDFile::setKeyValue(std::string key, long value) {
+void MDFile::setKeyValue(std::string key, long value, bool overwriteExisting/*=false*/) {
 	std::stringstream ss;
 	ss << value;
-	setKeyValue(key, ss.str());
+	setKeyValue(key, ss.str(), overwriteExisting);
 }
 
-void MDFile::setKeyValueSrc(std::string key, std::string value, std::string source) {
-	setKeyValue(key, value);
-	setKeyValue(key + "~SRC", source);
+void MDFile::setKeyValueSrc(std::string key, std::string value, std::string source, bool overwriteExisting/*=false*/) {
+	setKeyValue(key, value, overwriteExisting);
+	setKeyValue(key + "~SRC", source, overwriteExisting);
 }
 
-void MDFile::setKeyValueSrc(std::string key, long value, std::string source) {
-	setKeyValue(key, value);
-	setKeyValue(key + "~SRC", source);
+void MDFile::setKeyValueSrc(std::string key, long value, std::string source, bool overwriteExisting/*=false*/) {
+	setKeyValue(key, value, overwriteExisting);
+	setKeyValue(key + "~SRC", source, overwriteExisting);
 }
 
-void MDFile::setKeyValueSrc(std::string key, double value, std::string source) {
-	setKeyValue(key, value);
-	setKeyValue(key + "~SRC", source);
+void MDFile::setKeyValueSrc(std::string key, double value, std::string source, bool overwriteExisting/*=false*/) {
+	setKeyValue(key, value, overwriteExisting);
+	setKeyValue(key + "~SRC", source, overwriteExisting);
 }
 
 bool MDFile::importEmbeddedMetadata() {

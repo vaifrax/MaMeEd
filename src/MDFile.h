@@ -19,14 +19,14 @@ class MDFile {
 
 	MDProperty* MDFile::getPropertyByKey(std::string key);
 
-	void setKeyValue(std::string key, double value);
-	void setKeyValue(std::string key, long value);
-	void setKeyValue(std::string key, std::string value);
+	void setKeyValue(std::string key, double value, bool overwriteExisting=false);
+	void setKeyValue(std::string key, long value, bool overwriteExisting=false);
+	void setKeyValue(std::string key, std::string value, bool overwriteExisting=false);
 
 	// if possible, provide a source where the information is coming from, e.g. "EXIF"
-	void setKeyValueSrc(std::string key, double value, std::string source);
-	void setKeyValueSrc(std::string key, long value, std::string source);
-	void setKeyValueSrc(std::string key, std::string value, std::string source);
+	void setKeyValueSrc(std::string key, double value, std::string source, bool overwriteExisting=false);
+	void setKeyValueSrc(std::string key, long value, std::string source, bool overwriteExisting=false);
+	void setKeyValueSrc(std::string key, std::string value, std::string source, bool overwriteExisting=false);
 
 	void changeKeyValue(std::string const& oldKey, std::string const& newKey, std::string const& newValue);
 

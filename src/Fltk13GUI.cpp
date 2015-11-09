@@ -9,6 +9,7 @@
 #include "Fltk13GUI.h"
 #include "F13FileList.h"
 #include "F13KeyValueList.h"
+#include "F13KeyValueGroup.h"
 #include <FL/fl_ask.H>
 
 #include "MCore.h"
@@ -136,7 +137,36 @@ Fltk13GUI::~Fltk13GUI() {
 }
 
 void Fltk13GUI::applyChangesOfSelectedKeyValue() {
-	if (keyValueList) keyValueList->applyChangesOfSelectedKeyValue();
+//	if (keyValueList) keyValueList->applyChangesOfSelectedKeyValue();
+	if (!keyValueList) return;
+	const KeyValueGroup* kvg = keyValueList->getSelectedKeyValue();
+	std::string newKey = kvg->getKey();
+	std::string newValue = kvg->getValue();
+
+	bool overwriteExisting = false;
+	bool alreadyAskedOverwrite = false;
+
+	// for all selected files
+	for (auto sp=fileList->getSelectedFiles().begin(); sp!=fileList->getSelectedFiles().end(); ++sp) {
+std::cout << (*sp)->getFileName() << std::endl;
+		bool dataExists = (*sp)->mdf->getPropertyByKey(newKey);
+		if (dataExists && !alreadyAskedOverwrite) {
+			switch(fl_choice("Overwrite all existing data?", "Yes to all", "No to all", "Cancel")) {
+				case 0: // first button
+					overwriteExisting = true;
+					break;
+				case 1: // second button
+					overwriteExisting = false;
+					break;
+				default:
+					return;
+			}
+		}
+		if (!dataExists || overwriteExisting) {
+			(*sp)->mdf->setKeyValueSrc(newKey, newValue, "manual", true);
+		}
+	}
+
 }
 
 void Fltk13GUI::saveDataBase() {
@@ -264,9 +294,9 @@ std::cout << (*sp)->getFileName() << std::endl;
 			}
 		}
 		if (!dataExists || overwriteExisting) {
-			(*sp)->mdf->setKeyValueSrc("Longitude", lon, "manual");
-			(*sp)->mdf->setKeyValueSrc("Latitude", lat, "manual");
-			(*sp)->mdf->setKeyValueSrc("PositionUncertaintyRadius", radius, "manual");
+			(*sp)->mdf->setKeyValueSrc("Longitude", lon, "manual", true);
+			(*sp)->mdf->setKeyValueSrc("Latitude", lat, "manual", true);
+			(*sp)->mdf->setKeyValueSrc("PositionUncertaintyRadius", radius, "manual", true);
 		}
 	}
 }
@@ -445,7 +475,8 @@ void Fltk13GUI::updateFlags() {
 		if (longProp && latProp) {
 			double longitude  = atof(longProp->value.c_str());
 			double latitude  = atof(latProp->value.c_str());
-			float radius = atof(radProp->value.c_str());
+			float radius = 0;
+			if (radProp) radius = atof(radProp->value.c_str());
 			worldMap->addFlag(longitude, latitude, radius);
 		}
 		worldMap->redraw();
