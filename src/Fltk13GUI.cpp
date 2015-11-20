@@ -55,6 +55,9 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(1000,800,"Mar
 		{"&Edit", 0, 0, 0, FL_SUBMENU},
 			{"&Undo", FL_COMMAND + 'z', menuCallback, (void*) EDIT_UNDO, FL_MENU_DIVIDER},
 			{0},
+		{"&View", 0, 0, 0, FL_SUBMENU},
+			{"&remove all < 4 stars", FL_COMMAND + 'z', menuCallback, (void*) VIEW_REM_STARS, FL_MENU_DIVIDER},
+			{0},
 		{"&Help", 0, 0, 0, FL_SUBMENU},
 			{"&About...", FL_COMMAND + 'a', menuCallback, (void*) HELP_ABOUT},
 			{0},
@@ -140,11 +143,18 @@ void Fltk13GUI::applyChangesOfSelectedKeyValue() {
 //	if (keyValueList) keyValueList->applyChangesOfSelectedKeyValue();
 	if (!keyValueList) return;
 	const KeyValueGroup* kvg = keyValueList->getSelectedKeyValue();
+	if (!kvg) return;
 	std::string newKey = kvg->getKey();
 	std::string newValue = kvg->getValue();
 
 	bool overwriteExisting = false;
 	bool alreadyAskedOverwrite = false;
+
+	// for single entry: always overwrite without asking
+	if (fileList->getSelectedFiles().size() == 1) {
+		overwriteExisting = true;
+		alreadyAskedOverwrite = true;
+	}
 
 	// for all selected files
 	for (auto sp=fileList->getSelectedFiles().begin(); sp!=fileList->getSelectedFiles().end(); ++sp) {
@@ -154,9 +164,11 @@ std::cout << (*sp)->getFileName() << std::endl;
 			switch(fl_choice("Overwrite all existing data?", "Yes to all", "No to all", "Cancel")) {
 				case 0: // first button
 					overwriteExisting = true;
+					alreadyAskedOverwrite = true;
 					break;
 				case 1: // second button
 					overwriteExisting = false;
+					alreadyAskedOverwrite = true;
 					break;
 				default:
 					return;
@@ -233,8 +245,10 @@ void Fltk13GUI::saveDataBase() {
 		case FILE_EXIT:
 			fgui->applyChangesOfSelectedKeyValue();
 			fgui->saveDataBase(); // auto-save on exit
-			exit(0);
-			//break;
+			exit(0); //break;
+		case VIEW_REM_STARS:
+			fgui->removeFilesWithLessThan4Stars();
+			break;
 		case HELP_ABOUT:
 			fgui->showAboutDialog();
 			break;
@@ -398,6 +412,35 @@ void Fltk13GUI::openDir(std::string path) {
 		//}
 		fileList->redraw();
 	}
+}
+
+void Fltk13GUI::removeFilesWithLessThan4Stars() {
+	if (!fileList) return;
+	// iterate through all files
+	int i=0;
+	while (i < fileList->children()) {
+		// delete if less than 4 stars
+		FileGroup* fg = (FileGroup*) Fltk13GUI::fgui->fileList->child(i);
+		if (!fg->mdf) {i++; continue;}
+		MDProperty* mdp = fg->mdf->getPropertyByKey("rating");
+
+		if (mdp && (atoi(mdp->value.c_str()) < 4)) {
+			delete fileList->child(i);
+			fileList->remove(i);
+		} else {
+			i++; // increase only if not deleted
+		}
+	}
+
+	// recompute positions of leftover widgets
+	for (i=1; i < fileList->children(); i++) {
+		int newX = fileList->child(i)->x();
+		int newY = fileList->child(i-1)->y() + fileList->child(i-1)->h() + 1;
+		fileList->child(i)->position(newX, newY);
+	}
+	fileList->init_sizes();
+
+	fileList->redraw();
 }
 
 void Fltk13GUI::openSubDir(std::string subDirName) {

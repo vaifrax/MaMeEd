@@ -60,31 +60,7 @@ int KeyValueGroup::handle(int eventn) {
 			//label ("Lost focus");
 			//damage(1);
 // TODO: also do this before saving, or at return; maybe add a new empty key value pair at the end
-
-			// apply to all selected files not just one
-
-//TODO
-			//KeyValueGroup* selectedKeyValue = ((F13KeyValueList*) parent())->getSelectedKeyValue();
-			//if (!selectedKeyValue) return;
-			//std::string newKey = getKey();
-			//std::string newValue = getValue();
 			Fltk13GUI::fgui->applyChangesOfSelectedKeyValue();
-/*
-
-?				MDDir* mdd = ;
-			for (auto mdf=mdd->files.begin(); mdf!=mdd->files.end(); ++mdf) {
-				std::string origSelectedKey = selectedKeyValue->getKey();
-				std::string origSelectedValue = selectedKeyValue->getValue();
-				if ((origSelectedKey != newKey) || (origSelectedValue != newValue)) {
-					mdf->changeKeyValue(origSelectedKey, newKey, newValue);
-				}
-			}
-			// only last one in list:
-			//((F13KeyValueList*) parent())->applyChangesOfSelectedKeyValue();
-			// //				propFile->setKeyValue(selectedKeyValue->fixedBox->value(), selectedKeyValue->stretchBox->value());
-			// // TODO: how to remove?
-			// //return 1; 
-*/
 			return Fl_Group::handle(eventn);
 			}
 		default:

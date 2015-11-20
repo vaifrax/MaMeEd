@@ -27,6 +27,7 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
 	~Fltk13GUI();
 
 	void openDir(std::string path); // absolute path
+void removeFilesWithLessThan4Stars();
 	void openSubDir(std::string subDirName); // relative to currently opened path
 	void showFileMetaData(); // update/show new file meta data window (of selected file)
 	void updateFlags(); // update Flag list from world map according to selection
@@ -66,7 +67,7 @@ class Fltk13GUI : public MGUI, public Fl_Double_Window {
 	Fl_Window* exitNoSavingDialog;
 	void showExitNoSavingDialog();
 
-	static enum {FILE_OPEN, FILE_SAVE, FILE_EXIT_NO_SAVING, FILE_EXIT, EDIT_UNDO, HELP_ABOUT} MenuItemEnum;
+	static enum {FILE_OPEN, FILE_SAVE, FILE_EXIT_NO_SAVING, FILE_EXIT, EDIT_UNDO, VIEW_REM_STARS, HELP_ABOUT} MenuItemEnum;
 	static enum {BUTTON_PATH, BUTTON_ABOUT_OK, BUTTON_NO_SAVING_OK, BUTTON_NO_SAVING_CANCEL} ButtonEnum;
 	static enum {FROM_PATHTEXTEDIT} KeyboardEnum;
 

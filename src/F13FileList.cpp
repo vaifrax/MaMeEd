@@ -139,9 +139,11 @@ F13FileList::F13FileList(int X, int Y, int W, int H, MDDir const* mddir/* = NULL
 FileGroup* F13FileList::getActiveFile(int offset/* = 0*/) const {
 	if (offset == 0) return activeFile;
 	int newIndex = activeFile->index + offset;
-	if (newIndex < 0) newIndex = 0;
-	if (newIndex >= this->itemNum) newIndex = this->itemNum-1;
-	FileGroup* ret = (FileGroup*) Fltk13GUI::fgui->fileList->child( newIndex ) ;
+	//if (newIndex < 0) newIndex = 0;
+	if (newIndex < 0) return NULL;
+	//if (newIndex >= this->itemNum) newIndex = this->itemNum-1;
+	if (newIndex >= this->itemNum) return NULL;
+	FileGroup* ret = (FileGroup*) Fltk13GUI::fgui->fileList->child(newIndex);
 	if (ret->mdf) return ret;
 	return NULL;
 }
@@ -187,6 +189,8 @@ void F13FileList::setActiveFileNext() {
 }
 
 void F13FileList::setActiveFile(FileGroup* sel) {
+	if (!sel) return;
+
 	FileGroup* prevActiveFile = activeFile;
 	activeFile = sel;
 

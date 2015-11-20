@@ -283,6 +283,7 @@ bool ExifFileM::readGPS(long position) {
 				double min = readRational(data + exifStartPos + 8);
 				double sec = readRational(data + exifStartPos + 16);
 				latitude = deg + min/60.0 + sec/3600.0;
+				if ((latitude < -90) || (latitude > 90)) break; // some number out of range can mean that GPS position was not known
 				hasLatitudeTag = true;
 				break;}
 			case 0x0003:
@@ -293,6 +294,7 @@ bool ExifFileM::readGPS(long position) {
 				double min = readRational(data + exifStartPos + 8);
 				double sec = readRational(data + exifStartPos + 16);
 				longitude = deg + min/60.0 + sec/3600.0;
+				if ((longitude < -180) || (longitude > 180)) break;
 				hasLongitudeTag = true;
 				break;}
 			case 0x0005:
