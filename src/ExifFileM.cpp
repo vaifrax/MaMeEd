@@ -287,7 +287,7 @@ bool ExifFileM::readGPS(long position) {
 				hasLatitudeTag = true;
 				break;}
 			case 0x0003:
-				latitudeNorth = (data != 'W');
+				longitudeEast = (data != 'W');
 				break;
 			case 0x0004: {
 				double deg = readRational(data + exifStartPos);

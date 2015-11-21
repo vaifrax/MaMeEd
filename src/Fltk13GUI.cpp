@@ -416,6 +416,9 @@ void Fltk13GUI::openDir(std::string path) {
 
 void Fltk13GUI::removeFilesWithLessThan4Stars() {
 	if (!fileList) return;
+
+	fileList->clearSelection();
+
 	// iterate through all files
 	int i=0;
 	while (i < fileList->children()) {
@@ -423,6 +426,7 @@ void Fltk13GUI::removeFilesWithLessThan4Stars() {
 		FileGroup* fg = (FileGroup*) Fltk13GUI::fgui->fileList->child(i);
 		if (!fg->mdf) {i++; continue;}
 		MDProperty* mdp = fg->mdf->getPropertyByKey("rating");
+		fg->index = i; // update index
 
 		if (mdp && (atoi(mdp->value.c_str()) < 4)) {
 			delete fileList->child(i);

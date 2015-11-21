@@ -30,6 +30,7 @@ class F13FileList : public Fl_Scroll {
 //	const char* getActiveFileName(int offset = 0) const;
 	void setActiveFile(FileGroup* sel);
 	void setActiveFileNext();
+	void clearSelection() {selectedFiles.clear();}
 	const std::list<FileGroup*>& getSelectedFiles() {return selectedFiles;};
 	//int handle(int eventn);
 

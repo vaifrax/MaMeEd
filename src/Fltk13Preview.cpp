@@ -40,12 +40,16 @@ void Fltk13Preview::setImg(std::string fileName, std::string prevFileName, std::
 
 		// if not used: delete
 		if (!used && cache[i].img) {
-			delete cache[i].img;
+			try {
+				delete cache[i].img;
+			} catch (...) {
+				std::cout << "DELETION FAILED of cached file " << cache[i].fileName << std::endl;
+			}
 			cache[i].img = NULL;
 			cache[i].fileName = std::string();
 		}
 	}
-std::cout << "START" << std::endl;
+
 	// load missing images
 	if (!img) img = loadImg(fileName);
 	// refresh preview
@@ -54,7 +58,6 @@ std::cout << "START" << std::endl;
 		redraw();
 	}
 	Fl::check();
-std::cout << "END REDRAW" << std::endl;
 
 	// load missing images
 	if (!prevImg) prevImg = loadImg(prevFileName);
@@ -66,18 +69,18 @@ std::cout << "END REDRAW" << std::endl;
 	cache[1].img = prevImg;
 	cache[2].fileName = nextFileName;
 	cache[2].img = nextImg;
-std::cout << "END LOADING" << std::endl;
+	//std::cout << "END LOADING" << std::endl;
 
 }
 
 // TODO: do this in a different thread!
 Fl_Image* Fltk13Preview::loadImg(std::string fileName) {
 	if (fileName.empty()) return NULL;
-std::cout << "loading " << fileName << std::endl;
+	std::cout << " loading " << fileName;
 
 	Fl_Image* img = NULL;
 	Fl_JPEG_Image imgl(fileName.c_str());
-std::cout << "  w x h " << imgl.w() << " " << imgl.h() << std::endl;
+	std::cout << "  w x h " << imgl.w() << " " << imgl.h() << std::endl;
 	if (imgl.w()) {
 		float scale = std::min(w() / (float) imgl.w(), h() / (float) imgl.h());
 		if (img) delete img; img = NULL;
