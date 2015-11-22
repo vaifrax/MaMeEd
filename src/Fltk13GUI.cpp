@@ -19,7 +19,8 @@
 
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Shared_Image.H>
-#include <FL/Fl_JPEG_Image.H> // for large preview img
+//#include <FL/Fl_JPEG_Image.H> // for large preview img
+#include "Fl_JPEG_Image-Fast.h"
 
 #include <FL/x.H> // to set icon in windows
 #include "../prj/resource.h" // for icon ID

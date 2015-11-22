@@ -2,7 +2,8 @@
 
 #include <FL/Fl.H>
 #include <FL/Fl_Shared_Image.H>
-#include <FL/Fl_JPEG_Image.H> // for large preview img
+//#include <FL/Fl_JPEG_Image.H> // for large preview img
+#include "Fl_JPEG_Image-Fast.h"
 
 #include <iostream> //for cout only
 
@@ -76,10 +77,17 @@ void Fltk13Preview::setImg(std::string fileName, std::string prevFileName, std::
 // TODO: do this in a different thread!
 Fl_Image* Fltk13Preview::loadImg(std::string fileName) {
 	if (fileName.empty()) return NULL;
+
+	// check extension
+	if (fileName.length() < 4) return NULL;
+	char ext[5] = {0,0,0,0,0};
+	for (int i=0; i<4; i++) ext[i] = toupper(fileName.at(fileName.length()-4+i));
+	if ((strcmp(ext, ".JPG") != 0) && (strcmp(ext, "JPEG") != 0)) return NULL; // not correct extension
+
 	std::cout << " loading " << fileName;
 
 	Fl_Image* img = NULL;
-	Fl_JPEG_Image imgl(fileName.c_str());
+	Fl_JPEG_ImageFast imgl(fileName.c_str());
 	std::cout << "  w x h " << imgl.w() << " " << imgl.h() << std::endl;
 	if (imgl.w()) {
 		float scale = std::min(w() / (float) imgl.w(), h() / (float) imgl.h());

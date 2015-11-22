@@ -148,8 +148,8 @@ void Fltk13WorldMap::draw() {
 	CHECK_GL_STATE
 	glUseProgram(shaderProgram);
 	CHECK_GL_STATE
-	setUniform1f(shaderProgram, "zoom", zoom);
-	CHECK_GL_STATE
+//	setUniform1f(shaderProgram, "zoom", zoom);
+//	CHECK_GL_STATE
 	//glEnable(GL_POLYGON_OFFSET_FILL);
 	//glPolygonOffset(5, 1); push depth values of map tile polygons back a little so that flags will appear on top without z-fighting: didn't work yet
 	tileLevels[tileLevel]->draw(w(), h(), zoom, angle1, angle2);

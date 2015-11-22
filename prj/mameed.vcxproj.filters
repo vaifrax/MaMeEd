@@ -83,6 +83,9 @@
     <ClCompile Include="..\src\F13KeyValueGroup.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Fl_JPEG_Image-Fast.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\F13FileList.h">
@@ -149,6 +152,9 @@
       <Filter>Source Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\src\F13KeyValueGroup.h">
+      <Filter>Source Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Fl_JPEG_Image-Fast.h">
       <Filter>Source Files\gui</Filter>
     </ClInclude>
   </ItemGroup>

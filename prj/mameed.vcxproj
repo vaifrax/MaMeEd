@@ -46,14 +46,14 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>E:\coding\_libs\fltk-1.3.3\;E:\coding\2012\MarcelsMetadataEditor\libcurl\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\coding\_libs\fltk-1.3.3\;E:\coding\2012\MarcelsMetadataEditor\libcurl\include;E:\coding\_libs\libjpeg-turbo\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltkimages.lib;fltkjpeg.lib;fltkpng.lib;fltkzlib.lib;glu32.lib;opengl32.lib;fltkgl.lib;libcurl.lib;ws2_32.lib;winmm.lib;wldap32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>E:\coding\_libs\fltk-1.3.3\lib;E:\coding\2012\MarcelsMetadataEditor\libcurl\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltkimages.lib;jpeg-static.lib;fltkpng.lib;fltkzlib.lib;glu32.lib;opengl32.lib;fltkgl.lib;libcurl.lib;ws2_32.lib;winmm.lib;wldap32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\coding\_libs\fltk-1.3.3\lib;E:\coding\2012\MarcelsMetadataEditor\libcurl\lib;E:\coding\_libs\libjpeg-turbo\lib</AdditionalLibraryDirectories>
       <ShowProgress>NotSet</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
@@ -63,7 +63,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>E:\coding\_libs\fltk-1.3.3\;E:\coding\2012\MarcelsMetadataEditor\libcurl\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\coding\_libs\fltk-1.3.3\;E:\coding\2012\MarcelsMetadataEditor\libcurl\include;E:\coding\_libs\libjpeg-turbo\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -71,8 +71,8 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltkimages.lib;fltkjpeg.lib;fltkpng.lib;fltkzlib.lib;glu32.lib;opengl32.lib;fltkgl.lib;libcurl.lib;ws2_32.lib;winmm.lib;wldap32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>E:\coding\_libs\fltk-1.3.3\lib;E:\coding\2012\MarcelsMetadataEditor\libcurl\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltkimages.lib;jpeg-static.lib;fltkpng.lib;fltkzlib.lib;glu32.lib;opengl32.lib;fltkgl.lib;libcurl.lib;ws2_32.lib;winmm.lib;wldap32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\coding\_libs\fltk-1.3.3\lib;E:\coding\2012\MarcelsMetadataEditor\libcurl\lib;E:\coding\_libs\libjpeg-turbo\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -83,6 +83,7 @@
     <ClCompile Include="..\src\Fltk13Widgets.cpp" />
     <ClCompile Include="..\src\Fltk13WorldMap.cpp" />
     <ClCompile Include="..\src\F13KeyValueGroup.cpp" />
+    <ClCompile Include="..\src\Fl_JPEG_Image-Fast.cpp" />
     <ClCompile Include="..\src\MapTile.cpp" />
     <ClCompile Include="..\src\MapTileZoomLevel.cpp" />
     <ClCompile Include="..\src\MConfig.cpp" />
@@ -105,6 +106,7 @@
     <ClInclude Include="..\src\Fltk13Preview.h" />
     <ClInclude Include="..\src\Fltk13Widgets.h" />
     <ClInclude Include="..\src\Fltk13WorldMap.h" />
+    <ClInclude Include="..\src\Fl_JPEG_Image-Fast.h" />
     <ClInclude Include="..\src\MapTile.h" />
     <ClInclude Include="..\src\MapTileZoomLevel.h" />
     <ClInclude Include="..\src\MConfig.h" />

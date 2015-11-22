@@ -5,7 +5,8 @@
 #include "MDProperty.h"
 
 #include <FL/Fl_Shared_Image.H>
-#include <FL/Fl_JPEG_Image.H>
+//#include <FL/Fl_JPEG_Image.H>
+#include "Fl_JPEG_Image-Fast.h"
 
 //#include "ExifFile.h"
 
@@ -64,7 +65,7 @@ FileGroup::FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* m
 					unsigned char* thumbData = new unsigned char[thumbSize];
 					fread(thumbData, 1, thumbSize, tf);
 
-					Fl_JPEG_Image jpgImgThumb(NULL, thumbData);
+					Fl_JPEG_ImageFast jpgImgThumb(NULL, thumbData);
 					//std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
 					float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgThumb.w(), jpgImgThumb.h());
 					int newW = (int) (scDiv * jpgImgThumb.w() + 0.499);

@@ -1,5 +1,5 @@
 uniform sampler2D tex;
-uniform float zoom;
+//uniform float zoom;
 
 // standard gl_FragCoord is 0..1 with lower left origin, use center origin with -0.5..0.5 with the following line
 layout(pixel_center_integer) in vec4 gl_FragCoord;
@@ -10,7 +10,7 @@ varying vec2 texCoord;
 void main(void) {
 	//vec3 color = texture2D(fresnel_gradient, vec2(angle,0.0)).xyz; // show gradient color
 
-	vec3 color = vec3(1, 0, 0.01*zoom);
+//	vec3 color = vec3(1, 0, 0.01*zoom);
 //	vec3 color = texture2D(tex1, zoom*gl_FragCoord.uv);
 	gl_FragColor = texture2D(tex, texCoord);
 //	gl_FragColor = vec4 (texCoord, 0.0,  1.0);
