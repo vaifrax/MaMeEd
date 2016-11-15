@@ -81,8 +81,16 @@ bool ExifFileM::parseFile() {
 		// read tag
 		int tag = readNum(2);
 		int type = readNum(2);
-		int count = readNum(4);
+		long count = readNum(4);
 		long data = readNum(4);
+		if ((count < 0) || (count > 1000)) {
+			std::cout << "ERROR: unexpected value for count: " << count << std::endl;
+			break;
+		}
+		if ((data < 0) || (data > 100000)) {
+			std::cout << "ERROR: unexpected value for data: " << data << std::endl;
+			break;
+		}
 
 		// parse tag
 		switch (tag) {
@@ -143,6 +151,11 @@ bool ExifFileM::parseFile() {
 			if (nextIfdOffset) {
 				fseek(exifFile, exifStartPos + nextIfdOffset, SEEK_SET);
 				fieldCount = readNum(2);
+
+				if ((fieldCount < 0) || (fieldCount > 1000)) {
+					std::cout << "ERROR: unexpected value for fieldCount: " << fieldCount << std::endl;
+					break;
+				}
 			}
 
 			if (ifdPointer) {
@@ -150,6 +163,11 @@ bool ExifFileM::parseFile() {
 				fseek(exifFile, exifStartPos + ifdPointer, SEEK_SET);
 				fieldCount = readNum(2);
 				ifdPointer = 0;
+
+				if ((fieldCount < 0) || (fieldCount > 1000)) {
+					std::cout << "ERROR: unexpected value for fieldCount: " << fieldCount << std::endl;
+					break;
+				}
 			}
 		}
 

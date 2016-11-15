@@ -195,6 +195,7 @@ void MDDir::importMetadataFromFiles() {
 	for (std::vector<MDFile*>::iterator f=files.begin(); f!=files.end(); ++f) {
 		if (!(*f)->isDirectory()) {
 			(*f)->importEmbeddedMetadata();
+std::cout << (*f)->getName() << std::endl;
 		}
 	}
 }
