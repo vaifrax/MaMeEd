@@ -11,7 +11,9 @@ class Fltk13Preview : public Fl_Box {
 
 	// show 1st image, cache other two
 //TODO: load other images in extra thread
-	void setImg(std::string fileName, std::string prevFileName, std::string nextFileName);
+	void setImg(std::string fileName, int imgExifStorageOrientation,
+				std::string prevFileName, int prevImgExifStorageOrientation,
+				std::string nextFileName, int nextImgExifStorageOrientation);
 
   protected:
 	Fl_Image* img;
@@ -21,7 +23,7 @@ class Fltk13Preview : public Fl_Box {
 		Fl_Image* img;
 	} cache[3];
 
-	Fl_Image* loadImg(std::string fileName);
+	Fl_Image* loadImg(std::string fileName, int exifStorageOrientation);
 };
 
 

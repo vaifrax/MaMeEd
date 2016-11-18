@@ -503,12 +503,27 @@ void Fltk13GUI::showFileMetaData() {
 
 	std::string currentPath(fgui->mCore->getMDDir()->getDirPath());
 	std::string fullPath = currentPath + '/' + fileList->getActiveFile()->getFileName();
-	FileGroup* prevFile = fileList->getActiveFile(-1);
-	std::string prevFileName = (prevFile && !prevFile->mdf->isDirectory()) ? currentPath + '/' + prevFile->getFileName() : "";
-	FileGroup* nextFile = fileList->getActiveFile(1);
-	std::string nextFileName = (nextFile && !nextFile->mdf->isDirectory()) ? currentPath + '/' + nextFile->getFileName() : "";
+	int nExifStorageOrientation = atoi(mdfile->getPropertyByKey("storageOrientation")->value.c_str());
 
-	largePreview->setImg(fullPath, prevFileName, nextFileName);
+	FileGroup* prevFile = fileList->getActiveFile(-1);
+	std::string prevFileName = "";
+	int prevImgExifStorageOrientation = 1;
+	if (prevFile && !prevFile->mdf->isDirectory()) {
+		prevFileName = currentPath + '/' + prevFile->getFileName();
+		prevImgExifStorageOrientation = atoi(mddir->getMDFile(prevFile->getFileName())->getPropertyByKey("storageOrientation")->value.c_str());
+	}
+
+	FileGroup* nextFile = fileList->getActiveFile(1);
+	std::string nextFileName = "";
+	int nextImgExifStorageOrientation = 1;
+	if (nextFile && !nextFile->mdf->isDirectory()) {
+		nextFileName = currentPath + '/' + nextFile->getFileName();
+		nextImgExifStorageOrientation = atoi(mddir->getMDFile(nextFile->getFileName())->getPropertyByKey("storageOrientation")->value.c_str());
+	}
+
+	largePreview->setImg(fullPath, nExifStorageOrientation,
+						prevFileName, prevImgExifStorageOrientation,
+						nextFileName, nextImgExifStorageOrientation);
 }
 
 // update Flag list from world map according to selection

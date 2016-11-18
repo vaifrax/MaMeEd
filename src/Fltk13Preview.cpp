@@ -1,9 +1,10 @@
 #include "Fltk13Preview.h"
 
 #include <FL/Fl.H>
-#include <FL/Fl_Shared_Image.H>
+#include <FL/Fl_Image.H>
 //#include <FL/Fl_JPEG_Image.H> // for large preview img
 #include "Fl_JPEG_Image-Fast.h"
+#include "FlImgTools.h"
 
 #include <iostream> //for cout only
 
@@ -15,7 +16,10 @@ Fltk13Preview::Fltk13Preview(int X, int Y, int W, int H) : Fl_Box(X,Y,W,H,0) {
 	}
 }
 
-void Fltk13Preview::setImg(std::string fileName, std::string prevFileName, std::string nextFileName) {
+void Fltk13Preview::setImg(std::string fileName, int imgExifStorageOrientation,
+				std::string prevFileName, int prevImgExifStorageOrientation,
+				std::string nextFileName, int nextImgExifStorageOrientation) {
+
 	Fl_Image* prevImg = NULL;
 	Fl_Image* nextImg = NULL;
 	img = NULL;
@@ -51,8 +55,10 @@ void Fltk13Preview::setImg(std::string fileName, std::string prevFileName, std::
 		}
 	}
 
+	//std::cout << "START LOADING" << std::endl;
+
 	// load missing images
-	if (!img) img = loadImg(fileName);
+	if (!img) img = loadImg(fileName, imgExifStorageOrientation);
 	// refresh preview
 	if (img && (img->w() > 0)) {
 		image(img);
@@ -61,8 +67,8 @@ void Fltk13Preview::setImg(std::string fileName, std::string prevFileName, std::
 	Fl::check();
 
 	// load missing images
-	if (!prevImg) prevImg = loadImg(prevFileName);
-	if (!nextImg) nextImg = loadImg(nextFileName);
+	if (!prevImg) prevImg = loadImg(prevFileName, nextImgExifStorageOrientation);
+	if (!nextImg) nextImg = loadImg(nextFileName, nextImgExifStorageOrientation);
 
 	cache[0].fileName = fileName;
 	cache[0].img = img;
@@ -70,12 +76,12 @@ void Fltk13Preview::setImg(std::string fileName, std::string prevFileName, std::
 	cache[1].img = prevImg;
 	cache[2].fileName = nextFileName;
 	cache[2].img = nextImg;
-	//std::cout << "END LOADING" << std::endl;
 
+	//std::cout << "END LOADING" << std::endl;
 }
 
 // TODO: do this in a different thread!
-Fl_Image* Fltk13Preview::loadImg(std::string fileName) {
+Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientation) {
 	if (fileName.empty()) return NULL;
 
 	// check extension
@@ -94,5 +100,23 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName) {
 		if (img) delete img; img = NULL;
 		img = imgl.copy((int) (scale * imgl.w()), (int) (scale * imgl.h()));
 	}
+
+	// rotate if necessary
+	// there are mirrored versions, too, they are not yet implemented here
+	int rotateClockwDeg = 0;
+	switch (exifStorageOrientation) {
+		case 3: rotateClockwDeg = 180;
+			break;
+		case 5: rotateClockwDeg = 270;
+			break;
+		case 6: rotateClockwDeg = 90;
+			break;
+	}
+	if (rotateClockwDeg != 0) {
+		Fl_Image* tmpImg = FlImgTools::rotate(img, rotateClockwDeg);
+		delete img;
+		img = tmpImg;
+	}
+
 	return img;
 }
