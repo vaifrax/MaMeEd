@@ -96,7 +96,7 @@ extern "C" {
  
  \param[in] filename a full path and name pointing to a valid jpeg file.
  */
-Fl_JPEG_ImageFast::Fl_JPEG_ImageFast(const char *filename)	// I - File to load
+Fl_JPEG_ImageFast::Fl_JPEG_ImageFast(const char *filename, int minDim /*=-1*/)	// I - File to load
 : Fl_RGB_Image(0,0,0) {
 #ifdef HAVE_LIBJPEG
   FILE				*fp;	// File pointer
@@ -164,9 +164,22 @@ Fl_JPEG_ImageFast::Fl_JPEG_ImageFast(const char *filename)	// I - File to load
   dinfo.out_color_space      = JCS_RGB;
   dinfo.out_color_components = 3;
   dinfo.output_components    = 3;
-  
+
+  dinfo.scale_num = 1;
+  dinfo.scale_denom = 1;
+
+  // only decode to smaller size: lower quality but faster
+  if (minDim > 0) {
+    int maxDim = dinfo.image_width;
+    if (dinfo.image_height > maxDim) maxDim = dinfo.image_height;
+    while ((dinfo.scale_denom <= 8) && (maxDim > 2*minDim)) {
+      dinfo.scale_denom *= 2;
+      maxDim /= 2;
+    }
+  }
+
   jpeg_calc_output_dimensions(&dinfo);
-  
+
   w(dinfo.output_width); 
   h(dinfo.output_height);
   d(dinfo.output_components);
@@ -284,7 +297,7 @@ static void jpeg_mem_src(j_decompress_ptr cinfo, const unsigned char *data)
  \param name A unique name or NULL
  \param data A pointer to the memory location of the JPEG image
  */
-Fl_JPEG_ImageFast::Fl_JPEG_ImageFast(const char *name, const unsigned char *data)
+Fl_JPEG_ImageFast::Fl_JPEG_ImageFast(const char *name, const unsigned char *data, int minDim /*=-1*/)
 : Fl_RGB_Image(0,0,0) {
 #ifdef HAVE_LIBJPEG
   jpeg_decompress_struct	dinfo;	// Decompressor info
@@ -346,6 +359,19 @@ Fl_JPEG_ImageFast::Fl_JPEG_ImageFast(const char *name, const unsigned char *data
   dinfo.out_color_space      = JCS_RGB;
   dinfo.out_color_components = 3;
   dinfo.output_components    = 3;
+
+  dinfo.scale_num = 1;
+  dinfo.scale_denom = 1;
+
+  // only decode to smaller size: lower quality but faster
+  if (minDim > 0) {
+    int maxDim = dinfo.image_width;
+    if (dinfo.image_height > maxDim) maxDim = dinfo.image_height;
+    while ((dinfo.scale_denom <= 8) && (maxDim > 2*minDim)) {
+      dinfo.scale_denom *= 2;
+      maxDim /= 2;
+    }
+  }
   
   jpeg_calc_output_dimensions(&dinfo);
   

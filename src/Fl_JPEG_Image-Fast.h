@@ -32,9 +32,9 @@
 class FL_EXPORT Fl_JPEG_ImageFast : public Fl_RGB_Image {
 
 public:
-
-  Fl_JPEG_ImageFast(const char *filename);
-  Fl_JPEG_ImageFast(const char *name, const unsigned char *data);
+  // minDim: minimal size of max dimension, enables (faster) decoding of lower resolution, -1 disables
+  Fl_JPEG_ImageFast(const char *filename, int minDim = -1);
+  Fl_JPEG_ImageFast(const char *name, const unsigned char *data, int minDim = -1);
 };
 
 #endif

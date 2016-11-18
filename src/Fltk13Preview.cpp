@@ -87,7 +87,7 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName) {
 	std::cout << " loading " << fileName;
 
 	Fl_Image* img = NULL;
-	Fl_JPEG_ImageFast imgl(fileName.c_str());
+	Fl_JPEG_ImageFast imgl(fileName.c_str(), 800);
 	std::cout << "  w x h " << imgl.w() << " " << imgl.h() << std::endl;
 	if (imgl.w()) {
 		float scale = std::min(w() / (float) imgl.w(), h() / (float) imgl.h());
