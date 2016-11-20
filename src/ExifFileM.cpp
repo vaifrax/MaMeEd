@@ -87,7 +87,7 @@ bool ExifFileM::parseFile() {
 			std::cout << "ERROR: unexpected value for count: " << count << std::endl;
 			break;
 		}
-		if ((data < 0) || (data > 100000)) {
+		if ((data < 0) || (data > 500000)) {
 			std::cout << "ERROR: unexpected value for data: " << data << std::endl;
 			break;
 		}

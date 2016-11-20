@@ -503,14 +503,22 @@ void Fltk13GUI::showFileMetaData() {
 
 	std::string currentPath(fgui->mCore->getMDDir()->getDirPath());
 	std::string fullPath = currentPath + '/' + fileList->getActiveFile()->getFileName();
-	int nExifStorageOrientation = atoi(mdfile->getPropertyByKey("storageOrientation")->value.c_str());
+	int nExifStorageOrientation = 1;
+	MDProperty* so = mdfile->getPropertyByKey("storageOrientation");
+	if (so) {
+		nExifStorageOrientation = atoi(so->value.c_str());
+	}
 
 	FileGroup* prevFile = fileList->getActiveFile(-1);
 	std::string prevFileName = "";
 	int prevImgExifStorageOrientation = 1;
 	if (prevFile && !prevFile->mdf->isDirectory()) {
 		prevFileName = currentPath + '/' + prevFile->getFileName();
-		prevImgExifStorageOrientation = atoi(mddir->getMDFile(prevFile->getFileName())->getPropertyByKey("storageOrientation")->value.c_str());
+
+		MDProperty* so = mddir->getMDFile(prevFile->getFileName())->getPropertyByKey("storageOrientation");
+		if (so) {
+			prevImgExifStorageOrientation = atoi(so->value.c_str());
+		}
 	}
 
 	FileGroup* nextFile = fileList->getActiveFile(1);
@@ -518,7 +526,11 @@ void Fltk13GUI::showFileMetaData() {
 	int nextImgExifStorageOrientation = 1;
 	if (nextFile && !nextFile->mdf->isDirectory()) {
 		nextFileName = currentPath + '/' + nextFile->getFileName();
-		nextImgExifStorageOrientation = atoi(mddir->getMDFile(nextFile->getFileName())->getPropertyByKey("storageOrientation")->value.c_str());
+
+		MDProperty* so = mddir->getMDFile(nextFile->getFileName())->getPropertyByKey("storageOrientation");
+		if (so) {
+			nextImgExifStorageOrientation = atoi(so->value.c_str());
+		}
 	}
 
 	largePreview->setImg(fullPath, nExifStorageOrientation,
