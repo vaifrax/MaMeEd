@@ -24,7 +24,7 @@ MDFile::MDFile(std::string fileName, std::string const& dirPath) : fileName(file
 
 	struct tm* clock = gmtime(&(myStat.st_mtime));	// Get the last modified time and put it into the time structure
 std::stringstream sstream;
-sstream << clock->tm_mday << '.' << clock->tm_mon << '.' << (clock->tm_year+1900);
+sstream << clock->tm_mday << '.' << clock->tm_mon+1 << '.' << (clock->tm_year+1900);
 dateStr = sstream.str();//std::string("") + clock->tm_mday + '.' + clock->tm_mon + '.' + (clock->tm_year+1900);
 // clock->tm_year returns the year (since 1900)
 // clock->tm_mon returns the month (January = 0)

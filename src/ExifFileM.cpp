@@ -3,7 +3,7 @@
 // TODO: add event handler for changes in folder (update fileList)
 
 // TODO: add dropdown helper for categories and rating of images
-// TODO: add possibility to rotate image and/or thumbnail
+// TODO: rotate thumbnail
 // TODO: add GPS tags
 
 

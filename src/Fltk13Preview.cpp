@@ -90,28 +90,39 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 	for (int i=0; i<4; i++) ext[i] = toupper(fileName.at(fileName.length()-4+i));
 	if ((strcmp(ext, ".JPG") != 0) && (strcmp(ext, "JPEG") != 0)) return NULL; // not correct extension
 
+	// load image
 	std::cout << " loading " << fileName;
-
 	Fl_Image* img = NULL;
 	Fl_JPEG_ImageFast imgl(fileName.c_str(), 800);
-	std::cout << "  w x h " << imgl.w() << " " << imgl.h() << std::endl;
+	int imglWr = imgl.w();
+	int imglHr = imgl.h();
+
+	// check rotation
+	int rotateClockwDeg = 0;
+	switch (exifStorageOrientation) {
+		case 3:
+			rotateClockwDeg = 180;
+			break;
+		case 5:
+			rotateClockwDeg = 270;
+			std::swap(imglWr, imglHr);
+			break;
+		case 6:
+			rotateClockwDeg = 90;
+			std::swap(imglWr, imglHr);
+			break;
+	}
+
+	// resize first
+	std::cout << "  w x h " << imglWr << " " << imglHr << std::endl;
 	if (imgl.w()) {
-		float scale = std::min(w() / (float) imgl.w(), h() / (float) imgl.h());
+		float scale = std::min(w() / (float) imglWr, h() / (float) imglHr);
 		if (img) delete img; img = NULL;
 		img = imgl.copy((int) (scale * imgl.w()), (int) (scale * imgl.h()));
 	}
 
 	// rotate if necessary
 	// there are mirrored versions, too, they are not yet implemented here
-	int rotateClockwDeg = 0;
-	switch (exifStorageOrientation) {
-		case 3: rotateClockwDeg = 180;
-			break;
-		case 5: rotateClockwDeg = 270;
-			break;
-		case 6: rotateClockwDeg = 90;
-			break;
-	}
 	if (rotateClockwDeg != 0) {
 		Fl_Image* tmpImg = FlImgTools::rotate(img, rotateClockwDeg);
 		delete img;
