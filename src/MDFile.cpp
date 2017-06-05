@@ -76,8 +76,8 @@ void MDFile::changeKeyValue(std::string const& oldKey, std::string const& newKey
 
 void MDFile::setKeyValue(std::string key, std::string value, bool overwriteExisting/*=false*/) {
 	MDProperty* existingProp = getPropertyByKey(key);
-	if (existingProp && overwriteExisting) {
-		existingProp->value = value;
+	if (existingProp) {
+		if (overwriteExisting) existingProp->value = value;
 	} else {
 		properties.push_back(new MDProperty(key, value));
 	}

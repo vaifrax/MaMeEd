@@ -581,7 +581,7 @@ void Fltk13GUI::setStarRating(int stars) { // 0 to 5
 
 	FileGroup* fg = fileList->getActiveFile();
 	if (fg) {
-		fg->mdf->setKeyValueSrc("rating", std::string(r), "manual");
+		fg->mdf->setKeyValueSrc("rating", std::string(r), "manual", true);
 
 		// trigger repainting of property list
 		keyValueList->setValueOrAddItem("rating", std::string(r));
