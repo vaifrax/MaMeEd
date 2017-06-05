@@ -78,7 +78,8 @@ void MapTile::loadFromInternet() {
 	od.httpHandle = curl_easy_init();
 	od.mapTilePtr = this;
 
-	std::string url = std::string("http://otile4.mqcdn.com/tiles/1.0.0/osm/") + toZeroPaddedStr(zoomLevel, 2) + "/" + toZeroPaddedStr(x, 6) + "/" + toZeroPaddedStr(y, 6) + ".png";
+//	std::string url = std::string("http://otile4.mqcdn.com/tiles/1.0.0/osm/") + toZeroPaddedStr(zoomLevel, 2) + "/" + toZeroPaddedStr(x, 6) + "/" + toZeroPaddedStr(y, 6) + ".png";
+	std::string url = std::string("http://a.tile.opencyclemap.org/cycle/") + std::to_string((_Longlong) zoomLevel) + "/" + std::to_string((_Longlong) x) + "/" + std::to_string((_Longlong) y) + ".png";
 	std::cout << url << std::endl;
 	curl_easy_setopt(od.httpHandle, CURLOPT_URL, url.c_str());
 
@@ -94,7 +95,7 @@ if (!MDDir::isDirectory(outpath2.c_str())) {
 	CreateDirectory(outpath2.c_str(), NULL);
 }
 
-	od.outFileName = outpath2 + "\\" + toZeroPaddedStr(y, 6) + ".jpg"; //std::string("http://otile4.mqcdn.com/tiles/1.0.0/osm/") + toZeroPaddedStr(zoomLevel, 2) + "/" + toZeroPaddedStr(x, 6) + "/" + toZeroPaddedStr(y, 6) + ".png";
+	od.outFileName = outpath2 + "\\" + toZeroPaddedStr(y, 6) + ".png"; //std::string("http://otile4.mqcdn.com/tiles/1.0.0/osm/") + toZeroPaddedStr(zoomLevel, 2) + "/" + toZeroPaddedStr(x, 6) + "/" + toZeroPaddedStr(y, 6) + ".png";
 	std::cout << od.outFileName << std::endl;
 	od.outFile = fopen(od.outFileName.c_str(), "wb");
 	curl_easy_setopt(od.httpHandle, CURLOPT_WRITEFUNCTION, write_data);
@@ -122,14 +123,18 @@ if (!MDDir::isDirectory(outpath2.c_str())) {
 					// close file
 					fclose(i->outFile);
 
-					// convert to dds
-					std::string cmdComp = std::string(mapCachePath) + "nvidiaTextureTools\\nvcompress.exe -nomips -bc1 " + i->outFileName + " " + i->outFileName.substr(0, i->outFileName.length()-3) + "dds";
-					system(cmdComp.c_str());
+					if (msg->data.result == CURLE_COULDNT_CONNECT) {
+						std::cout << "curl ERROR: couldn't connect (check internet connection and firewall?)" << std::endl;
+					} else {
+						// convert to dds
+						std::string cmdComp = std::string(mapCachePath) + "nvidiaTextureTools\\nvcompress.exe -nomips -bc1 " + i->outFileName + " " + i->outFileName.substr(0, i->outFileName.length()-3) + "dds";
+						system(cmdComp.c_str());
 
-					// load texture
-					i->mapTilePtr->loadFromFile();
+						// load texture
+						i->mapTilePtr->loadFromFile();
+					}
 
-					// remove .jpg
+					// remove .png
 					std::string cmdDel = std::string("del ") + i->outFileName;
 					system(cmdDel.c_str());
 
