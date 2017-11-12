@@ -7,6 +7,9 @@
 #include <iostream> // for cout, debugging only!?
 
 StarButton::StarButton(int X, int Y, int W, int H, const char*L=0) : Fl_Button(X,Y,W,H,L) {
+	// set a style that fills background, so that when changing to draw less stars everything looks ok
+	box(FL_FLAT_BOX);
+	color(50);
 }
 
 void StarButton::starVertices() {

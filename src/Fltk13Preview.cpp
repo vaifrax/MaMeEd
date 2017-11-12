@@ -14,6 +14,10 @@ Fltk13Preview::Fltk13Preview(int X, int Y, int W, int H) : Fl_Box(X,Y,W,H,0) {
 		cache[i].fileName = std::string();
 		cache[i].img = NULL;
 	}
+
+	// set a style that fills background, so that when setting a new image with a different size everything looks ok
+	box(FL_FLAT_BOX);
+	color(50);
 }
 
 void Fltk13Preview::setImg(std::string fileName, int imgExifStorageOrientation,
