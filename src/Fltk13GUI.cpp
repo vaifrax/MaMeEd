@@ -430,7 +430,7 @@ void Fltk13GUI::removeFilesWithLessThan4Stars() {
 		fg->index = i; // update index
 
 		if (mdp && (atoi(mdp->value.c_str()) < 4)) {
-			delete fileList->child(i);
+			//delete fileList->child(i);
 			fileList->remove(i);
 		} else {
 			i++; // increase only if not deleted
