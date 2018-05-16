@@ -36,7 +36,7 @@ void removeFilesWithLessThan4Stars();
 	void applyChangesOfSelectedKeyValue();
 	void saveDataBase();
 
-	//int Fltk13GUI::handle(int e);
+	int handle(int e);
 	static void closeWindowCallback(Fl_Widget* widget, void* userData);
 	static void menuCallback(Fl_Widget* widget, void* userData);
 	static void buttonCallback(Fl_Widget* widget, void* userData);

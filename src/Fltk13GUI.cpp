@@ -188,9 +188,31 @@ void Fltk13GUI::saveDataBase() {
 	mCore->getMDDir()->writeToFile();
 }
 
+int Fltk13GUI::handle(int e) {
+	switch(e) {
+		case FL_FOCUS:
+		case FL_UNFOCUS:
+			return 1; // enables receiving keyboard events
 
-//int Fltk13GUI::handle(int e) {
-//	switch (e) {
+		case FL_KEYDOWN:
+			{
+				char ch = Fl::event_key();
+				if (ch >= '0' && ch <= '5') {
+					setStarRating(ch - '0');
+					return 1; // indicate event was handled
+				}
+				if (ch >= '0'+FL_KP && ch <= '5'+FL_KP) {
+					setStarRating(ch - '0' - FL_KP);
+					return 1; // indicate event was handled
+				}
+			}
+			break;
+
+		case FL_MOUSEWHEEL:
+			fileList->setActiveFile(fileList->getActiveFile(Fl::event_dy()));
+			Fltk13GUI::fgui->showFileMetaData();
+			return 1; // indicate event was handled
+
 //		case FL_PASTE:
 //			// make a copy of the DND payload
 //			int evtLen = Fl::event_length();
@@ -207,15 +229,19 @@ void Fltk13GUI::saveDataBase() {
 //			if(callback() && ((when() & FL_WHEN_RELEASE) || (when() & FL_WHEN_CHANGED)))
 //				Fl::add_timeout(0.0, dragDropCallbackDeferred, (void*)this);
 //			return 1;
-//	}
-//}
-//
+	}
+
+	return Fl_Double_Window::handle(e);
+}
+
+
 ///*static*/ void dragDropCallbackDeferred(void* v) {
 //	assert(dynamic_cast<Fltk13GUI*> v);
 //	Fltk13GUI* fgui = (Fltk13GUI*) v;
 //	fgui->openDir(dragDropEventText);
 //	delete[] dragDropEventText;
 //}
+
 
 // called when pressing 'Esc' or closing window via 'X' button
 /*static*/ void Fltk13GUI::closeWindowCallback(Fl_Widget* widget, void* userData) {
