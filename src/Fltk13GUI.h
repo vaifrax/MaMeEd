@@ -77,6 +77,8 @@ void removeFilesWithLessThan4Stars();
 
 	//char* dragDropEventText; // required for drag and drop
 	//static void dragDropCallbackDeferred(void* v);
+
+	int eventRecursion;
 };
 
 #endif // FLTK13GUI_HEADER_INCLUDED

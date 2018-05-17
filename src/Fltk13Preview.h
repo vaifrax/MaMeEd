@@ -14,7 +14,6 @@ class Fltk13Preview : public Fl_Box {
 	void setImg(std::string fileName, int imgExifStorageOrientation,
 				std::string prevFileName, int prevImgExifStorageOrientation,
 				std::string nextFileName, int nextImgExifStorageOrientation);
-
   protected:
 	Fl_Image* img;
 
@@ -24,6 +23,11 @@ class Fltk13Preview : public Fl_Box {
 	} cache[3];
 
 	Fl_Image* loadImg(std::string fileName, int exifStorageOrientation);
+
+
+public:
+void printCache(ImgCacheStruct* cache);
+
 };
 
 

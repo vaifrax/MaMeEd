@@ -134,7 +134,17 @@ int FileGroup::handle(int eventn) {
 ////////////////////////////////////////////////////////////////////////////////////
 
 F13FileList::F13FileList(int X, int Y, int W, int H, MDDir const* mddir/* = NULL*/) : Fl_Scroll(X,Y,W,H,0), mddir(mddir), activeFile(NULL), itemNum(0) {
-	if (mddir) fillList();
+	if (mddir) {
+		fillList();
+
+		// set activeFile to first node that contains a FileGroup
+		int i = 0;
+		while (!dynamic_cast<FileGroup*>(child(i))) {
+			i++;
+			if (i >= children()) return; // no child is a FileGroup
+		}
+		activeFile = (FileGroup*) child(i);
+	}
 }
 
 FileGroup* F13FileList::getActiveFile(int offset/* = 0*/) const {
@@ -144,8 +154,8 @@ FileGroup* F13FileList::getActiveFile(int offset/* = 0*/) const {
 	if (newIndex < 0) return NULL;
 	//if (newIndex >= this->itemNum) newIndex = this->itemNum-1;
 	if (newIndex >= this->itemNum) return NULL;
-	FileGroup* ret = (FileGroup*) Fltk13GUI::fgui->fileList->child(newIndex);
-	if (ret->mdf) return ret;
+	FileGroup* ret = dynamic_cast<FileGroup*>(Fltk13GUI::fgui->fileList->child(newIndex));
+	if (ret && ret->mdf) return ret;
 	return NULL;
 }
 /*

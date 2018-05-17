@@ -20,6 +20,10 @@ Fltk13Preview::Fltk13Preview(int X, int Y, int W, int H) : Fl_Box(X,Y,W,H,0) {
 	color(50);
 }
 
+void Fltk13Preview::printCache(ImgCacheStruct* cache) {
+	std::cout << "cache [" << cache[0].fileName << "_" << cache[1].fileName << "_" << cache[2].fileName << "]" << std::endl;
+}
+
 void Fltk13Preview::setImg(std::string fileName, int imgExifStorageOrientation,
 				std::string prevFileName, int prevImgExifStorageOrientation,
 				std::string nextFileName, int nextImgExifStorageOrientation) {
@@ -27,6 +31,7 @@ void Fltk13Preview::setImg(std::string fileName, int imgExifStorageOrientation,
 	Fl_Image* prevImg = NULL;
 	Fl_Image* nextImg = NULL;
 	img = NULL;
+printCache(cache);
 
 	// check cache images if they are still being used
 	for (int i=0; i<3; i++) {
@@ -48,9 +53,9 @@ void Fltk13Preview::setImg(std::string fileName, int imgExifStorageOrientation,
 		}
 
 		// if not used: delete
-		if (!used && cache[i].img) {
+		if (!used) {
 			try {
-				delete cache[i].img;
+				if (cache[i].img) delete cache[i].img;
 			} catch (...) {
 				std::cout << "DELETION FAILED of cached file " << cache[i].fileName << std::endl;
 			}
@@ -68,16 +73,18 @@ void Fltk13Preview::setImg(std::string fileName, int imgExifStorageOrientation,
 		image(img);
 		redraw();
 	}
-	Fl::check();
+	Fl::check(); // this is necessary to execute drawing now before loading the other images below
 
 	// load missing images
 	if (!prevImg) prevImg = loadImg(prevFileName, nextImgExifStorageOrientation);
+	if (!prevImg || !prevImg->data()) prevFileName = std::string();
 	if (!nextImg) nextImg = loadImg(nextFileName, nextImgExifStorageOrientation);
+	if (!nextImg || !nextImg->data()) nextFileName = std::string();
 
-	cache[0].fileName = fileName;
-	cache[0].img = img;
-	cache[1].fileName = prevFileName;
-	cache[1].img = prevImg;
+	cache[0].fileName = prevFileName;
+	cache[0].img = prevImg;
+	cache[1].fileName = fileName;
+	cache[1].img = img;
 	cache[2].fileName = nextFileName;
 	cache[2].img = nextImg;
 

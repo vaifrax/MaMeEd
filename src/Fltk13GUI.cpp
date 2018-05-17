@@ -36,6 +36,7 @@
 
 Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(1000,800,"Marcel's Metadata Editor") {
 	fgui = this;
+	eventRecursion = 0;
 	Fl::scheme("gtk+");
 	//Fl::scheme("plastic");
 
@@ -196,7 +197,7 @@ int Fltk13GUI::handle(int e) {
 
 		case FL_KEYDOWN:
 			{
-				char ch = Fl::event_key();
+				int ch = Fl::event_key();
 				if (ch >= '0' && ch <= '5') {
 					setStarRating(ch - '0');
 					return 1; // indicate event was handled
@@ -205,12 +206,34 @@ int Fltk13GUI::handle(int e) {
 					setStarRating(ch - '0' - FL_KP);
 					return 1; // indicate event was handled
 				}
+				switch (ch) {
+					case FL_Up:
+						eventRecursion++;
+						if (eventRecursion <= 1) { // inside the functions below, another call to handle() is triggered for redrawing; if in mean time another file switch event occurs, the whole cache thing is messed up, so just don't do anything in that case
+							fileList->setActiveFile(fileList->getActiveFile(-1));
+							Fltk13GUI::fgui->showFileMetaData();
+						}
+						eventRecursion--;
+						break;
+					case FL_Down:
+						eventRecursion++;
+						if (eventRecursion <= 1) { // inside the functions below, another call to handle() is triggered for redrawing; if in mean time another file switch event occurs, the whole cache thing is messed up, so just don't do anything in that case
+							fileList->setActiveFile(fileList->getActiveFile(4));
+							Fltk13GUI::fgui->showFileMetaData();
+						}
+						eventRecursion--;
+						break;
+				}
 			}
 			break;
 
 		case FL_MOUSEWHEEL:
-			fileList->setActiveFile(fileList->getActiveFile(Fl::event_dy()));
-			Fltk13GUI::fgui->showFileMetaData();
+			eventRecursion++;
+			if (eventRecursion <= 1) { // inside the functions below, another call to handle() is triggered for redrawing; if in mean time another file switch event occurs, the whole cache thing is messed up, so just don't do anything in that case
+				fileList->setActiveFile(fileList->getActiveFile(Fl::event_dy()));
+				Fltk13GUI::fgui->showFileMetaData();
+			}
+			eventRecursion--;
 			return 1; // indicate event was handled
 
 //		case FL_PASTE:
