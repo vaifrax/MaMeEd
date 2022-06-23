@@ -114,14 +114,15 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 		case 3:
 			rotateClockwDeg = 180;
 			break;
-		case 5:
-			rotateClockwDeg = 270;
-			std::swap(imglWr, imglHr);
-			break;
 		case 6:
 			rotateClockwDeg = 90;
 			std::swap(imglWr, imglHr);
 			break;
+		case 8:
+			rotateClockwDeg = 270;
+			std::swap(imglWr, imglHr);
+			break;
+		// there are mirrored versions, too, they are not yet implemented here
 	}
 
 	// resize first
@@ -133,7 +134,6 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 	}
 
 	// rotate if necessary
-	// there are mirrored versions, too, they are not yet implemented here
 	if (rotateClockwDeg != 0) {
 		Fl_Image* tmpImg = FlImgTools::rotate(img, rotateClockwDeg);
 		delete img;

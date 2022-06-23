@@ -380,7 +380,7 @@ menu.popup();
 			zoom *= pow(1.1, -Fl::event_dy()); // zoom = earth diameter in pixels
 			updateRadius();
 			redraw();
-			break;
+			return 1; // event consumed
 		default:
 			return Fl_Gl_Window::handle(event);
 	}

@@ -228,6 +228,10 @@ int Fltk13GUI::handle(int e) {
 			break;
 
 		case FL_MOUSEWHEEL:
+			// if mouse is over worldMap widget, sent event there
+			if (Fl::event_inside(worldMap) && (worldMap->handle(e) == 1)) return 1; // TODO
+
+			// else go to next/previous file
 			eventRecursion++;
 			if (eventRecursion <= 1) { // inside the functions below, another call to handle() is triggered for redrawing; if in mean time another file switch event occurs, the whole cache thing is messed up, so just don't do anything in that case
 				fileList->setActiveFile(fileList->getActiveFile(Fl::event_dy()));
