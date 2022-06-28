@@ -79,7 +79,7 @@ void MapTile::loadFromInternet() {
 	od.mapTilePtr = this;
 
 //	std::string url = std::string("http://otile4.mqcdn.com/tiles/1.0.0/osm/") + toZeroPaddedStr(zoomLevel, 2) + "/" + toZeroPaddedStr(x, 6) + "/" + toZeroPaddedStr(y, 6) + ".png";
-	std::string url = std::string("http://a.tile.opencyclemap.org/cycle/") + std::to_string((_Longlong) zoomLevel) + "/" + std::to_string((_Longlong) x) + "/" + std::to_string((_Longlong) y) + ".png";
+	std::string url = std::string("http://a.tile.opencyclemap.org/cycle/") + std::to_string((long long) zoomLevel) + "/" + std::to_string((long long) x) + "/" + std::to_string((long long) y) + ".png";
 	std::cout << url << std::endl;
 	curl_easy_setopt(od.httpHandle, CURLOPT_URL, url.c_str());
 
@@ -263,7 +263,7 @@ void MapTile::draw(double zoom) {
 
 /*static*/ void MapTile::updateCurl() {
 	struct timeval timeout;
-	int rc; // select() return code
+	//int rc; // select() return code
 
 	fd_set fdread;
 	fd_set fdwrite;

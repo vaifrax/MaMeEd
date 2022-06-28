@@ -123,11 +123,11 @@ void Fltk13WorldMap::draw() {
 
 	glLoadIdentity();
 	glTranslatef(0, zoom, 0);
-	glRotatef(angle2, 1, 0, 0);
-	glRotatef(angle1 + 90, 0, 0, -1);
+	glRotatef((float) angle2, 1, 0, 0);
+	glRotatef((float) angle1 + 90.f, 0, 0, -1);
 
 	// Draw white 'X'
-	glColor3f(0.2, 0.2, 0.2);
+	glColor3f(0.2f, 0.2f, 0.2f);
 	//glBegin(GL_LINE_STRIP); glVertex2f(w(),  h()); glVertex2f(-w(), -h()); glEnd();
 	//glBegin(GL_LINE_STRIP); glVertex2f(w(), -h()); glVertex2f(-w(),  h()); glEnd();
 	//glBegin(GL_LINE_STRIP); glVertex2f(-w(), 0); glVertex2f(w(), 0); glEnd();
@@ -138,12 +138,12 @@ void Fltk13WorldMap::draw() {
 //	int tileLevel = (int) ((w()+h())/2800.0 * std::log(zoom)/std::log(2.0));
 //	float tileLevelF = std::log(0.03 * zoom)/std::log(2.0) * cos(angle2*M_PI/180); // zoom is earth diameter in pixels, independent of window size
 //	float tileLevelF = std::log(0.1 * zoom -100)/std::log(2.0) * cos(angle2*M_PI/180); // zoom is earth diameter in pixels, independent of window size
-	float tileLevelF = 1.37*std::log(zoom) -5.8;
-	if (tileLevelF < 0.1) tileLevelF = 0.1;
-	if (tileLevelF > MAX_LEVEL+0.5) tileLevelF = MAX_LEVEL+0.5;
+	float tileLevelF = 1.37f*std::log(zoom) -5.8f;
+	if (tileLevelF < 0.1f) tileLevelF = 0.1f;
+	if (tileLevelF > MAX_LEVEL+0.5f) tileLevelF = MAX_LEVEL+0.5f;
 	int tileLevel = (int) tileLevelF;
 	glEnable(GL_TEXTURE_2D);
-	glColor3f(1, 1, 1);
+	glColor3f(1.f, 1.f, 1.f);
 	glDisable(GL_LIGHTING);
 	CHECK_GL_STATE
 	glUseProgram(shaderProgram);
@@ -163,7 +163,7 @@ void Fltk13WorldMap::draw() {
 		float zoomRatio = zoom / min(w(), h());
 
 		glPointSize(3.0);
-		glColor4f(1, 0, 0, 2/mflags.size() + 0.3);
+		glColor4f(1, 0, 0, 2.f/mflags.size() + 0.3f);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBegin(GL_POINTS);
@@ -197,8 +197,8 @@ void Fltk13WorldMap::draw() {
 		glColor3f(0.2, 0.2, 0.2);
 		glBegin(GL_LINES);
 		for (int i=0; i<16; i++) {
-			float fi = i/16.0 * 2*M_PI;
-			float r = RADSIZE * min(w(), h())/2;
+			float fi = i/16.f * 2.f*M_PI;
+			float r = RADSIZE * min(w(), h())/2.f;
 			glVertex3f(r*cos(fi), 0, r*sin(fi));
 		}
 		glEnd();
@@ -377,7 +377,7 @@ menu.popup();
 		//	}
 		//	return 0;
 		case FL_MOUSEWHEEL:
-			zoom *= pow(1.1, -Fl::event_dy()); // zoom = earth diameter in pixels
+			zoom *= pow(1.1f, -Fl::event_dy()); // zoom = earth diameter in pixels
 			updateRadius();
 			redraw();
 			return 1; // event consumed
@@ -387,7 +387,7 @@ menu.popup();
 }
 
 void Fltk13WorldMap::updateRadius() {
-	radius = 6371000.0 * RADSIZE * 0.5*min(w(), h()) / zoom;
+	radius = 6371000.f * RADSIZE * 0.5f*min(w(), h()) / zoom;
 }
 
 /*static*/ void Fltk13WorldMap::Menu_CB(Fl_Widget* widget, void *data) {

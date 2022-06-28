@@ -17,16 +17,16 @@ void StarButton::starVertices() {
 	float my = h();
 	int tx = x();
 	int ty = y();
-	fl_vertex(0.47*mx + tx, 0.94*my + ty);
-	fl_vertex(0.62*mx + tx, 0.64*my + ty);
-	fl_vertex(0.96*mx + tx, 0.66*my + ty);
-	fl_vertex(0.71*mx + tx, 0.42*my + ty);
-	fl_vertex(0.83*mx + tx, 0.11*my + ty);
-	fl_vertex(0.54*mx + tx, 0.27*my + ty);
-	fl_vertex(0.28*mx + tx, 0.05*my + ty);
-	fl_vertex(0.33*mx + tx, 0.39*my + ty);
-	fl_vertex(0.05*mx + tx, 0.57*my + ty);
-	fl_vertex(0.38*mx + tx, 0.62*my + ty);
+	fl_vertex(0.47f*mx + tx, 0.94f*my + ty);
+	fl_vertex(0.62f*mx + tx, 0.64f*my + ty);
+	fl_vertex(0.96f*mx + tx, 0.66f*my + ty);
+	fl_vertex(0.71f*mx + tx, 0.42f*my + ty);
+	fl_vertex(0.83f*mx + tx, 0.11f*my + ty);
+	fl_vertex(0.54f*mx + tx, 0.27f*my + ty);
+	fl_vertex(0.28f*mx + tx, 0.05f*my + ty);
+	fl_vertex(0.33f*mx + tx, 0.39f*my + ty);
+	fl_vertex(0.05f*mx + tx, 0.57f*my + ty);
+	fl_vertex(0.38f*mx + tx, 0.62f*my + ty);
 }
 
 void StarButton::draw() {

@@ -67,7 +67,7 @@ FileGroup::FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* m
 
 					Fl_JPEG_ImageFast jpgImgThumb(NULL, thumbData, 64);
 					//std::cout << "exif thumbnail: " << jpgImgThumb.w() << 'x' << jpgImgThumb.h() << std::endl;
-					float scDiv = ((float) F13FileList::thumbnailSize) / max(jpgImgThumb.w(), jpgImgThumb.h());
+					float scDiv = ((float) F13FileList::thumbnailSize) / std::max(jpgImgThumb.w(), jpgImgThumb.h());
 					int newW = (int) (scDiv * jpgImgThumb.w() + 0.499);
 					int newH = (int) (scDiv * jpgImgThumb.h() + 0.499);
 					Fl_Image* jpgImg = jpgImgThumb.copy(newW, newH);
