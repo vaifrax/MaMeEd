@@ -4,6 +4,7 @@
 #include <FL/Fl_Image.H>
 //#include <FL/Fl_JPEG_Image.H> // for large preview img
 #include "Fl_JPEG_Image-Fast.h"
+#include "Heif_Image.h"
 #include "FlImgTools.h"
 
 #include <iostream> //for cout only
@@ -99,14 +100,24 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 	if (fileName.length() < 4) return NULL;
 	char ext[5] = {0,0,0,0,0};
 	for (int i=0; i<4; i++) ext[i] = toupper(fileName.at(fileName.length()-4+i));
-	if ((strcmp(ext, ".JPG") != 0) && (strcmp(ext, "JPEG") != 0)) return NULL; // not correct extension
 
-	// load image
-	std::cout << " loading " << fileName;
 	Fl_Image* img = NULL;
-	Fl_JPEG_ImageFast imgl(fileName.c_str(), 800);
-	int imglWr = imgl.w();
-	int imglHr = imgl.h();
+	//Fl_JPEG_ImageFast imgl(fileName.c_str(), 800);
+	Fl_Image* imgl = NULL;
+
+	if ((strcmp(ext, ".JPG") != 0) || (strcmp(ext, "JPEG") != 0)) {
+		// load jpeg image
+		imgl = new Fl_JPEG_ImageFast(fileName.c_str(), 800);
+	} else if (strcmp(ext, ".HEIC") != 0) {
+		// load heif image
+		imgl = new Heif_Image(fileName.c_str());
+	} else {
+		return NULL;
+	}
+
+	std::cout << " loading " << fileName;
+	int imglWr = imgl->w();
+	int imglHr = imgl->h();
 
 	// check rotation
 	int rotateClockwDeg = 0;
@@ -127,10 +138,10 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 
 	// resize first
 	std::cout << "  w x h " << imglWr << " " << imglHr << std::endl;
-	if (imgl.w()) {
+	if (imgl->w()) {
 		float scale = std::min(w() / (float) imglWr, h() / (float) imglHr);
 		if (img) delete img; img = NULL;
-		img = imgl.copy((int) (scale * imgl.w()), (int) (scale * imgl.h()));
+		img = imgl->copy((int) (scale * imgl->w()), (int) (scale * imgl->h()));
 	}
 
 	// rotate if necessary
@@ -140,5 +151,6 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 		img = tmpImg;
 	}
 
+	delete imgl;
 	return img;
 }

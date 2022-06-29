@@ -89,6 +89,9 @@
     <ClCompile Include="..\src\FlImgTools.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Heif_Image.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\F13FileList.h">
@@ -161,6 +164,9 @@
       <Filter>Source Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\src\FlImgTools.h">
+      <Filter>Source Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Heif_Image.h">
       <Filter>Source Files\gui</Filter>
     </ClInclude>
   </ItemGroup>
