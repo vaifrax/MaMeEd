@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 //#include <setjmp.h>
+#include <iostream> // for cerr
 
 #include <libheif/heif.h>
 
@@ -29,14 +30,28 @@ Heif_Image::Heif_Image(const char* filename)
 
     // decode the image and convert colorspace to RGB, saved as 24bit interleaved
     heif_image* img;
-    heif_decode_image(handle, &img, heif_colorspace_RGB, heif_chroma_interleaved_RGB, nullptr);
 
-    int stride;
-    const uint8_t* data = heif_image_get_plane_readonly(img, heif_channel_interleaved, &stride);
+    heif_decoding_options* decode_opts = heif_decoding_options_alloc();
+    if (decode_opts) {
+        decode_opts->convert_hdr_to_8bit = 1;
+    }
+
+    heif_error error = heif_decode_image(handle, &img, heif_colorspace_RGB, heif_chroma_interleaved_RGB, decode_opts);
+
+    heif_decoding_options_free(decode_opts);
+    decode_opts = NULL;
+
+    if (error.code != heif_error_Ok) {
+        std::cerr << "failed to open " << filename << " : " << error.message << std::endl;
+        return;
+    }
 
     w(heif_image_handle_get_width(handle));
     h(heif_image_handle_get_height(handle));
     d(3);
+
+    int stride;
+    const uint8_t* data = heif_image_get_plane_readonly(img, heif_channel_interleaved, &stride);
     array = data;
 
    //load_jpg_(filename, 0L, 0L);

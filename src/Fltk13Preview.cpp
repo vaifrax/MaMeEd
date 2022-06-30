@@ -105,10 +105,10 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 	//Fl_JPEG_ImageFast imgl(fileName.c_str(), 800);
 	Fl_Image* imgl = NULL;
 
-	if ((strcmp(ext, ".JPG") != 0) || (strcmp(ext, "JPEG") != 0)) {
+	if ((strcmp(ext, ".JPG") == 0) || (strcmp(ext, "JPEG") == 0)) {
 		// load jpeg image
 		imgl = new Fl_JPEG_ImageFast(fileName.c_str(), 800);
-	} else if (strcmp(ext, ".HEIC") != 0) {
+	} else if (strcmp(ext, "HEIC") == 0) {
 		// load heif image
 		imgl = new Heif_Image(fileName.c_str());
 	} else {
