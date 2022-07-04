@@ -10,12 +10,13 @@ class MDFile;
 
 class ExifFileM {
   public:
-	ExifFileM(const char* fileName, MDFile* mdf);
+	ExifFileM(const char* fileName, MDFile* mdf, std::string& ext);
 	~ExifFileM();
 	bool parseFile();
 
   protected:
 	string fileName;
+	std::string ext_;
 	FILE* exifFile; // is NULL if exif data couldn't be read
 	bool bigEndian;
 	MDFile* mdf;

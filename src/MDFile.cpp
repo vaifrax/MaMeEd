@@ -123,8 +123,8 @@ bool MDFile::importEmbeddedMetadata() {
 	}
 
 	// extension is upper case now, test for .JPG or .JPEG
-	if ((ext == "JPG") || (ext == "JPEG")) {
-		ExifFileM ex(fullPath.c_str(), this);
+	if ((ext == "JPG") || (ext == "JPEG") || (ext == "HEIC")) {
+		ExifFileM ex(fullPath.c_str(), this, ext);
 		ex.parseFile();
 	}
 

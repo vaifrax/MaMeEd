@@ -21,6 +21,9 @@
     <Filter Include="Source Files\shader">
       <UniqueIdentifier>{837b9ba2-ff18-492b-89c7-cd0ec8e14a6a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\TinyEXIF">
+      <UniqueIdentifier>{36c2ff6a-3214-4c6a-8e39-176e7b5965a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\mameed.cpp">
@@ -91,6 +94,9 @@
     </ClCompile>
     <ClCompile Include="..\src\Heif_Image.cpp">
       <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\_libs\TinyEXIF\TinyEXIF.cpp">
+      <Filter>Source Files\TinyEXIF</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +174,9 @@
     </ClInclude>
     <ClInclude Include="..\src\Heif_Image.h">
       <Filter>Source Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\_libs\TinyEXIF\TinyEXIF.h">
+      <Filter>Source Files\TinyEXIF</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -6,15 +6,18 @@
 // TODO: rotate thumbnail
 // TODO: add GPS tags
 
+#include "TinyEXIF.h" // lib for reading exif from memory
 
 #include "ExifFileM.h"
 #include "MDFile.h"
 
+#include <libheif/heif.h>
 #include <iostream> // for cout only
 
-ExifFileM::ExifFileM(const char* fileName, MDFile* mdf) {
+ExifFileM::ExifFileM(const char* fileName, MDFile* mdf, std::string& ext) {
 	this->fileName = string(fileName);
 	this->mdf = mdf;
+	this->ext_ = ext;
 	exifFile = NULL;
 
 	// open file (for read access)
@@ -30,32 +33,82 @@ bool ExifFileM::parseFile() {
 
 	int ifdNum = 0;
 
-	// if it's a jpg file 'start of image' (soi) should be 0xFFD8
-	unsigned char soi[2];
-	if (fread(&soi, 1, 2, exifFile) < 2) return false;
-	if ((soi[0] != 0xFF) || (soi[1] != 0xD8)) return false;
+	if (ext_ == "HEIC") {
+		heif_context* ctx = heif_context_alloc();
+		heif_context_read_from_file(ctx, fileName.c_str(), nullptr);
 
-	int len = 0;
-	int cnt = 0;
-	unsigned char appMarker[2], appLength[2];
-	while(true) {
-		// search for start of APP1 tag containing EXIF data
-		if (fread(&appMarker, 1, 2, exifFile) < 2) return false;
-		if (fread(&appLength, 1, 2, exifFile) < 2) return false;
-		len = appLength[0]*256 + appLength[1];
+		// get a handle to the primary image
+		heif_image_handle* handle;
+		heif_context_get_primary_image_handle(ctx, &handle);
 
-		if ((appMarker[0] == 0xFF) && (appMarker[1] == 0xE1)) break; // found exif data
-		if ((appMarker[0] == 0xFF) && (appMarker[1] == 0xDA)) return false; // 'start of stream' marker
+		heif_item_id ids; // only first one for now
+		int r= heif_image_handle_get_list_of_metadata_block_IDs(handle, "Exif", &ids, 1);
 
-		// go to next marker
-		fseek(exifFile, len - 2, SEEK_CUR);
-		cnt++;
+		// Get the size of the raw metadata, as stored in the HEIF file.
+		size_t metdat_size = heif_image_handle_get_metadata_size(handle, ids);
 
-		if (cnt > 10) return false; // likely, this file is corrupt   TODO: is this a good value/way to do this?
-		if (feof(exifFile)) return false;
-	};
+		unsigned char* metdat_data = new unsigned char[metdat_size];
+		heif_error err = heif_image_handle_get_metadata(handle, ids, metdat_data);
+		if (err.code == heif_error_Ok) {
+			TinyEXIF::EXIFInfo ei(metdat_data, metdat_size);
+			ei.parseFromEXIFSegment(metdat_data+4, metdat_size-4); // skip 4 bytes
 
-	if (len < 16) return false; // must be at least that long
+			mdf->setKeyValueSrc("thumbnailPosition", (long) ei.ThumbnailOffset, "EXIF");
+			mdf->setKeyValueSrc("thumbnailSize", (long) ei.ThumbnailLength, "EXIF");
+			mdf->setKeyValueSrc("storageOrientation", (long) ei.Orientation, "EXIF");
+			mdf->setKeyValueSrc("dateTime", ei.DateTime, "EXIF");
+			mdf->setKeyValueSrc("imgageTitle", ei.ImageDescription, "EXIF");
+			mdf->setKeyValueSrc("deviceManufacturer", ei.Make, "EXIF");
+			mdf->setKeyValueSrc("deviceModel", ei.Model, "EXIF");
+			mdf->setKeyValueSrc("artist", ei.Artist, "EXIF");
+			mdf->setKeyValueSrc("copyright", ei.Copyright, "EXIF");
+			mdf->setKeyValueSrc("ExposureTime", ei.ExposureTime, "EXIF");
+			mdf->setKeyValueSrc("FNumber", ei.FNumber, "EXIF");
+			mdf->setKeyValueSrc("ISOSpeed", (long) ei.ISOSpeedRatings, "EXIF");
+			mdf->setKeyValueSrc("ExposureBias", ei.ExposureBiasValue, "EXIF");
+			mdf->setKeyValueSrc("SubjectDistance", ei.SubjectDistance, "EXIF");
+			mdf->setKeyValueSrc("MeteringMode", (long) ei.MeteringMode, "EXIF");
+			mdf->setKeyValueSrc("userComment", ei.UserComment, "EXIF");
+			mdf->setKeyValueSrc("FlashFired", ei.Flash ? "yes" : "no", "EXIF");
+			mdf->setKeyValueSrc("FocalLengthIn35mm", ei.LensInfo.FocalLengthIn35mm, "EXIF");
+			mdf->setKeyValueSrc("Width", (long) ei.ImageWidth, "EXIF");
+			mdf->setKeyValueSrc("Height", (long) ei.ImageHeight, "EXIF");
+			if (ei.GeoLocation.hasLatLon()) {
+				mdf->setKeyValueSrc("PositionUncertaintyRadius", (ei.GeoLocation.GPSDOP), "EXIF");
+				mdf->setKeyValueSrc("Longitude", ei.GeoLocation.Longitude, "EXIF");
+				mdf->setKeyValueSrc("Latitude", ei.GeoLocation.Latitude, "EXIF");
+			}
+			if (ei.GeoLocation.hasAltitude()/* && measureMode3D*/) mdf->setKeyValueSrc("Altitude", ei.GeoLocation.Altitude, "EXIF");
+
+		}
+	} else {
+		// if it's a jpg file 'start of image' (soi) should be 0xFFD8
+		unsigned char soi[2];
+		if (fread(&soi, 1, 2, exifFile) < 2) return false;
+		if ((soi[0] != 0xFF) || (soi[1] != 0xD8)) return false;
+
+		int len = 0;
+		int cnt = 0;
+		unsigned char appMarker[2], appLength[2];
+		while(true) {
+			// search for start of APP1 tag containing EXIF data
+			if (fread(&appMarker, 1, 2, exifFile) < 2) return false;
+			if (fread(&appLength, 1, 2, exifFile) < 2) return false;
+			len = appLength[0]*256 + appLength[1];
+
+			if ((appMarker[0] == 0xFF) && (appMarker[1] == 0xE1)) break; // found exif data
+			if ((appMarker[0] == 0xFF) && (appMarker[1] == 0xDA)) return false; // 'start of stream' marker
+
+			// go to next marker
+			fseek(exifFile, len - 2, SEEK_CUR);
+			cnt++;
+
+			if (cnt > 10) return false; // likely, this file is corrupt   TODO: is this a good value/way to do this?
+			if (feof(exifFile)) return false;
+		};
+
+		if (len < 16) return false; // must be at least that long
+	}
 
 	char exifId[6];
 	if (fread(&exifId, 1, 6, exifFile) != 6) return false;

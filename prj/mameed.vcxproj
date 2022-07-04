@@ -111,11 +111,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;CURL_STATICLIB;HTTP_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;TINYEXIF_NO_XMP_SUPPORT;CURL_STATICLIB;HTTP_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>E:\coding\_libs\fltk\;E:\coding\_libs\fltk\build\;E:\coding\2012\MarcelsMetadataEditor\libcurl\include;E:\coding\_libs\libjpeg-turbo-bin\include;E:\coding\_libs\libheif;E:\coding\_libs\libheif\build</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\coding\_libs\fltk\;E:\coding\_libs\fltk\build\;E:\coding\2012\MarcelsMetadataEditor\libcurl\include;E:\coding\_libs\libjpeg-turbo-bin\include;E:\coding\_libs\libheif;E:\coding\_libs\libheif\build;E:\coding\_libs\TinyEXIF</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\_libs\TinyEXIF\TinyEXIF.cpp" />
     <ClCompile Include="..\src\ExifFileM.cpp" />
     <ClCompile Include="..\src\F13FileList.cpp" />
     <ClCompile Include="..\src\F13KeyValueList.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="..\tools\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\_libs\TinyEXIF\TinyEXIF.h" />
     <ClInclude Include="..\src\ExifFileM.h" />
     <ClInclude Include="..\src\F13FileList.h" />
     <ClInclude Include="..\src\F13KeyValueGroup.h" />

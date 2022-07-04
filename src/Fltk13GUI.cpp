@@ -78,7 +78,7 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(1000,800,"Mar
 		int x2 = 0.5*mainGroup->w() + x0;
 		int x3 = mainGroup->w() + x0;
 		int y0 = mainGroup->y(); // row positions
-		int y1 = 0.5*mainGroup->h() + y0;
+		int y1 = 0.7*mainGroup->h() + y0;
 		int y2 = 0.9*mainGroup->h() + y0;
 		int y9 = mainGroup->h() + y0;
 		pathFilesGroup = new Fl_Group(x0, y0, x1-x0, mainGroup->h()); // left side
@@ -414,7 +414,7 @@ void Fltk13GUI::showFileChooser(const char* initPath/* = NULL*/) {
 void Fltk13GUI::showAboutDialog() {
 	if (!aboutDialog) {
 		aboutDialog = new Fl_Window(300, 105, "About");
-		Fl_Box *aboutInfo = new Fl_Box(70, 10, 200, 25, "MaMeEd 2012-11-12"); // TODO: update date automatically
+		Fl_Box *aboutInfo = new Fl_Box(70, 10, 200, 25, "MaMeEd 2022-06-30"); // TODO: update date automatically
 		Fl_Button *aboutOk = new Fl_Button(230, 70, 60, 25, "Ok");
 		aboutOk->callback(buttonCallback, (void*) BUTTON_ABOUT_OK);
 		aboutDialog->end();

@@ -89,7 +89,7 @@ MDDir::MDDir(std::string const& path) {
 	}
 
 // TODO : this is just for debugging ///
-else importMetadataFromFiles();
+//else importMetadataFromFiles();
 //////
 
 }
