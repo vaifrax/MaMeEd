@@ -87,11 +87,6 @@ MDDir::MDDir(std::string const& path) {
 		// couldn't read/find meta data file
 		importMetadataFromFiles();
 	}
-
-// TODO : this is just for debugging ///
-//else importMetadataFromFiles();
-//////
-
 }
 
 MDDir::~MDDir() {

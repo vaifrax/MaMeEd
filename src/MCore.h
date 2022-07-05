@@ -17,6 +17,7 @@ class MCore {
 	bool openDir(std::string const& path);
 
 	MDDir const* getMDDir() const {return mddir;};
+	MDDir* getMDDir() {return mddir;};
 	MConfig const* getConfig() const {return config;};
 
   protected:

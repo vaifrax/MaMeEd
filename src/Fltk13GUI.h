@@ -35,6 +35,7 @@ void removeFilesWithLessThan4Stars();
 	int showWindow();
 	void applyChangesOfSelectedKeyValue();
 	void saveDataBase();
+	void rescan(); // scan all files in directory, extracting meta data (even when .metadata.mmd already exists)
 
 	int handle(int e);
 	static void closeWindowCallback(Fl_Widget* widget, void* userData);
@@ -67,7 +68,7 @@ void removeFilesWithLessThan4Stars();
 	Fl_Window* exitNoSavingDialog;
 	void showExitNoSavingDialog();
 
-	static enum {FILE_OPEN, FILE_SAVE, FILE_EXIT_NO_SAVING, FILE_EXIT, EDIT_UNDO, VIEW_REM_STARS, HELP_ABOUT} MenuItemEnum;
+	static enum {FILE_OPEN, FILE_SAVE, FILE_RESCAN, FILE_EXIT_NO_SAVING, FILE_EXIT, EDIT_UNDO, VIEW_REM_STARS, HELP_ABOUT} MenuItemEnum;
 	static enum {BUTTON_PATH, BUTTON_ABOUT_OK, BUTTON_NO_SAVING_OK, BUTTON_NO_SAVING_CANCEL} ButtonEnum;
 	static enum {FROM_PATHTEXTEDIT} KeyboardEnum;
 

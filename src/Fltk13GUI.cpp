@@ -51,6 +51,7 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(1000,800,"Mar
 		{"&File", 0, 0, 0, FL_SUBMENU},
 			{"&Open", FL_COMMAND + 'o', menuCallback, (void*) FILE_OPEN},
 			{"&Save", FL_COMMAND + 's', menuCallback, (void*) FILE_SAVE},
+			{"&Rescan metadata", FL_COMMAND + 'r', menuCallback, (void*) FILE_RESCAN},
 			{"Exit without saving", FL_COMMAND + 'q', menuCallback, (void*) FILE_EXIT_NO_SAVING},
 			{"E&xit", FL_COMMAND + 'q', menuCallback, (void*) FILE_EXIT},
 			{0},
@@ -189,6 +190,10 @@ void Fltk13GUI::saveDataBase() {
 	mCore->getMDDir()->writeToFile();
 }
 
+void Fltk13GUI::rescan() {
+	mCore->getMDDir()->importMetadataFromFiles();
+}
+
 int Fltk13GUI::handle(int e) {
 	switch(e) {
 		case FL_FOCUS:
@@ -292,6 +297,9 @@ int Fltk13GUI::handle(int e) {
 		case FILE_SAVE:
 			//fgui->applyChangesOfSelectedKeyValue();
 			fgui->saveDataBase();
+			break;
+		case FILE_RESCAN:
+			fgui->rescan();
 			break;
 		case FILE_EXIT_NO_SAVING:
 			fgui->showExitNoSavingDialog();
