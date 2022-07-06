@@ -5,7 +5,7 @@
 #include "FL/Fl_Input.H"
 #include <string>
 
-#include "F13KeyValueList.h";
+#include "F13KeyValueList.h"
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
 //class KeyValueGroup;

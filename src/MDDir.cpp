@@ -90,7 +90,7 @@ MDDir::MDDir(std::string const& path) {
 		importMetadataFromFiles();
 	}
 
-	// TODO: sort by creation date: key 'dateTime'
+	// sort by creation date: key 'dateTime'
 	sortByKey("dateTime");
 }
 

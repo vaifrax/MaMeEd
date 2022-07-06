@@ -75,12 +75,12 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(1000,800,"Mar
 	const int MAIN_GROUP_PADDING = 0; // must be 0 otherwise tile doesn't work!
 	mainGroup = new Fl_Tile(MAIN_GROUP_PADDING, MENU_HEIGHT+MAIN_GROUP_PADDING, w()-2*MAIN_GROUP_PADDING, h()-MENU_HEIGHT-2*MAIN_GROUP_PADDING); // put everything in a group for equal resizing
 		int x0 = mainGroup->x(); // 0 [column 1] x1 [column 2] x2 [column 3] x3
-		int x1 = 0.25*mainGroup->w() + x0;
-		int x2 = 0.5*mainGroup->w() + x0;
+		int x1 = (int) (0.25*mainGroup->w() + x0);
+		int x2 = (int) (0.5*mainGroup->w() + x0);
 		int x3 = mainGroup->w() + x0;
 		int y0 = mainGroup->y(); // row positions
-		int y1 = 0.7*mainGroup->h() + y0;
-		int y2 = 0.9*mainGroup->h() + y0;
+		int y1 = (int) (0.7*mainGroup->h() + y0);
+		int y2 = (int) (0.9*mainGroup->h() + y0);
 		int y9 = mainGroup->h() + y0;
 		pathFilesGroup = new Fl_Group(x0, y0, x1-x0, mainGroup->h()); // left side
 			const int PATHFILESGROUP_PADDING = 2;
@@ -190,8 +190,11 @@ void Fltk13GUI::saveDataBase() {
 	mCore->getMDDir()->writeToFile();
 }
 
+// read meta data of all files in folder again, potentially adding information
 void Fltk13GUI::rescan() {
 	mCore->getMDDir()->importMetadataFromFiles();
+	mCore->getMDDir()->sortByKey("dateTime"); // update sorting
+
 }
 
 int Fltk13GUI::handle(int e) {
@@ -612,7 +615,7 @@ void Fltk13GUI::updateFlags() {
 			double longitude  = atof(longProp->value.c_str());
 			double latitude  = atof(latProp->value.c_str());
 			float radius = 0;
-			if (radProp) radius = atof(radProp->value.c_str());
+			if (radProp) radius = (float) atof(radProp->value.c_str());
 			worldMap->addFlag(longitude, latitude, radius);
 		}
 		worldMap->redraw();
