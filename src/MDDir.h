@@ -21,6 +21,7 @@ class MDDir {
 	bool writeToFile() const;
 
 	void importMetadataFromFiles(); // EXIF, etc.
+	void sortByKey(const std::string& key); // alphanumeric sorting by string content
 
 	static bool isFile(const char* pathName);
 	static bool isDirectory(const char* pathName);

@@ -6,12 +6,14 @@
 
 #include "MDDir.h"
 #include "MDFile.h"
+#include "MDProperty.h"
 
 #include <iostream>
 #include <fstream>
 #include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <algorithm> // for sorting
 
 #ifndef S_ISDIR
 #define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
@@ -87,12 +89,52 @@ MDDir::MDDir(std::string const& path) {
 		// couldn't read/find meta data file
 		importMetadataFromFiles();
 	}
+
+	// TODO: sort by creation date: key 'dateTime'
+	sortByKey("dateTime");
 }
 
 MDDir::~MDDir() {
 	for (std::vector<MDFile*>::iterator i=files.begin(); i!=files.end(); ++i) {
 		delete (*i);
 	}
+}
+
+// alphanumeric sorting by string content
+void MDDir::sortByKey(const std::string& key) {
+	std::sort(files.begin(),
+		files.end(),
+		[&key](MDFile* a, MDFile* b) {
+			if (a->isDirectory()) {
+				if (b->isDirectory()) {
+					return a->getName() < b->getName();
+				} else {
+					return true;
+				}
+			} else {
+				if (b->isDirectory()) {
+					return false;
+				} else {
+					// both not directories
+					MDProperty* aProp = a->getPropertyByKey(key);
+					MDProperty* bProp = b->getPropertyByKey(key);
+					if (aProp) {
+						if (bProp) {
+							return aProp->value < bProp->value;
+						} else {
+							return true;
+						}
+					} else {
+						if (bProp) {
+							return false;
+						} else {
+							return a->getName() < b->getName();
+						}
+					}
+				}
+			}
+		}
+	);
 }
 
 // TODO: for performance: use an additional map<string fileName, int arrayIndex> ??
