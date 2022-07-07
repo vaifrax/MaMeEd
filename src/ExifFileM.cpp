@@ -10,6 +10,7 @@
 
 #include "ExifFileM.h"
 #include "MDFile.h"
+#include "Heif_Image.h" // for string conversion to UTF8
 
 #include <libheif/heif.h>
 #include <iostream> // for cout only
@@ -35,11 +36,14 @@ bool ExifFileM::parseFile() {
 
 	if (ext_ == "HEIC") {
 		heif_context* ctx = heif_context_alloc();
-		heif_context_read_from_file(ctx, fileName.c_str(), nullptr);
+		heif_context_read_from_file(ctx, Heif_Image::iso_8859_1_to_utf8(fileName).c_str(), nullptr);
 
 		// get a handle to the primary image
 		heif_image_handle* handle;
-		heif_context_get_primary_image_handle(ctx, &handle);
+		heif_error err = heif_context_get_primary_image_handle(ctx, &handle);
+		if (!err.code == heif_error_Ok) {
+			return false;
+		}
 
 		heif_item_id ids; // only first one for now
 		int r= heif_image_handle_get_list_of_metadata_block_IDs(handle, "Exif", &ids, 1);
@@ -48,7 +52,7 @@ bool ExifFileM::parseFile() {
 		size_t metdat_size = heif_image_handle_get_metadata_size(handle, ids);
 
 		unsigned char* metdat_data = new unsigned char[metdat_size];
-		heif_error err = heif_image_handle_get_metadata(handle, ids, metdat_data);
+		err = heif_image_handle_get_metadata(handle, ids, metdat_data);
 		if (err.code == heif_error_Ok) {
 			TinyEXIF::EXIFInfo ei(metdat_data, metdat_size);
 			ei.parseFromEXIFSegment(metdat_data+4, metdat_size-4); // skip 4 bytes
@@ -81,6 +85,9 @@ bool ExifFileM::parseFile() {
 			if (ei.GeoLocation.hasAltitude()/* && measureMode3D*/) mdf->setKeyValueSrc("Altitude", ei.GeoLocation.Altitude, "EXIF");
 
 		}
+		// clean up
+		heif_context_free(ctx);
+
 	} else {
 		// if it's a jpg file 'start of image' (soi) should be 0xFFD8
 		unsigned char soi[2];

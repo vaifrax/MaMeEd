@@ -112,16 +112,25 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 		// load heif image
 		imgl = new Heif_Image(fileName.c_str());
 	} else {
-		return NULL;
+		return nullptr;
 	}
+	if (imgl == nullptr) return nullptr;
 
 	std::cout << " loading " << fileName;
 	int imglWr = imgl->w();
 	int imglHr = imgl->h();
 
+	if ((imglWr == 0) || (imglHr == 0)) {
+		std::cerr << "  Error" << std::endl;
+		return nullptr;
+	}
+
 	// check rotation
 	int rotateClockwDeg = 0;
 	switch (exifStorageOrientation) {
+		case 1:
+			// do nothing
+			break;
 		case 3:
 			rotateClockwDeg = 180;
 			break;
@@ -133,16 +142,18 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 			rotateClockwDeg = 270;
 			std::swap(imglWr, imglHr);
 			break;
-		// there are mirrored versions, too, they are not yet implemented here
+		default:
+			// there are mirrored versions, too, they are not yet implemented here
+			std::cerr << "exifStorageOrientation " << exifStorageOrientation << " not supported" << std::endl;
+			break;
 	}
 
-	// resize first
 	std::cout << "  w x h " << imglWr << " " << imglHr << std::endl;
-	if (imgl->w()) {
-		float scale = std::min(w() / (float) imglWr, h() / (float) imglHr);
-		if (img) delete img; img = NULL;
-		img = imgl->copy((int) (scale * imgl->w()), (int) (scale * imgl->h()));
-	}
+
+	// resize first (faster than rotating first)
+	float scale = std::min(w() / (float) imglWr, h() / (float) imglHr);
+	//if (img) delete img; img = NULL;
+	img = imgl->copy((int) (scale * imgl->w()), (int) (scale * imgl->h()));
 
 	// rotate if necessary
 	if (rotateClockwDeg != 0) {

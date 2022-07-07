@@ -210,7 +210,11 @@ bool MDDir::writeToFile() const {
 	std::ofstream os;
 
 	os.open(dbFileName.c_str());
-	if (!os) return false; // file couldn't be opened
+	if (!os) {
+		std::cerr << "Could not open file for writing: " << dbFileName << std::endl;
+		std::cerr << strerror(errno) << std::endl;
+		return false; // file couldn't be opened
+	}
 	os << "# meta data for files in this folder (file written by MaMeEd)\n\n";
 
 	//for (std::map<std::string, MDProperty>::iterator i=properties.begin(); i!=properties.end(); ++i) {

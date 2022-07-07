@@ -13,6 +13,22 @@
 
 #include <libheif/heif.h>
 
+/*static*/ std::string Heif_Image::iso_8859_1_to_utf8(std::string &str) {
+    std::string strOut;
+    for (std::string::iterator it = str.begin(); it != str.end(); ++it)
+    {
+        uint8_t ch = *it;
+        if (ch < 0x80) {
+            strOut.push_back(ch);
+        }
+        else {
+            strOut.push_back(0xc0 | ch >> 6);
+            strOut.push_back(0x80 | (ch & 0x3f));
+        }
+    }
+    return strOut;
+}
+
 
 /**
 
@@ -22,11 +38,19 @@ Heif_Image::Heif_Image(const char* filename)
 {
  
     heif_context* ctx = heif_context_alloc();
-    heif_context_read_from_file(ctx, filename, nullptr);
+    heif_error err = heif_context_read_from_file(ctx, iso_8859_1_to_utf8(std::string(filename)).c_str(), nullptr);
+    if (err.code != heif_error_Ok) {
+        std::cerr << "failed to open " << filename << " : " << err.message << std::endl;
+        return;
+    }
 
     // get a handle to the primary image
     heif_image_handle* handle;
-    heif_context_get_primary_image_handle(ctx, &handle);
+    err = heif_context_get_primary_image_handle(ctx, &handle);
+    if (err.code != heif_error_Ok) {
+        std::cerr << "failed to open " << filename << " : " << err.message << std::endl;
+        return;
+    }
 
     // decode the image and convert colorspace to RGB, saved as 24bit interleaved
     heif_image* img;
@@ -36,15 +60,14 @@ Heif_Image::Heif_Image(const char* filename)
         decode_opts->convert_hdr_to_8bit = 1;
     }
 
-    heif_error error = heif_decode_image(handle, &img, heif_colorspace_RGB, heif_chroma_interleaved_RGB, decode_opts);
+    err = heif_decode_image(handle, &img, heif_colorspace_RGB, heif_chroma_interleaved_RGB, decode_opts);
+    if (err.code != heif_error_Ok) {
+        std::cerr << "failed to open " << filename << " : " << err.message << std::endl;
+        return;
+    }
 
     heif_decoding_options_free(decode_opts);
     decode_opts = NULL;
-
-    if (error.code != heif_error_Ok) {
-        std::cerr << "failed to open " << filename << " : " << error.message << std::endl;
-        return;
-    }
 
     w(heif_image_handle_get_width(handle));
     h(heif_image_handle_get_height(handle));
@@ -54,7 +77,8 @@ Heif_Image::Heif_Image(const char* filename)
     const uint8_t* data = heif_image_get_plane_readonly(img, heif_channel_interleaved, &stride);
     array = data;
 
-   //load_jpg_(filename, 0L, 0L);
+    // clean up
+    heif_context_free(ctx);
 
 #ifdef HAVE_LIBJPEG
   FILE				*fp;	// File pointer
