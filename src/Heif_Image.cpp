@@ -78,6 +78,7 @@ Heif_Image::Heif_Image(const char* filename)
     array = data;
 
     // clean up
+    heif_image_handle_release(handle);
     heif_context_free(ctx);
 
 #ifdef HAVE_LIBJPEG

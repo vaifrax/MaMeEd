@@ -46,7 +46,7 @@ bool ExifFileM::parseFile() {
 		}
 
 		heif_item_id ids; // only first one for now
-		int r= heif_image_handle_get_list_of_metadata_block_IDs(handle, "Exif", &ids, 1);
+		int r = heif_image_handle_get_list_of_metadata_block_IDs(handle, "Exif", &ids, 1);
 
 		// Get the size of the raw metadata, as stored in the HEIF file.
 		size_t metdat_size = heif_image_handle_get_metadata_size(handle, ids);
@@ -86,6 +86,7 @@ bool ExifFileM::parseFile() {
 
 		}
 		// clean up
+	    heif_image_handle_release(handle);
 		heif_context_free(ctx);
 
 	} else {
