@@ -76,19 +76,19 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CURL_STATICLIB;HTTP_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;TINYEXIF_NO_XMP_SUPPORT;CURL_STATICLIB;HTTP_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>E:\coding\_libs\fltk\;E:\coding\2012\MarcelsMetadataEditor\libcurl\include;E:\coding\_libs\libjpeg-turbo\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\coding\_libs\fltk\;E:\coding\_libs\fltk\build\;E:\coding\2012\MarcelsMetadataEditor\libcurl\include;E:\coding\_libs\libjpeg-turbo-bin\include;E:\coding\_libs\libheif;E:\coding\_libs\libheif\build;E:\coding\_libs\TinyEXIF</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltkimages.lib;jpeg-static.lib;fltkpng.lib;fltkzlib.lib;glu32.lib;opengl32.lib;fltkgl.lib;libcurl.lib;ws2_32.lib;winmm.lib;wldap32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>E:\coding\_libs\fltk\lib;E:\coding\2012\MarcelsMetadataEditor\libcurl\lib;E:\coding\_libs\libjpeg-turbo\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;gdiplus.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Comctl32.lib;fltk.lib;fltk_gl.lib;fltk_images.lib;fltk_jpeg.lib;fltk_png.lib;fltk_z.lib;jpeg-static.lib;glu32.lib;opengl32.lib;libcurl_imp.lib;ws2_32.lib;winmm.lib;wldap32.lib;heif.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\coding\_libs\fltk\build\lib\RelWithDebInfo;E:\coding\2012\MarcelsMetadataEditor\libcurl\lib;E:\coding\_libs\libjpeg-turbo-bin\lib;E:\coding\_libs\libheif\build\libheif\RelWithDebInfo</AdditionalLibraryDirectories>
       <ShowProgress>NotSet</ShowProgress>
     </Link>
   </ItemDefinitionGroup>

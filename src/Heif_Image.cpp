@@ -11,8 +11,6 @@
 //#include <setjmp.h>
 #include <iostream> // for cerr
 
-#include <libheif/heif.h>
-
 /*static*/ std::string Heif_Image::iso_8859_1_to_utf8(std::string &str) {
     std::string strOut;
     for (std::string::iterator it = str.begin(); it != str.end(); ++it)
@@ -36,7 +34,8 @@
 Heif_Image::Heif_Image(const char* filename)
     : Fl_RGB_Image(0, 0, 0)
 {
- 
+    img_ = nullptr;
+
     heif_context* ctx = heif_context_alloc();
     heif_error err = heif_context_read_from_file(ctx, iso_8859_1_to_utf8(std::string(filename)).c_str(), nullptr);
     if (err.code != heif_error_Ok) {
@@ -53,14 +52,12 @@ Heif_Image::Heif_Image(const char* filename)
     }
 
     // decode the image and convert colorspace to RGB, saved as 24bit interleaved
-    heif_image* img;
-
     heif_decoding_options* decode_opts = heif_decoding_options_alloc();
     if (decode_opts) {
         decode_opts->convert_hdr_to_8bit = 1;
     }
 
-    err = heif_decode_image(handle, &img, heif_colorspace_RGB, heif_chroma_interleaved_RGB, decode_opts);
+    err = heif_decode_image(handle, &img_, heif_colorspace_RGB, heif_chroma_interleaved_RGB, decode_opts);
     if (err.code != heif_error_Ok) {
         std::cerr << "failed to open " << filename << " : " << err.message << std::endl;
         return;
@@ -74,7 +71,7 @@ Heif_Image::Heif_Image(const char* filename)
     d(3);
 
     int stride;
-    const uint8_t* data = heif_image_get_plane_readonly(img, heif_channel_interleaved, &stride);
+    const uint8_t* data = heif_image_get_plane_readonly(img_, heif_channel_interleaved, &stride);
     array = data;
 
     // clean up
@@ -191,7 +188,11 @@ Heif_Image::Heif_Image(const char* filename)
 
 }
 
-
+Heif_Image::~Heif_Image() {
+    if (img_) {
+        heif_image_release(img_);
+    }
+}
 
 /**
 
@@ -199,6 +200,7 @@ Heif_Image::Heif_Image(const char* filename)
 Heif_Image::Heif_Image(const char* name, const unsigned char* data)
     : Fl_RGB_Image(0, 0, 0)
 {
+    img_ = nullptr;
 /*
 #ifdef HAVE_LIBJPEG
   jpeg_decompress_struct	dinfo;	// Decompressor info

@@ -105,12 +105,15 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 	//Fl_JPEG_ImageFast imgl(fileName.c_str(), 800);
 	Fl_Image* imgl = NULL;
 
+	bool applyRotation = false;
 	if ((strcmp(ext, ".JPG") == 0) || (strcmp(ext, "JPEG") == 0)) {
 		// load jpeg image
 		imgl = new Fl_JPEG_ImageFast(fileName.c_str(), 800);
+		applyRotation = true; // image is still in sensor orientation and may need rotation
 	} else if (strcmp(ext, "HEIC") == 0) {
 		// load heif image
 		imgl = new Heif_Image(fileName.c_str());
+		applyRotation = false; // libheif already rotates images on its own
 	} else {
 		return nullptr;
 	}
@@ -125,27 +128,29 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 		return nullptr;
 	}
 
-	// check rotation
 	int rotateClockwDeg = 0;
-	switch (exifStorageOrientation) {
-		case 1:
-			// do nothing
-			break;
-		case 3:
-			rotateClockwDeg = 180;
-			break;
-		case 6:
-			rotateClockwDeg = 90;
-			std::swap(imglWr, imglHr);
-			break;
-		case 8:
-			rotateClockwDeg = 270;
-			std::swap(imglWr, imglHr);
-			break;
-		default:
-			// there are mirrored versions, too, they are not yet implemented here
-			std::cerr << "exifStorageOrientation " << exifStorageOrientation << " not supported" << std::endl;
-			break;
+	if (applyRotation) {
+		// check rotation
+		switch (exifStorageOrientation) {
+			case 1:
+				// do nothing
+				break;
+			case 3:
+				rotateClockwDeg = 180;
+				break;
+			case 6:
+				rotateClockwDeg = 90;
+				std::swap(imglWr, imglHr);
+				break;
+			case 8:
+				rotateClockwDeg = 270;
+				std::swap(imglWr, imglHr);
+				break;
+			default:
+				// there are mirrored versions, too, they are not yet implemented here
+				std::cerr << "exifStorageOrientation " << exifStorageOrientation << " not supported" << std::endl;
+				break;
+		}
 	}
 
 	std::cout << "  w x h " << imglWr << " " << imglHr << std::endl;
@@ -156,7 +161,7 @@ Fl_Image* Fltk13Preview::loadImg(std::string fileName, int exifStorageOrientatio
 	img = imgl->copy((int) (scale * imgl->w()), (int) (scale * imgl->h()));
 
 	// rotate if necessary
-	if (rotateClockwDeg != 0) {
+	if ((applyRotation) && (rotateClockwDeg != 0)) {
 		Fl_Image* tmpImg = FlImgTools::rotate(img, rotateClockwDeg);
 		delete img;
 		img = tmpImg;
