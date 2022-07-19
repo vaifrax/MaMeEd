@@ -43,6 +43,8 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(1400,980,"Mar
 	fileList = NULL;
 	keyValueList = NULL;
 
+	show_thumbs_ = false;
+
 	callback(closeWindowCallback, this);
 
 	fl_register_images(); // init image lib
@@ -59,7 +61,8 @@ Fltk13GUI::Fltk13GUI(MCore* mCore) : MGUI(mCore), Fl_Double_Window(1400,980,"Mar
 			{"&Undo", FL_COMMAND + 'z', menuCallback, (void*) EDIT_UNDO, FL_MENU_DIVIDER},
 			{0},
 		{"&View", 0, 0, 0, FL_SUBMENU},
-			{"&remove all < 4 stars", FL_COMMAND + 'z', menuCallback, (void*) VIEW_REM_STARS, FL_MENU_DIVIDER},
+			{"show &thumbnails", FL_COMMAND + 't', menuCallback, (void*) VIEW_SHOW_THUMBS, FL_MENU_TOGGLE | FL_MENU_DIVIDER},
+			{"&remove all < 4 stars", FL_COMMAND + 'z', menuCallback, (void*) VIEW_REM_STARS},
 			{0},
 		{"&Help", 0, 0, 0, FL_SUBMENU},
 			{"&About...", FL_COMMAND + 'a', menuCallback, (void*) HELP_ABOUT},
@@ -291,6 +294,7 @@ int Fltk13GUI::handle(int e) {
 /*static*/ void Fltk13GUI::menuCallback(Fl_Widget* widget, void* userData) {
 	//Fltk13GUI* fgui = dynamic_cast<Fltk13GUI*> (widget->window());
 	//if (!fgui) return; // TODO: error
+	const Fl_Menu_Item *mi = ((Fl_Menu_ *)widget)->mvalue();
 
 	switch ((int) userData) {
 		case FILE_OPEN:
@@ -311,6 +315,9 @@ int Fltk13GUI::handle(int e) {
 			fgui->applyChangesOfSelectedKeyValue();
 			fgui->saveDataBase(); // auto-save on exit
 			exit(0); //break;
+		case VIEW_SHOW_THUMBS:
+			fgui->setShowThumbs(mi->checked());
+			break;
 		case VIEW_REM_STARS:
 			fgui->removeFilesWithLessThan4Stars();
 			break;
@@ -467,7 +474,7 @@ void Fltk13GUI::openDir(std::string path) {
 //			keyValueList = NULL;
 		}
 
-		fileList = new F13FileList(pathFilesGroup->x()+2, pathFilesGroup->y() + 29, pathFilesGroup->w()-4, pathFilesGroup->h()-31, mCore->getMDDir());
+		fileList = new F13FileList(pathFilesGroup->x()+2, pathFilesGroup->y() + 29, pathFilesGroup->w()-4, pathFilesGroup->h()-31, show_thumbs_, mCore->getMDDir());
 		pathFilesGroup->add(fileList); // add to window
 		pathFilesGroup->resizable(fileList); // must be here, doesn't work otherwise
 

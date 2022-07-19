@@ -23,7 +23,7 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 // Combo widget to appear in the scroll, two boxes: one fixed, the other stretches
-FileGroup::FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, int index, const char* L/*=0*/) : Fl_Group(X,Y,W,H,L) {
+FileGroup::FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, bool showThumb, int index, const char* L/*=0*/) : Fl_Group(X,Y,W,H,L) {
 	this->index = index;
 
 	begin();
@@ -53,7 +53,7 @@ FileGroup::FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* m
 			MDProperty* thumbPosProp = mdf->getPropertyByKey("thumbnailPosition");
 			MDProperty* thumbSizeProp = mdf->getPropertyByKey("thumbnailSize");
 
-			if (thumbPosProp && thumbSizeProp) {
+			if (showThumb && thumbPosProp && thumbSizeProp) {
 				long thumbPos  = atoi(thumbPosProp->value.c_str());
 				long thumbSize  = atoi(thumbSizeProp->value.c_str());
 
@@ -133,9 +133,9 @@ int FileGroup::handle(int eventn) {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-F13FileList::F13FileList(int X, int Y, int W, int H, MDDir const* mddir/* = NULL*/) : Fl_Scroll(X,Y,W,H,0), mddir(mddir), activeFile(NULL), itemNum(0) {
+F13FileList::F13FileList(int X, int Y, int W, int H, bool showThumb, MDDir const* mddir/* = NULL*/) : Fl_Scroll(X,Y,W,H,0), mddir(mddir), activeFile(NULL), itemNum(0) {
 	if (mddir) {
-		fillList();
+		fillList(showThumb);
 
 		// set activeFile to first node that contains a FileGroup
 		int i = 0;
@@ -165,22 +165,22 @@ const char* F13FileList::getActiveFileName(int offset/ * = 0* /) const {
 }
 */
 
-void F13FileList::addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory, MDFile* mdf) {
+void F13FileList::addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory, bool showThumb, MDFile* mdf) {
 	int X = x(),
 		Y = y() - yposition() + (itemNum*(F13FileList::thumbnailSize+1)) + 1,
 		W = w() - 18, // -18: compensate for vscroll bar
 		H = F13FileList::thumbnailSize;
-	add(new FileGroup(X,Y,W,H, fileName.c_str(), mdf, dateStr.c_str(), isDirectory, itemNum));
+	add(new FileGroup(X,Y,W,H, fileName.c_str(), mdf, dateStr.c_str(), isDirectory, showThumb, itemNum));
 	redraw();
 	itemNum++;
 }
 
-void F13FileList::fillList() {
+void F13FileList::fillList(bool showThumb) {
 	if (!mddir) return;
 
 	std::vector<MDFile*> const& files = mddir->getFiles();
 	for (std::vector<MDFile*>::const_iterator i=files.begin(); i!=files.end(); ++i) {
-		addItem((*i)->getName(), (*i)->getDateStr(), (*i)->isDirectory(), *i);
+		addItem((*i)->getName(), (*i)->getDateStr(), (*i)->isDirectory(), showThumb, *i);
 	}
 }
 

@@ -47,6 +47,9 @@ void removeFilesWithLessThan4Stars();
 	void setGPSPosition(double lon, double lat, float radius);
 	void setStarRating(int stars); // 0 to 5, to process click on stars
 
+	void setShowThumbs(bool s) { show_thumbs_ = s; }
+	bool getShowThumbs() { return show_thumbs_; }
+
 	Fltk13WorldMap* worldMap;
 	Fltk13Widgets* widgets;
 	Fltk13Preview* largePreview;
@@ -68,7 +71,7 @@ void removeFilesWithLessThan4Stars();
 	Fl_Window* exitNoSavingDialog;
 	void showExitNoSavingDialog();
 
-	static enum {FILE_OPEN, FILE_SAVE, FILE_RESCAN, FILE_EXIT_NO_SAVING, FILE_EXIT, EDIT_UNDO, VIEW_REM_STARS, HELP_ABOUT} MenuItemEnum;
+	static enum {FILE_OPEN, FILE_SAVE, FILE_RESCAN, FILE_EXIT_NO_SAVING, FILE_EXIT, EDIT_UNDO, VIEW_SHOW_THUMBS, VIEW_REM_STARS, HELP_ABOUT} MenuItemEnum;
 	static enum {BUTTON_PATH, BUTTON_ABOUT_OK, BUTTON_NO_SAVING_OK, BUTTON_NO_SAVING_CANCEL} ButtonEnum;
 	static enum {FROM_PATHTEXTEDIT} KeyboardEnum;
 
@@ -80,6 +83,7 @@ void removeFilesWithLessThan4Stars();
 	//static void dragDropCallbackDeferred(void* v);
 
 	int eventRecursion;
+	bool show_thumbs_;
 };
 
 #endif // FLTK13GUI_HEADER_INCLUDED

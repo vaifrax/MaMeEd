@@ -56,6 +56,7 @@ printCache(cache);
 		// if not used: delete
 		if (!used) {
 			try {
+				std::cout << "deleting cache " << i << std::endl;
 				if (cache[i].img) delete cache[i].img;
 			} catch (...) {
 				std::cout << "DELETION FAILED of cached file " << cache[i].fileName << std::endl;

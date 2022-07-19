@@ -12,7 +12,7 @@ class MDDir;
 
 class FileGroup : public Fl_Group {
   public:
-	FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, int index, const char* L=0);
+	FileGroup(int X, int Y, int W, int H, const char* fileName, MDFile* mdf, const char* dateStr, bool isDirectory, bool showThumb, int index, const char* L=0);
 	const char* getFileName() const {return nameBox->label();}
 	int handle(int eventn);
 	MDFile* mdf;
@@ -25,7 +25,7 @@ class FileGroup : public Fl_Group {
 
 class F13FileList : public Fl_Scroll {
   public:
-	F13FileList(int X, int Y, int W, int H, MDDir const* mddir = NULL);
+	F13FileList(int X, int Y, int W, int H, bool showThumb, MDDir const* mddir = NULL);
 	FileGroup* getActiveFile(int offset = 0) const; // offset for previous/next file, returns NULL if it doesn't exist
 //	const char* getActiveFileName(int offset = 0) const;
 	void setActiveFile(FileGroup* sel);
@@ -41,8 +41,8 @@ class F13FileList : public Fl_Scroll {
 	static int thumbnailSize;
 
   protected:
-	void addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory, MDFile* mdf);
-	void fillList();
+	void addItem(std::string const& fileName, std::string const& dateStr, bool isDirectory, bool showThumb, MDFile* mdf);
+	void fillList(bool showThumb);
 	int itemNum;
 	MDDir const* mddir;
 	FileGroup* activeFile;
