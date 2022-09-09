@@ -84,6 +84,8 @@ void removeFilesWithLessThan4Stars();
 
 	int eventRecursion;
 	bool show_thumbs_;
+	bool auto_save_ = true;
+	int ratings_since_last_save = 0;
 };
 
 #endif // FLTK13GUI_HEADER_INCLUDED

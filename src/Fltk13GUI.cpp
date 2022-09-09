@@ -191,6 +191,7 @@ void Fltk13GUI::saveDataBase() {
 	if (!keyValueList) return;
 	keyValueList->applyChangesOfSelectedKeyValue();
 	mCore->getMDDir()->writeToFile();
+	ratings_since_last_save = 0;
 }
 
 // read meta data of all files in folder again, potentially adding information
@@ -483,6 +484,7 @@ void Fltk13GUI::openDir(std::string path) {
 		//	keyValueList = new F13KeyValueList(250, 30, 200, 600, selFileName);
 		//}
 		fileList->redraw();
+		ratings_since_last_save = 0;
 	}
 }
 
@@ -660,5 +662,10 @@ void Fltk13GUI::setStarRating(int stars) { // 0 to 5
 		// auto advance to next file
 		fileList->setActiveFileNext();
 		Fltk13GUI::fgui->showFileMetaData();
+	}
+	ratings_since_last_save++;
+	if (auto_save_ && (ratings_since_last_save > 40)) {
+		saveDataBase();
+		std::cout << "auto save complete" << std::endl;
 	}
 }
